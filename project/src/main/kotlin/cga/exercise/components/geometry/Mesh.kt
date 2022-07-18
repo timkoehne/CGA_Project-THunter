@@ -24,10 +24,7 @@ open class Mesh(vertexdata: FloatArray, indexdata: IntArray, attributes: Array<V
     private var ibo = 0
     private var indexcount = 0
 
-    var useLinesInstead = false
-
     init {
-
         // setup vao
         vao = GL30.glGenVertexArrays()
         GL30.glBindVertexArray(vao)
@@ -65,10 +62,8 @@ open class Mesh(vertexdata: FloatArray, indexdata: IntArray, attributes: Array<V
 
         material?.bind(shaderProgram)
 
-        if (useLinesInstead)
-            GL11.glDrawElements(GL11.GL_LINES, indexcount, GL11.GL_UNSIGNED_INT, 0)
-        else
-            GL11.glDrawElements(GL11.GL_TRIANGLES, indexcount, GL11.GL_UNSIGNED_INT, 0)
+        GL11.glDrawElements(GL11.GL_TRIANGLES, indexcount, GL11.GL_UNSIGNED_INT, 0)
+
         GL30.glBindVertexArray(0)
     }
 
@@ -80,4 +75,14 @@ open class Mesh(vertexdata: FloatArray, indexdata: IntArray, attributes: Array<V
         if (vbo != 0) GL15.glDeleteBuffers(vbo)
         if (vao != 0) GL30.glDeleteVertexArrays(vao)
     }
+
+    companion object{
+        val stride: Int = 8 * 4
+        val attrPos = VertexAttribute(3, GL11.GL_FLOAT, stride, 0) //position
+        val attrTC = VertexAttribute(2, GL11.GL_FLOAT, stride, 3 * 4) //textureCoordinate
+        val attrNorm = VertexAttribute(3, GL11.GL_FLOAT, stride, 5 * 4) //normalval
+        val vertexAttributes = arrayOf<VertexAttribute>(attrPos, attrTC, attrNorm)
+    }
+
+
 }

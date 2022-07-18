@@ -60,7 +60,9 @@ class Scene(private val window: GameWindow) {
         )
         bike?.scale(Vector3f(0.8f))
 
-        ground = Renderable(mutableListOf(GroundMesh()))
+        val proceduralGround = ProceduralGround.createGround(10,10, 1f)
+        ground = Renderable(mutableListOf(proceduralGround))
+        //bike?.translate(Vector3f(0f, proceduralGround.getHeight(25, 25), 0f))
         ground.color = Vector3f(0f, 1f, 0f)
 
         lights.add(PointLight(Vector3f(0f, 0.75f, 0f), Vector3f(1f, 1f, 1f)))
