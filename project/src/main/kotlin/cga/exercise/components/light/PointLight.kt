@@ -7,7 +7,7 @@ import org.joml.Vector3f
 open class PointLight(pos: Vector3f, var color: Vector3f) : Transformable(), IPointLight {
 
     init {
-        preTranslate(pos)
+        translate(pos)
     }
 
     override fun bind(shaderProgram: ShaderProgram) {

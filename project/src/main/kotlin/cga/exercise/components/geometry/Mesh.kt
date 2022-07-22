@@ -1,10 +1,7 @@
 package cga.exercise.components.geometry
 
 import cga.exercise.components.shader.ShaderProgram
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL15
-import org.lwjgl.opengl.GL20
-import org.lwjgl.opengl.GL30
+import org.lwjgl.opengl.*
 
 /**
  * Creates a Mesh object from vertexdata, intexdata and a given set of vertex attributes
@@ -16,7 +13,12 @@ import org.lwjgl.opengl.GL30
  *
  * Created by Fabian on 16.09.2017.
  */
-open class Mesh(vertexdata: FloatArray, indexdata: IntArray, attributes: Array<VertexAttribute>, private val material: Material? = null) {
+open class Mesh(
+    vertexdata: FloatArray,
+    indexdata: IntArray,
+    attributes: Array<VertexAttribute>,
+    var material: Material? = null
+) {
     //private data
 
     private var vao = 0
@@ -42,9 +44,15 @@ open class Mesh(vertexdata: FloatArray, indexdata: IntArray, attributes: Array<V
 
         //vertex attribute
         for (num in attributes.indices) {
+
             GL20.glEnableVertexAttribArray(num)
             GL20.glVertexAttribPointer( //vbo in vao speichern
-                num, attributes[num].n, attributes[num].type, false, attributes[num].stride, attributes[num].offset.toLong()
+                num,
+                attributes[num].n,
+                attributes[num].type,
+                false,
+                attributes[num].stride,
+                attributes[num].offset.toLong()
             )
         }
 
@@ -76,7 +84,7 @@ open class Mesh(vertexdata: FloatArray, indexdata: IntArray, attributes: Array<V
         if (vao != 0) GL30.glDeleteVertexArrays(vao)
     }
 
-    companion object{
+    companion object {
         val stride: Int = 8 * 4
         val attrPos = VertexAttribute(3, GL11.GL_FLOAT, stride, 0) //position
         val attrTC = VertexAttribute(2, GL11.GL_FLOAT, stride, 3 * 4) //textureCoordinate

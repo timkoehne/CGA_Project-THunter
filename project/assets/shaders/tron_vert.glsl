@@ -10,6 +10,7 @@ uniform mat4 projection;
 uniform vec2 tcMultiplier;
 uniform int anzLichter;
 
+
 uniform struct LightInput
 {
     vec3 lightPos;

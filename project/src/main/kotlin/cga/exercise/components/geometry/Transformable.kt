@@ -6,6 +6,8 @@ import java.util.*
 import kotlin.math.acos
 
 open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var parent: Transformable? = null) {
+
+
     /**
      * Returns copy of object model matrix
      * @return modelMatrix
@@ -36,6 +38,12 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
         modelMatrix.rotateZ(roll)
     }
 
+    fun worldRotate(pitch: Float, yaw: Float, roll: Float) {
+        modelMatrix.rotateLocalX(pitch)
+        modelMatrix.rotateLocalY(yaw)
+        modelMatrix.rotateLocalZ(roll)
+    }
+
     /**
      * Rotates object around given rotation center.
      * @param pitch radiant angle around x-axis ccw
@@ -50,12 +58,16 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
         rotate(pitch, yaw, roll)
         translate(to.mul(-1f))
 
-//        preTranslate(to)
+//        translate(to)
 //        to.rotateX(pitch)
 //        to.rotateY(yaw)
 //        to.rotateZ(roll)
-//        preTranslate(to.mul(-1f))
+//        translate(to.mul(-1f))
 
+    }
+
+    fun setWorldPosition(location: Vector3f) {
+        preTranslate(getPosition().sub(location))
     }
 
     /**

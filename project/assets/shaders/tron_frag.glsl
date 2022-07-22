@@ -41,7 +41,7 @@ vec3 emmisivBerechnen(){
 }
 
 vec3 ambientBerechnen(){
-    return gamma(texture(diff, vertexData.textureCords).rgb) * 0.1;
+    return gamma(texture(diff, vertexData.textureCords).rgb) * 0.8;
 }
 
 vec3 diffuseBerechnen(vec3 normal, vec3 toLight, vec3 color){
@@ -63,11 +63,11 @@ vec3 specularBerechnen(vec3 normal, vec3 toLight, vec3 color){
     return specular;
 
     //Phong-Modell
-//    vec3 reflection = normalize(reflect(-toLight, normal));
-//    float cosBeta = max(0.0, dot(reflection, toCamera));
-//    float cosBetak = pow(cosBeta, shininess);
-//    vec3 specularTerm = matSpecular * color;
-//    return specularTerm * cosBetak;
+    //    vec3 reflection = normalize(reflect(-toLight, normal));
+    //    float cosBeta = max(0.0, dot(reflection, toCamera));
+    //    float cosBetak = pow(cosBeta, shininess);
+    //    vec3 specularTerm = matSpecular * color;
+    //    return specularTerm * cosBetak;
 }
 
 float angleIntensity(){
@@ -98,19 +98,14 @@ vec3 diffuseAndSpecularBerechnen(vec3 toLight, vec3 color){
 void main(){
 
     color = vec4(emmisivBerechnen() * fragColor, 1.0);
-    color += vec4(ambientBerechnen(), 0.4);
+    color += vec4(ambientBerechnen(), 0.0);
 
     for (int i = 0; i < anzLichter; i++){
         color += vec4(diffuseAndSpecularBerechnen(lights[i].toLight, lights[i].lightColor), 0.0);
     }
 
     color += vec4(diffuseAndSpecularBerechnen(toSpotlight, lightColorSpot) * angleIntensity(), 0.0);
-
-//    if(vertexData.position.y > 0.4){
-//        color = vec4(0, 1, 0, 1);
-//    }else{
-//        color = vec4(1, 0, 0, 1);
-//    }
+    color = vec4(invgamma(color.rgb), 1);
 
 
 }

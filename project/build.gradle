@@ -42,7 +42,6 @@ dependencies {
     implementation "org.lwjgl:lwjgl-glfw"
     implementation "org.lwjgl:lwjgl-opengl"
     implementation "org.lwjgl:lwjgl-stb"
-    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
     runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
@@ -59,6 +58,10 @@ dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
 }
 
+test {
+    useJUnitPlatform()
+}
+
 compileKotlin {
     kotlinOptions.jvmTarget = "11"
 }
@@ -67,6 +70,7 @@ compileTestKotlin {
 }
 
 task(fatJar, type: Jar) {
+    org.gradle.api.file.DuplicatesStrategy.EXCLUDE
     manifest {
         attributes('Main-Class': 'cga.exercise.MainKt')
     }

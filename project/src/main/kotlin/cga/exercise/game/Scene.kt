@@ -2,6 +2,8 @@ package cga.exercise.game
 
 import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.geometry.*
+import cga.exercise.components.geometry.skybox.Skybox
+import cga.exercise.components.geometry.skybox.SkyboxRenderer
 import cga.exercise.components.light.PointLight
 import cga.exercise.components.light.SpotLight
 import cga.exercise.components.shader.ShaderProgram
@@ -10,6 +12,7 @@ import cga.framework.GameWindow
 import cga.framework.ModelLoader
 import org.joml.*
 import org.lwjgl.glfw.GLFW.*
+import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.*
 
 
@@ -20,11 +23,18 @@ class Scene(private val window: GameWindow) {
 
     private var prevX: Double = window.windowWidth / 2.0
     private var prevY: Double = window.windowHeight / 2.0
+
     private val staticShader: ShaderProgram
+    private val skyboxShader: ShaderProgram
     val camera: TronCamera
     var bike: Renderable?
 
+    val skybox: SkyboxRenderer
+    val proceduralGround: ProceduralGround
     var ground: Renderable
+
+    val sniper: Renderable
+    val tree: Renderable
 
     val lights = arrayListOf<PointLight>()
     var spotlight: SpotLight
@@ -33,11 +43,12 @@ class Scene(private val window: GameWindow) {
     //scene setup
     init {
         staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
+        skyboxShader = ShaderProgram("project/assets/shaders/skybox_vert.glsl", "project/assets/shaders/skybox_frag.glsl")
 
         //initial opengl state
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
 
-        val backfaceCullingEnable = true
+        val backfaceCullingEnable = false
         if (backfaceCullingEnable) {
             glEnable(GL_CULL_FACE); GLError.checkThrow()
             glFrontFace(GL_CCW); GLError.checkThrow()
@@ -51,6 +62,7 @@ class Scene(private val window: GameWindow) {
         glEnable(GL_DEPTH_TEST); GLError.checkThrow()
         glDepthFunc(GL_LESS); GLError.checkThrow()
 
+        skybox = SkyboxRenderer(Skybox())
 
         bike = ModelLoader.loadModel(
             ("project/assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj"),
@@ -60,10 +72,20 @@ class Scene(private val window: GameWindow) {
         )
         bike?.scale(Vector3f(0.8f))
 
-        val proceduralGround = ProceduralGround.createGround(10,10, 1f)
+        proceduralGround = ProceduralGround.createGround(500, 500, 1f)
         ground = Renderable(mutableListOf(proceduralGround))
-        //bike?.translate(Vector3f(0f, proceduralGround.getHeight(25, 25), 0f))
         ground.color = Vector3f(0f, 1f, 0f)
+
+
+        tree = OakTree3()
+        //tree.color = Vector3f(1f, 1f, 1f)
+        tree.translate(Vector3f(25f, proceduralGround.getHeight(25f, 25f) - 0.1f, 25f))
+
+
+        sniper = Sniper()
+        sniper.translate(Vector3f(5f, proceduralGround.getHeight(5f, 5f) + 1, 5f))
+        sniper.scale(Vector3f(0.5f))
+
 
         lights.add(PointLight(Vector3f(0f, 0.75f, 0f), Vector3f(1f, 1f, 1f)))
         lights[0].parent = bike
@@ -77,16 +99,21 @@ class Scene(private val window: GameWindow) {
             Math.toRadians(10f),
             Math.toRadians(45f)
         )
-        spotlight.preTranslate(Vector3f(0f, 1f, -1.5f))
+        spotlight.translate(Vector3f(0f, 1f, -1.5f))
         spotlight.rotate(Math.toRadians(-20f), 0f, 0f)
         spotlight.parent = bike
 
 
-
         camera = TronCamera()
-        //camera.rotate(Math.toRadians(-35f), 0f, 0f)
-        camera.translate(Vector3f(0f, 2f, 4.0f))
         camera.parent = bike
+
+
+        camera.parent = sniper
+        camera.translate(Vector3f(-1.0f, 1.3f, 1.9f))
+
+        bike?.rotate(Math.toRadians(0f), Math.toRadians(225f), Math.toRadians(0f))
+
+
     }
 
     fun rainbowColor(t: Float): Vector3f {
@@ -102,9 +129,18 @@ class Scene(private val window: GameWindow) {
     }
 
     fun render(dt: Float, t: Float) {
-        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-        staticShader.use()
 
+        glEnable(GL_TEXTURE_2D)
+
+        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+
+        GL11.glDepthMask(false)
+        skyboxShader.use()
+        skybox.bind(skyboxShader)
+        camera.bind(skyboxShader)
+        GL11.glDepthMask(true)
+
+        staticShader.use()
         staticShader.setUniform("anzLichter", lights.size)
         camera.bind(staticShader)
 
@@ -129,39 +165,81 @@ class Scene(private val window: GameWindow) {
         spotlight.bind(staticShader, camera.getCalculateViewMatrix())
 
         ground.render(staticShader)
+        tree.render(staticShader)
+        sniper.render(staticShader)
+
+
         bike?.color = rainbowColor(t)
         bike?.render(staticShader)
+
+
+    }
+
+    fun updateBike(dt: Float, t: Float) {
+//        if (window.getKeyState(GLFW_KEY_W))
+//            bike?.translate(Vector3f(0f, 0f, -5 * dt))
+//        if (window.getKeyState(GLFW_KEY_S))
+//            bike?.translate(Vector3f(0f, 0f, 5 * dt))
+//        if (window.getKeyState(GLFW_KEY_A))
+//            bike?.rotate(0f, dt, 0f)
+//        if (window.getKeyState(GLFW_KEY_D))
+//            bike?.rotate(0f, -dt, 0f)
+//
+//
+//        bike?.translate(
+//            Vector3f(
+//                0f, proceduralGround.getHeight(
+//                    bike!!.getPosition().x,
+//                    bike!!.getPosition().z
+//                ) - bike!!.getPosition()!!.y, 0f
+//            )
+//        )
     }
 
     fun update(dt: Float, t: Float) {
         if (window.getKeyState(GLFW_KEY_W))
-            bike?.translate(Vector3f(0f, 0f, -5 * dt))
+            sniper.translate(Vector3f(0f, 0f, -5 * dt))
         if (window.getKeyState(GLFW_KEY_S))
-            bike?.translate(Vector3f(0f, 0f, 5 * dt))
+            sniper.translate(Vector3f(0f, 0f, 5 * dt))
         if (window.getKeyState(GLFW_KEY_A))
-            bike?.rotate(0f, dt, 0f)
+            sniper.translate(Vector3f(-5 * dt, 0f, 0f))
         if (window.getKeyState(GLFW_KEY_D))
-            bike?.rotate(0f, -dt, 0f)
+            sniper.translate(Vector3f(5 * dt, 0f, 0f))
+
+        if (window.getKeyState(GLFW_KEY_I))
+            camera.translate(Vector3f(0f, 0f, -5 * dt))
+        if (window.getKeyState(GLFW_KEY_K))
+            camera.translate(Vector3f(0f, 0f, 5 * dt))
+        if (window.getKeyState(GLFW_KEY_J))
+            camera.rotate(0f, dt, 0f)
+        if (window.getKeyState(GLFW_KEY_L))
+            camera.rotate(0f, -dt, 0f)
+
+
+        sniper.translate(
+            Vector3f(
+                0f, proceduralGround.getHeight(
+                    sniper.getPosition().x,
+                    sniper.getPosition().z
+                ) - sniper.getPosition()!!.y + 1, 0f
+            )
+        )
     }
 
 
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {}
 
     fun onMouseMove(xpos: Double, ypos: Double) {
+        sniper.rotate(0f, (prevX - xpos).toFloat() * 0.002f, 0f)
+        sniper.rotate((prevY - ypos).toFloat() * 0.002f, 0f, 0f)
 
-        bike?.let {
-//            camera.rotateAroundPoint(0f, (prevX - xpos).toFloat() * 0.002f, 0f, it.getPosition())
-            camera.rotateAroundPoint(0f, (prevX - xpos).toFloat() * 0.002f, 0f, camera.getPosition())
-//            camera.rotateAroundPoint(
-//                0f, (prevX - xpos).toFloat() * 0.002f, 0f,
-//                Vector3f(it.getWorldPosition().x, camera.getWorldPosition().y, it.getWorldPosition().z)
-//            )
-        }
-
+//        bike.let {
+//            camera.rotateAroundPoint(0f, (prevX - xpos).toFloat() * 0.002f, 0f, bike!!.getPosition())
+//            camera.rotate(0f, (prevX - xpos).toFloat() * 0.001f, 0f)
+//        }
 
         prevX = xpos
         prevY = ypos
-
     }
 
     fun cleanup() {}
