@@ -21,7 +21,7 @@ open class Mesh(
 ) {
     //private data
 
-    private var vao = 0
+     var vao = 0
     private var vbo = 0
     private var ibo = 0
     private var indexcount = 0
@@ -59,7 +59,7 @@ open class Mesh(
         //unbind for safety
         GL30.glBindVertexArray(0)
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
-        //TODO ibo entbinden
+        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0)
     }
 
     /**

@@ -7,6 +7,7 @@ import kotlin.math.acos
 
 open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var parent: Transformable? = null) {
 
+    var rotationInsgesamt = Vector3f()
 
     /**
      * Returns copy of object model matrix
@@ -33,9 +34,19 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
      * @param roll radiant angle around z-axis ccw
      */
     fun rotate(pitch: Float, yaw: Float, roll: Float) {
+
+        rotationInsgesamt.add(Vector3f(pitch, yaw, roll))
+
+//        println(
+//            "aktuelle gesamt rotation ${Math.toDegrees(rotationInsgesamt.x.toDouble())}, " +
+//                    "${Math.toDegrees(rotationInsgesamt.y.toDouble())}, " +
+//                    "${Math.toDegrees(rotationInsgesamt.z.toDouble())}"
+//        )
+
         modelMatrix.rotateX(pitch)
         modelMatrix.rotateY(yaw)
         modelMatrix.rotateZ(roll)
+
     }
 
     fun worldRotate(pitch: Float, yaw: Float, roll: Float) {

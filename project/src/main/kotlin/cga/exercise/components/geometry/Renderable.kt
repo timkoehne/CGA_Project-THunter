@@ -1,7 +1,6 @@
 package cga.exercise.components.geometry
 
 import cga.exercise.components.shader.ShaderProgram
-import org.joml.Matrix4fStack
 import org.joml.Vector3f
 
 open class Renderable(var meshes: MutableList<Mesh>) : Transformable(), IRenderable {

@@ -30,6 +30,7 @@ object ModelLoader {
                 Assimp.aiGetMaterialTexture(mat, Assimp.aiTextureType_DIFFUSE, 0, tpath, null as IntBuffer?, null, null, null, null, null)
                 // diffuse texture
                 var tpathj = tpath.dataString()
+                println(tpathj)
                 if (rm.textures.contains(tpathj)) rmat.diffTexIndex = rm.textures.indexOf(tpathj) else {
                     rm.textures.add(tpathj)
                     rmat.diffTexIndex = rm.textures.size - 1

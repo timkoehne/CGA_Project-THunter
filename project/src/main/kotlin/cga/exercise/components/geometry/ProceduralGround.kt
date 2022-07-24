@@ -3,9 +3,7 @@ package cga.exercise.components.geometry
 import cga.exercise.components.TerrainGenerator
 import cga.exercise.components.texture.Texture2D
 import org.joml.Vector2f
-import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL11
-import java.nio.FloatBuffer
 
 class ProceduralGround(
     val anzX: Int,
@@ -118,6 +116,6 @@ class ProceduralGround(
     }
 
     fun getHeight(x: Float, z: Float): Float {
-        return heightGenerator.getTerrainHeight(x/abstand, z/abstand)
+        return heightGenerator.getTerrainHeight(x / abstand, z / abstand)
     }
 }
