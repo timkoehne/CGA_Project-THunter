@@ -4,6 +4,14 @@ uniform float shininess, cosInnen, cosAussen;
 uniform vec3 fragColor, lightColorSpot, spotlightDir;
 uniform int anzLichter;
 
+uniform float ambientTag;
+uniform float ambientNacht;
+
+uniform float ingameTime;
+uniform float sonnenaufgangUhrzeit;
+uniform float sonnenuntergangUhrzeit;
+uniform float fadeDauerIngameStunden;
+
 uniform sampler2D emit, diff, specular;
 
 in struct VertexData
@@ -23,6 +31,10 @@ in vec3 toSpotlight;
 
 out vec4 color;
 
+float mixFactor(float startzeit){
+    return (ingameTime - startzeit)/fadeDauerIngameStunden;
+}
+
 vec3 gamma(vec3 c_linear){
     return vec3(pow(c_linear.x, 1/2.2), pow(c_linear.y, 1/2.2), pow(c_linear.z, 1/2.2));
 }
@@ -41,7 +53,21 @@ vec3 emmisivBerechnen(){
 }
 
 vec3 ambientBerechnen(){
-    return gamma(texture(diff, vertexData.textureCords).rgb) * 0.8;
+    float ambient = 0.8;
+    if (ingameTime >= sonnenaufgangUhrzeit  && ingameTime < (sonnenaufgangUhrzeit + fadeDauerIngameStunden)){ // Morning
+        ambient = mix(ambientNacht, ambientTag, mixFactor(sonnenaufgangUhrzeit));
+
+    } else if (ingameTime >= sonnenaufgangUhrzeit + fadeDauerIngameStunden && ingameTime <  sonnenuntergangUhrzeit){ // Day
+        ambient = ambientTag;
+
+    } else if (ingameTime >= sonnenuntergangUhrzeit  && ingameTime < (sonnenuntergangUhrzeit + fadeDauerIngameStunden)){ // Evening
+        ambient = mix(ambientTag, ambientNacht, mixFactor(sonnenuntergangUhrzeit));
+
+    } else { // Night
+        ambient = ambientNacht;
+    }
+
+    return gamma(texture(diff, vertexData.textureCords).rgb) * ambient;
 }
 
 vec3 diffuseBerechnen(vec3 normal, vec3 toLight, vec3 color){

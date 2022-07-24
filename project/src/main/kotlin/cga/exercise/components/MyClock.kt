@@ -10,7 +10,7 @@ class MyClock(
 
     fun update(time: Float) {
         ingameTime = (time / ingameStundenDauerInSekunden) % 24
-        println(ingameTime)
+        println("ingameTime: $ingameTime Uhr")
     }
 
 

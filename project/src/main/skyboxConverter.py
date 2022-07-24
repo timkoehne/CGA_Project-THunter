@@ -2,6 +2,8 @@ from PIL import Image
 import sys
 
 image = Image.open(sys.argv[1])
+filepath = sys.argv[1][:sys.argv[1].rindex("/")]
+
 sides = ("", "top", "", "", "left", "front",
          "right", "back", "", "bottom", "", "")
 
@@ -14,4 +16,4 @@ for y in range(3):
             print(sides[y*4+x])
             tile = image.crop(
                 (new_width * x, new_height * y, new_width * x + new_width, new_height * y + new_height))
-            tile.save(sides[y*4+x]+".png")
+            tile.save(filepath + "/" + sides[y*4+x]+".png")

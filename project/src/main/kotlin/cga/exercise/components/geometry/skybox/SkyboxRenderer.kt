@@ -8,7 +8,12 @@ import org.joml.Vector3f
 import org.lwjgl.opengl.*
 
 
-class SkyboxRenderer(val dayTextures: List<String>, val nightTextures: List<String>, val myClock: MyClock) {
+class SkyboxRenderer(
+    private val dayTextures: List<String>,
+    private val nightTextures: List<String>,
+    private val myClock: MyClock,
+    private val rotation: Boolean
+) {
 
     private val cube = Cube()
     private val dayTexID: Int = Loader.loadCubeMap(dayTextures)
@@ -20,23 +25,27 @@ class SkyboxRenderer(val dayTextures: List<String>, val nightTextures: List<Stri
     }
 
     fun update(dt: Float) {
-        cube.rotate(0f, 0.05f * dt, 0f)
+        if (rotation)
+            cube.rotate(0f, 0.05f * dt, 0f)
     }
 
     fun render(shaderProgram: ShaderProgram, ingameTime: Float) {
 
         shaderProgram.setUniform("ingameTime", ingameTime)
-        shaderProgram.setUniform("cubeMapDay", 0)
-        shaderProgram.setUniform("cubeMapNight", 1)
 
         shaderProgram.setUniform("sonnenaufgangUhrzeit", myClock.sonnenaufgangUhrzeit)
         shaderProgram.setUniform("sonnenuntergangUhrzeit", myClock.sonnenuntergangUhrzeit)
         shaderProgram.setUniform("fadeDauerIngameStunden", myClock.fadeDauerIngameStunden)
 
+        shaderProgram.setUniform("cubeMapDay", 0)
         GL13.glActiveTexture(GL13.GL_TEXTURE0)
         GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, dayTexID)
+
+        shaderProgram.setUniform("cubeMapNight", 1)
         GL13.glActiveTexture(GL13.GL_TEXTURE1)
         GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, nightTexID)
         cube.render(shaderProgram)
+
+
     }
 }

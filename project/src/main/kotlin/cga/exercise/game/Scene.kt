@@ -1,16 +1,14 @@
 package cga.exercise.game
 
 import cga.exercise.components.camera.TronCamera
-import cga.exercise.components.geometry.MyMap
-import cga.exercise.components.geometry.OakTree3
-import cga.exercise.components.geometry.Renderable
-import cga.exercise.components.geometry.Sniper
+import cga.exercise.components.geometry.*
 import cga.exercise.components.light.PointLight
 import cga.exercise.components.light.SpotLight
 import cga.exercise.components.shader.ShaderProgram
 import cga.framework.GLError
 import cga.framework.GameWindow
 import cga.framework.ModelLoader
+import cga.framework.OBJLoader
 import org.joml.Math
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.*
@@ -33,6 +31,9 @@ class Scene(private val window: GameWindow) {
 
     val sniper: Renderable
     val tree: Renderable
+
+    val bear: ComplexModel
+
 
     val lights = arrayListOf<PointLight>()
     var spotlight: SpotLight
@@ -62,7 +63,8 @@ class Scene(private val window: GameWindow) {
         camera = TronCamera()
         camera.translate(Vector3f(-1.0f, 1.3f, 1.9f))
 
-        myMap = MyMap(500, 500, 1f, camera, 6f, 18f, 2f, 2)
+        myMap = MyMap(500, 500, 1f, camera, 6f, 18f,
+            2f, 2, 0.8f, 0.5f)
 
         bike = ModelLoader.loadModel(
             ("project/assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj"), Math.toRadians(-90f), Math.toRadians(90f), 0f
@@ -79,6 +81,9 @@ class Scene(private val window: GameWindow) {
         sniper.scale(Vector3f(0.5f))
         camera.parent = sniper
 
+
+        bear = ComplexModel("project/assets/models/brownbear.obj")
+        bear.scale(Vector3f(0.05f))
 
         lights.add(PointLight(Vector3f(0f, 0.75f, 0f), Vector3f(1f, 1f, 1f)))
         lights[0].parent = bike
@@ -121,9 +126,23 @@ class Scene(private val window: GameWindow) {
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 
         staticShader.use()
+
+
+        staticShader.setUniform("ingameTime", myMap.myClock.ingameTime)
+
+        staticShader.setUniform("sonnenaufgangUhrzeit", myMap.myClock.sonnenaufgangUhrzeit)
+        staticShader.setUniform("sonnenuntergangUhrzeit", myMap.myClock.sonnenuntergangUhrzeit)
+        staticShader.setUniform("fadeDauerIngameStunden", myMap.myClock.fadeDauerIngameStunden)
+
+        staticShader.setUniform("ambientTag", myMap.ambientLightTagsueber)
+        staticShader.setUniform("ambientNacht", myMap.ambientLightNachts)
+
         staticShader.setUniform("anzLichter", lights.size)
         camera.bind(staticShader)
 
+
+
+        bear.render(staticShader)
 
         lights.forEachIndexed { index, it ->
             run {
@@ -147,11 +166,10 @@ class Scene(private val window: GameWindow) {
         myMap.render(staticShader)
         tree.render(staticShader)
         sniper.render(staticShader)
-
-        myMap.renderSkybox()
-
         bike?.color = rainbowColor(time)
         bike?.render(staticShader)
+
+        myMap.renderSkybox()
     }
 
     fun updateBike(dt: Float, time: Float) {

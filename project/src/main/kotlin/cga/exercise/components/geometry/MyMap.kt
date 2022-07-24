@@ -15,12 +15,16 @@ class MyMap(
     sonnenaufgangUhrzeit: Float,
     sonnenuntergangUhrzeit: Float,
     fadeDauerIngameStunden: Float,
-    ingameStundenDauerInSekunden: Int
+    ingameStundenDauerInSekunden: Int,
+    val ambientLightTagsueber: Float, //TODO random noise reinbringen
+    val ambientLightNachts: Float
+
 ) {
 
-    var ground: Renderable
-    val proceduralGround: ProceduralGround
-    val skybox: SkyboxRenderer
+    private var ground: Renderable
+    private val proceduralGround: ProceduralGround
+    private val skyboxStationary: SkyboxRenderer
+    private val skyboxRotating: SkyboxRenderer
 
     val myClock: MyClock
 
@@ -36,22 +40,40 @@ class MyMap(
         skyboxShader =
             ShaderProgram("project/assets/shaders/skybox_vert.glsl", "project/assets/shaders/skybox_frag.glsl")
 
-        skybox = SkyboxRenderer(
+        skyboxStationary = SkyboxRenderer(
             listOf(
-                "project/assets/textures/skybox/right.png",
-                "project/assets/textures/skybox/left.png",
-                "project/assets/textures/skybox/top.png",
-                "project/assets/textures/skybox/bottom.png",
-                "project/assets/textures/skybox/front.png",
-                "project/assets/textures/skybox/back.png"
+                "project/assets/textures/skybox/day-stationary/right.png",
+                "project/assets/textures/skybox/day-stationary/left.png",
+                "project/assets/textures/skybox/day-stationary/top.png",
+                "project/assets/textures/skybox/day-stationary/bottom.png",
+                "project/assets/textures/skybox/day-stationary/front.png",
+                "project/assets/textures/skybox/day-stationary/back.png"
             ), listOf(
-                "project/assets/textures/skybox/night/right.png",
-                "project/assets/textures/skybox/night/left.png",
-                "project/assets/textures/skybox/night/top.png",
-                "project/assets/textures/skybox/night/bottom.png",
-                "project/assets/textures/skybox/night/front.png",
-                "project/assets/textures/skybox/night/back.png"
-            ), myClock
+                "project/assets/textures/skybox/night-stationary/right.png",
+                "project/assets/textures/skybox/night-stationary/left.png",
+                "project/assets/textures/skybox/night-stationary/top.png",
+                "project/assets/textures/skybox/night-stationary/bottom.png",
+                "project/assets/textures/skybox/night-stationary/front.png",
+                "project/assets/textures/skybox/night-stationary/back.png"
+            ), myClock, false
+        )
+
+        skyboxRotating = SkyboxRenderer(
+            listOf(
+                "project/assets/textures/skybox/day-rotating/right.png",
+                "project/assets/textures/skybox/day-rotating/left.png",
+                "project/assets/textures/skybox/day-rotating/top.png",
+                "project/assets/textures/skybox/day-rotating/bottom.png",
+                "project/assets/textures/skybox/day-rotating/front.png",
+                "project/assets/textures/skybox/day-rotating/back.png"
+            ), listOf(
+                "project/assets/textures/skybox/night-rotating/right.png",
+                "project/assets/textures/skybox/night-rotating/left.png",
+                "project/assets/textures/skybox/night-rotating/top.png",
+                "project/assets/textures/skybox/night-rotating/bottom.png",
+                "project/assets/textures/skybox/night-rotating/front.png",
+                "project/assets/textures/skybox/night-rotating/back.png"
+            ), myClock, true
         )
 
 
@@ -61,23 +83,27 @@ class MyMap(
         return proceduralGround.getHeight(x, z)
     }
 
+    fun getAmbient() {
+
+    }
+
     fun update(dt: Float, time: Float) {
         myClock.update(time)
-
-
+        skyboxStationary.update(dt)
+        skyboxRotating.update(dt)
     }
 
     fun render(staticShader: ShaderProgram) {
         staticShader.use()
         ground.render(staticShader)
-
     }
 
     fun renderSkybox() {
         GL11.glDepthMask(false)
         skyboxShader.use()
         camera.bind(skyboxShader)
-        skybox.render(skyboxShader, myClock.ingameTime)
+        skyboxRotating.render(skyboxShader, myClock.ingameTime)
+        skyboxStationary.render(skyboxShader, myClock.ingameTime)
         GL11.glDepthMask(true)
     }
 
