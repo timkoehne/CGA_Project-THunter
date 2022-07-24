@@ -1,14 +1,15 @@
+#version 400
 
-#version 330 core
-layout (location = 0) in vec3 aPos;
+in vec3 position;
+out vec3 textureCoords;
 
-out vec3 TexCoords;
-
-uniform mat4 projection;
+uniform mat4 model_matrix;
 uniform mat4 view;
+uniform mat4 projection;
 
-void main()
-{
-    TexCoords = aPos;
-    gl_Position = projection * view * vec4(aPos, 1.0);
+void main(void){
+
+    gl_Position = projection * mat4(mat3(view)) * model_matrix * vec4(position, 1.0);
+    textureCoords = position;
+
 }

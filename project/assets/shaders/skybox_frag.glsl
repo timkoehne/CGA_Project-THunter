@@ -1,24 +1,29 @@
-#version 330 core
+#version 400
 
-out vec4 FragColor;
+in vec3 textureCoords;
+out vec4 out_Color;
 
-in vec3 TexCoords;
+uniform float ingameTime;
+uniform samplerCube cubeMapDay;
+uniform samplerCube cubeMapNight;
 
-//uniform samplerCube skybox;
-//uniform samplerCube skybox;
-uniform sampler2D skybox;
+uniform float sonnenaufgangUhrzeit;
+uniform float sonnenuntergangUhrzeit;
+uniform float fadeDauerIngameStunden;
 
-void main()
-{
+void main(void){
 
-//    if (TexCoords.x > 0){
-//        FragColor = vec4(1,0,0,0);
-//    }else{
-//        FragColor = vec4(0,1,0,0);
-//    }
+    if (ingameTime >= sonnenaufgangUhrzeit  && ingameTime < (sonnenaufgangUhrzeit + fadeDauerIngameStunden)){ // Morning
+        out_Color = mix(texture(cubeMapNight, textureCoords), texture(cubeMapDay, textureCoords), (ingameTime - sonnenaufgangUhrzeit)/fadeDauerIngameStunden);
 
+    } else if (ingameTime >= sonnenaufgangUhrzeit + fadeDauerIngameStunden && ingameTime <  sonnenuntergangUhrzeit){ // Day
+        out_Color = texture(cubeMapDay, textureCoords);
 
-   FragColor = texture(skybox, TexCoords.xy);
-    FragColor += vec4(0.2);
+    } else if (ingameTime >= sonnenuntergangUhrzeit  && ingameTime < (sonnenuntergangUhrzeit + fadeDauerIngameStunden)){ // Evening
+        out_Color = mix(texture(cubeMapDay, textureCoords), texture(cubeMapNight, textureCoords), (ingameTime - sonnenuntergangUhrzeit)/fadeDauerIngameStunden);
+
+    } else { // Night
+        out_Color = texture(cubeMapNight, textureCoords);
+    }
 
 }

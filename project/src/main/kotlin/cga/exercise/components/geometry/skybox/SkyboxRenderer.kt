@@ -1,94 +1,42 @@
 package cga.exercise.components.geometry.skybox
 
+import cga.exercise.components.MyClock
+import cga.exercise.components.Loader
+import cga.exercise.components.geometry.Cube
 import cga.exercise.components.shader.ShaderProgram
+import org.joml.Vector3f
 import org.lwjgl.opengl.*
 
 
-class SkyboxRenderer(val skybox: Skybox) {
+class SkyboxRenderer(val dayTextures: List<String>, val nightTextures: List<String>, val myClock: MyClock) {
 
+    private val cube = Cube()
+    private val dayTexID: Int = Loader.loadCubeMap(dayTextures)
+    private val nightTexID: Int = Loader.loadCubeMap(nightTextures)
 
-    companion object {
-
-        val multiplier = 5f
-        var vertices = mutableListOf<Float>(
-            -1.0f, 1.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, 1.0f, -1.0f,
-            -1.0f, 1.0f, -1.0f,
-
-            -1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f, -1.0f,
-            -1.0f, 1.0f, -1.0f,
-            -1.0f, 1.0f, -1.0f,
-            -1.0f, 1.0f, 1.0f,
-            -1.0f, -1.0f, 1.0f,
-
-            1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-
-            -1.0f, -1.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f, 1.0f,
-
-            -1.0f, 1.0f, -1.0f,
-            1.0f, 1.0f, -1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f,
-            -1.0f, 1.0f, -1.0f,
-
-            -1.0f, -1.0f, -1.0f,
-            -1.0f, -1.0f, 1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            -1.0f, -1.0f, 1.0f,
-            1.0f, -1.0f, 1.0f
-        ).toFloatArray()
-    }
-
-    private var vao = 0
-    private var vbo = 0
 
     init {
-        // setup vao
-        vao = GL30.glGenVertexArrays()
-        GL30.glBindVertexArray(vao)
-
-        //setup vbo
-        vbo = GL15.glGenBuffers()
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo)
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertices, GL15.GL_STATIC_DRAW)
-
-        GL20.glEnableVertexAttribArray(0)
-        GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 4, 0)
-
-        GL30.glBindVertexArray(0)
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
-
+        cube.scale(Vector3f(50f))
     }
 
-    fun bind(shaderProgram: ShaderProgram) {
-
-        GL30.glBindVertexArray(vao)
-        GL20.glEnableVertexAttribArray(0)
-
-        GL30.glActiveTexture(GL13.GL_TEXTURE5)
-        GL30.glBindTexture(GL30.GL_TEXTURE_CUBE_MAP, skybox.texID)
-        shaderProgram.setUniform("skybox", 5)
-
-        GL30.glDrawArrays(GL30.GL_TRIANGLES, 0, vertices.size)
-
+    fun update(dt: Float) {
+        cube.rotate(0f, 0.05f * dt, 0f)
     }
 
+    fun render(shaderProgram: ShaderProgram, ingameTime: Float) {
+
+        shaderProgram.setUniform("ingameTime", ingameTime)
+        shaderProgram.setUniform("cubeMapDay", 0)
+        shaderProgram.setUniform("cubeMapNight", 1)
+
+        shaderProgram.setUniform("sonnenaufgangUhrzeit", myClock.sonnenaufgangUhrzeit)
+        shaderProgram.setUniform("sonnenuntergangUhrzeit", myClock.sonnenuntergangUhrzeit)
+        shaderProgram.setUniform("fadeDauerIngameStunden", myClock.fadeDauerIngameStunden)
+
+        GL13.glActiveTexture(GL13.GL_TEXTURE0)
+        GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, dayTexID)
+        GL13.glActiveTexture(GL13.GL_TEXTURE1)
+        GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, nightTexID)
+        cube.render(shaderProgram)
+    }
 }
-
-
