@@ -3,6 +3,9 @@
 in vec3 textureCoords;
 out vec4 out_Color;
 
+uniform float ambientTag;
+uniform float ambientNacht;
+
 uniform float ingameTime;
 uniform samplerCube cubeMapDay;
 uniform samplerCube cubeMapNight;
@@ -23,28 +26,30 @@ float mixFactor(float startzeit){
     return (ingameTime - startzeit)/fadeDauerIngameStunden;
 }
 
-
 void main(void){
+
+    float ambient;
 
     if (ingameTime >= sonnenaufgangUhrzeit  && ingameTime < (sonnenaufgangUhrzeit + fadeDauerIngameStunden)){ // Morning
         out_Color = mix(nightTexture(), dayTexture(), mixFactor(sonnenaufgangUhrzeit));
+        ambient = mix(ambientNacht, ambientTag, mixFactor(sonnenaufgangUhrzeit));
 
     } else if (ingameTime >= sonnenaufgangUhrzeit + fadeDauerIngameStunden && ingameTime <  sonnenuntergangUhrzeit){ // Day
         out_Color = dayTexture();
+        ambient = ambientTag;
 
     } else if (ingameTime >= sonnenuntergangUhrzeit  && ingameTime < (sonnenuntergangUhrzeit + fadeDauerIngameStunden)){ // Evening
         out_Color = mix(dayTexture(), nightTexture(), mixFactor(sonnenuntergangUhrzeit));
+        ambient = mix(ambientTag, ambientNacht, mixFactor(sonnenuntergangUhrzeit));
 
     } else { // Night
         out_Color = nightTexture();
+        ambient = ambientNacht;
     }
 
-    if(out_Color.a < 0.1){
+    out_Color *= ambient;
+
+    if(out_Color.a < 0.5){
         discard;
     }
-
-//    if (out_Color.xyz == vec3(1, 1, 1))
-//    out_Color = vec4(0, 1, 0, 0);
-
-
 }

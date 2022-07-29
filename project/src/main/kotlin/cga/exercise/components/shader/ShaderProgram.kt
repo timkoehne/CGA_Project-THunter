@@ -25,7 +25,6 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
     fun use() {
         val curprog = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM)
         if (curprog != programID) GL20.glUseProgram(programID)
-
     }
 
     /**

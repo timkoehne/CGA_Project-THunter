@@ -1,8 +1,8 @@
 #version 330 core
 
 uniform float shininess, cosInnen, cosAussen;
-uniform vec3 fragColor, lightColorSpot, spotlightDir;
-uniform int anzLichter;
+//uniform vec3 fragColor, lightColorSpot, spotlightDir;
+//uniform int anzLichter;
 
 uniform float ambientTag;
 uniform float ambientNacht;
@@ -12,24 +12,28 @@ uniform float sonnenaufgangUhrzeit;
 uniform float sonnenuntergangUhrzeit;
 uniform float fadeDauerIngameStunden;
 
-uniform sampler2D emit, diff, specular;
+uniform sampler2D emit, diff, spec, depthMap;
+
+uniform vec3 sunPos;
+uniform vec3 viewPos;
 
 in struct VertexData
 {
     vec3 position;
     vec2 textureCords;
     vec3 normal;
+    vec4 fragPosLightSpace;
 } vertexData;
 
-in struct Light
-{
-    vec3 toCamera;
-    vec3 toLight;
-    vec3 lightColor;
-} lights[5];
-in vec3 toSpotlight;
+//in struct Light
+//{
+//    vec3 toCamera;
+//    vec3 toLight;
+//    vec3 lightColor;
+//} lights[5];
+//in vec3 toSpotlight;
 
-out vec4 color;
+out vec4 FragColor;
 
 float mixFactor(float startzeit){
     return (ingameTime - startzeit)/fadeDauerIngameStunden;
@@ -49,11 +53,11 @@ float attenuation(vec3 toLight){
 }
 
 vec3 emmisivBerechnen(){
-    return gamma(texture(emit, vertexData.textureCords).rgb);
+    return texture(emit, vertexData.textureCords).rgb;
 }
 
 vec3 ambientBerechnen(){
-    float ambient = 0.8;
+    float ambient;
     if (ingameTime >= sonnenaufgangUhrzeit  && ingameTime < (sonnenaufgangUhrzeit + fadeDauerIngameStunden)){ // Morning
         ambient = mix(ambientNacht, ambientTag, mixFactor(sonnenaufgangUhrzeit));
 
@@ -66,73 +70,73 @@ vec3 ambientBerechnen(){
     } else { // Night
         ambient = ambientNacht;
     }
-
-    return gamma(texture(diff, vertexData.textureCords).rgb) * ambient;
+    return ambient * texture(diff, vertexData.textureCords).rgb;
 }
 
-vec3 diffuseBerechnen(vec3 normal, vec3 toLight, vec3 color){
-    vec3 matDiffuse = gamma(texture(diff, vertexData.textureCords).rgb);
+vec3 diffuseBerechnen(vec3 normal, vec3 lightPos){
+    vec3 matDiffuse = texture(diff, vertexData.textureCords).rgb;
+    vec3 lightDir = normalize(lightPos - vertexData.position);
 
-    float cosa = max(0.0, dot(normal, toLight));
-    vec3 diffuseTerm = matDiffuse * color;
-    return diffuseTerm*cosa;
+    float cosa = max(dot(lightDir, normal), 0.0);
+    return matDiffuse * cosa;
 }
 
-vec3 specularBerechnen(vec3 normal, vec3 toLight, vec3 color){
-    vec3 matSpecular = gamma(texture(specular, vertexData.textureCords).rgb);
-    vec3 toCamera = normalize(lights[0].toCamera);
+vec3 specularBerechnen(vec3 normal, vec3 lightPos){
+    vec3 matSpecular = texture(spec, vertexData.textureCords).rgb;
 
-    //Blinn-Phong-Modell
-    vec3 halfway = normalize(toLight + toCamera);
-    float spec = pow(max(0.0, dot(normal, halfway)), shininess);
-    vec3 specular = matSpecular * spec * color;
+    vec3 lightDir = normalize(lightPos - vertexData.position);
+    vec3 viewDir = normalize(viewPos - vertexData.position);
+    float cosb = 0.0;
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    cosb = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+    vec3 specular = matSpecular * cosb;
     return specular;
-
-    //Phong-Modell
-    //    vec3 reflection = normalize(reflect(-toLight, normal));
-    //    float cosBeta = max(0.0, dot(reflection, toCamera));
-    //    float cosBetak = pow(cosBeta, shininess);
-    //    vec3 specularTerm = matSpecular * color;
-    //    return specularTerm * cosBetak;
 }
 
-float angleIntensity(){
-    float theta = dot(normalize(toSpotlight), normalize(-spotlightDir));
-    if (theta > cosInnen){
-        return 1;
-    } else if (theta > cosAussen){
-        return clamp((theta - cosAussen) / (cosInnen - cosAussen), 0, 1);
-    }
-    return 0;
+//float angleIntensity(){
+//    float theta = dot(normalize(toSpotlight), normalize(-spotlightDir));
+//    if (theta > cosInnen){
+//        return 1;
+//    } else if (theta > cosAussen){
+//        return clamp((theta - cosAussen) / (cosInnen - cosAussen), 0, 1);
+//    }
+//    return 0;
+//}
+//
+//vec3 angleIntensityColorTest(){
+//    float theta = dot(normalize(toSpotlight), normalize(-spotlightDir));
+//    if (theta > cosInnen){
+//        return vec3(1, 0, 0);
+//    } else if (theta > cosAussen){
+//        return vec3(0, 1, 0);
+//    }
+//    return vec3(0, 0, 1);
+//}
+
+float shadowCalculation(vec4 fragPosLightSpace){
+    vec3 projCoords = (fragPosLightSpace.xyz * 0.5) + 0.5;
+    float lightSpaceDepth = texture(depthMap, projCoords.xy).r;
+    float cameraDepth = projCoords.z;
+    float shadow = cameraDepth > lightSpaceDepth  ? 1.0 : 0.0;
+    return shadow;
 }
 
-vec3 angleIntensityColorTest(){
-    float theta = dot(normalize(toSpotlight), normalize(-spotlightDir));
-    if (theta > cosInnen){
-        return vec3(1, 0, 0);
-    } else if (theta > cosAussen){
-        return vec3(0, 1, 0);
-    }
-    return vec3(0, 0, 1);
-}
-
-vec3 diffuseAndSpecularBerechnen(vec3 toLight, vec3 color){
-    return (diffuseBerechnen(normalize(vertexData.normal), normalize(toLight), color) +
-    specularBerechnen(normalize(vertexData.normal), normalize(toLight), color)) * attenuation(toLight);//
-}
 
 void main(){
+    vec3 normal = normalize(vertexData.normal);
 
-    color = vec4(emmisivBerechnen() * fragColor, 1.0);
-    color += vec4(ambientBerechnen(), 0.0);
+    vec3 lightColor = vec3(1);
 
-    for (int i = 0; i < anzLichter; i++){
-        color += vec4(diffuseAndSpecularBerechnen(lights[i].toLight, lights[i].lightColor), 0.0);
-    }
 
-    color += vec4(diffuseAndSpecularBerechnen(toSpotlight, lightColorSpot) * angleIntensity(), 0.0);
-    color = vec4(invgamma(color.rgb), 1);
+    float shadow = shadowCalculation(vertexData.fragPosLightSpace);
+
+//    FragColor = vec4(emmisivBerechnen() * lightColor, 1.0);
+    FragColor = vec4(ambientBerechnen(), 1.0);
+
+    FragColor += (1-shadow) * (vec4(diffuseBerechnen(normal, sunPos), 0.0));
+    FragColor += (1-shadow) * (vec4(specularBerechnen(normal, sunPos), 0.0));
+
+    FragColor = vec4(FragColor.rgb, 1);
 
 
 }
-

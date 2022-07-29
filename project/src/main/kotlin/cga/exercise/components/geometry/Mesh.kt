@@ -21,7 +21,7 @@ open class Mesh(
 ) {
     //private data
 
-     var vao = 0
+    var vao = 0
     private var vbo = 0
     private var ibo = 0
     private var indexcount = 0
@@ -69,6 +69,18 @@ open class Mesh(
         GL30.glBindVertexArray(vao)
 
         material?.bind(shaderProgram)
+
+        GL11.glDrawElements(GL11.GL_TRIANGLES, indexcount, GL11.GL_UNSIGNED_INT, 0)
+
+        GL30.glBindVertexArray(0)
+    }
+
+    fun render(shaderProgram: ShaderProgram, texID: Int) {
+        GL30.glBindVertexArray(vao)
+
+        GL13.glActiveTexture(GL13.GL_TEXTURE0)
+        GL11.glBindTexture(GL20.GL_TEXTURE_2D, texID)
+        shaderProgram.setUniform("diff", 0)
 
         GL11.glDrawElements(GL11.GL_TRIANGLES, indexcount, GL11.GL_UNSIGNED_INT, 0)
 

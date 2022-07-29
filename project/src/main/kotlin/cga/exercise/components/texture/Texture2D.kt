@@ -29,7 +29,7 @@ class Texture2D(imageData: ByteBuffer, width: Int, height: Int, genMipMaps: Bool
         //don't support compressed textures for now
         //instead stick to pngs
         operator fun invoke(path: String, genMipMaps: Boolean): Texture2D {
-            var t = Loader.decodeTextureFile(path)
+            var t = Loader.decodeTextureFile(path, true)
             return Texture2D(t.imagedata, t.width, t.height, genMipMaps)
             STBImage.stbi_image_free(t.imagedata)
 

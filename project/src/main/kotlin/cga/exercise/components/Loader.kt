@@ -13,12 +13,12 @@ data class TextureData(var imagedata: ByteBuffer, var width: Int, var height: In
 class Loader {
 
     companion object {
-        fun decodeTextureFile(filepath: String): TextureData {
+        fun decodeTextureFile(filepath: String, flip: Boolean): TextureData {
             val x = BufferUtils.createIntBuffer(1)
             val y = BufferUtils.createIntBuffer(1)
             val readChannels = BufferUtils.createIntBuffer(1)
             //flip y coordinate to make OpenGL happy
-//            STBImage.stbi_set_flip_vertically_on_load(true)
+            STBImage.stbi_set_flip_vertically_on_load(flip)
             val imageData = STBImage.stbi_load(filepath, x, y, readChannels, 4)
                 ?: throw Exception("Image file \"" + filepath + "\" couldn't be read:\n" + STBImage.stbi_failure_reason())
             try {
@@ -36,7 +36,7 @@ class Loader {
             GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, texID)
 
             for (i in textureFiles.indices) {
-                val data = decodeTextureFile(textureFiles[i])
+                val data = decodeTextureFile(textureFiles[i], false)
                 GL11.glTexImage2D(
                     GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
                     GL11.GL_RGBA,
