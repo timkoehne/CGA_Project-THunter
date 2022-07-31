@@ -30,7 +30,7 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
     /**
      * Frees the allocated OpenGL objects
      */
-    fun cleanup() {
+    fun cleanUp() {
         GL20.glDeleteProgram(programID)
     }
 

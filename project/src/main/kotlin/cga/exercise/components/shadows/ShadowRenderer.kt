@@ -1,5 +1,6 @@
 package cga.exercise.components.shadows
 
+import cga.exercise.components.entities.Cube
 import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.game.Scene
 import org.joml.Matrix4f
@@ -15,9 +16,11 @@ class ShadowRenderer(val scene: Scene) {
         const val SHADOW_HEIGHT = 1024 * 16//TODO bessere loesung finden
     }
 
+    lateinit var sun: Cube
+
+
     val depthMapFBO: Int
     val depthMap: Int
-    var sunPos = Vector3f(0f, 20f, 0f)
     val simpleDepthShader =
         ShaderProgram("project/assets/shaders/simpleDepth_vert.glsl", "project/assets/shaders/simpleDepth_frag.glsl")
     var sunSpaceMatrix = Matrix4f()
@@ -26,6 +29,10 @@ class ShadowRenderer(val scene: Scene) {
     val far_plane = scene.camera.fPlane
 
     init {
+
+        sun = Cube()
+        sun.translate(Vector3f(0f, 20f, 0f))
+
         depthMapFBO = GL30.glGenFramebuffers()
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, depthMapFBO)
 
@@ -54,13 +61,14 @@ class ShadowRenderer(val scene: Scene) {
         GL30.glDrawBuffer(GL30.GL_NONE)
         GL30.glReadBuffer(GL30.GL_NONE)
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0)
+
     }
 
     fun render(dt: Float, time: Float) {
 
         val depthProjection =
             Matrix4f().ortho(-200f, 200f, -200f, 200f, near_plane, far_plane) //TODO bessere loesung finden. debugshader hilft
-        val depthView = Matrix4f().lookAt(sunPos, Vector3f(1f, 10f, 1f), Vector3f(0f, 1f, 0f))
+        val depthView = Matrix4f().lookAt(sun.getPosition(), Vector3f(1f, 10f, 1f), Vector3f(0f, 1f, 0f))
         sunSpaceMatrix = depthProjection.mul(depthView)
 
         simpleDepthShader.use()
@@ -74,8 +82,11 @@ class ShadowRenderer(val scene: Scene) {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
 
         GL11.glCullFace(GL11.GL_FRONT)
+
+        //TODO was soll alles hier gerendert werden?? evtl uebergeben?
         scene.myMap.render(simpleDepthShader)
-        scene.renderEntities(dt, time, simpleDepthShader)
+        scene.entityManager.render(dt, time, simpleDepthShader)
+
         GL11.glCullFace(GL11.GL_BACK)
 
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0)

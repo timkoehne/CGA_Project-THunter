@@ -168,11 +168,10 @@ object ModelLoader {
         return data
     }
 
-    fun loadModelSameTextures(objpaths: List<String>): MutableList<Renderable>? {
-
+    fun loadModelSameTextures(objpaths: List<String>): MutableList<Renderable> {
         val models = mutableListOf<RawModel>()
         for (objpath in objpaths) {
-            models.add(load(objpath) ?: return null)
+            models.add(load(objpath) ?: throw Exception("cannot load model $objpath"))
         }
 
         val textures = ArrayList<Texture2D>()
@@ -235,8 +234,12 @@ object ModelLoader {
         return renderables
     }
 
-    fun loadModel(objpath: String, pitch: Float, yaw: Float, roll: Float): Renderable? {
-        val model = load(objpath) ?: return null
+    fun loadModel(objpath: String) {
+        loadModel(objpath, 0f, 0f, 0f)
+    }
+
+    fun loadModel(objpath: String, pitch: Float, yaw: Float, roll: Float): Renderable {
+        val model = load(objpath) ?: throw Exception("cannot load model $objpath")
         val textures = ArrayList<Texture2D>()
         val materials = ArrayList<Material>()
         val meshes = ArrayList<Mesh>()

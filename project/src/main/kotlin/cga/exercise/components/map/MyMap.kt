@@ -31,8 +31,10 @@ class MyMap(
         proceduralGround = ProceduralGround.createGround(anzX, anzZ, abstand)
         ground = Renderable(mutableListOf(proceduralGround))
 
-        myClock =
-            MyClock(sonnenaufgangUhrzeit, sonnenuntergangUhrzeit, fadeDauerIngameStunden, ingameStundenDauerInSekunden)
+        myClock = MyClock(
+            sonnenaufgangUhrzeit, sonnenuntergangUhrzeit,
+            fadeDauerIngameStunden, ingameStundenDauerInSekunden
+        )
 
 
 //        skyboxStationary = SkyboxRenderer(
@@ -70,8 +72,6 @@ class MyMap(
                 "project/assets/textures/skybox/night-rotating/back.png"
             ), this, true
         )
-
-
     }
 
     fun getHeight(x: Float, z: Float): Float {
@@ -99,6 +99,12 @@ class MyMap(
     fun renderSkybox() {
         skyboxRotating?.render(myClock.ingameTime, camera)
         skyboxStationary?.render(myClock.ingameTime, camera)
+    }
+
+    fun cleanUp(){
+        ground.cleanUp()
+        skyboxRotating?.cleanUp()
+        skyboxStationary?.cleanUp()
     }
 
 

@@ -54,5 +54,10 @@ class GuiRenderer(private val window: GameWindow, private val guiElements: Mutab
         GL30.glBindVertexArray(0)
     }
 
+    fun cleanUp(){
+        if (vbo != 0) GL15.glDeleteBuffers(vbo)
+        if (vao != 0) GL30.glDeleteVertexArrays(vao)
+    }
+
 
 }

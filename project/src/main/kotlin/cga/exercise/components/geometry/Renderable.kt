@@ -14,4 +14,10 @@ open class Renderable(var meshes: MutableList<Mesh>) : Transformable(), IRendera
             mesh.render(shaderProgram)
         }
     }
+
+    fun cleanUp(){
+        for(mesh in meshes){
+            mesh.cleanUp()
+        }
+    }
 }

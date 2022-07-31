@@ -1,87 +1,72 @@
 package cga.exercise.components.entities
 
-import cga.exercise.components.geometry.Renderable
 import cga.exercise.components.shader.ShaderProgram
 import cga.framework.ModelLoader
 import org.joml.Vector3f
 
-class Drone() : Entity() {
+class Drone : Entity(
+    ModelLoader.loadModelSameTextures(
+        listOf(
+            filepath + "droneBody.obj",
+            filepath + "droneArm.obj",
+            filepath + "droneArm.obj",
+            filepath + "droneArm.obj",
+            filepath + "droneArm.obj",
+            filepath + "propeller.obj",
+            filepath + "propeller.obj",
+            filepath + "propeller.obj",
+            filepath + "propeller.obj"
+        )
+    )
+) {
 
     companion object {
         enum class Zustand {
             Opening, Closing, Open, Closed, SpinningUp, SpinningDown, FindingClosingPosition
         }
 
-        private val filepath = "project/assets/drone/parts/"
+        private const val filepath = "project/assets/drone/parts/"
         private val propellerTransform = Vector3f(0.135f, 0f, -0.405f)
         private var rotationsSpeed = 20f
-        private val propellerClosedAngle = 152.74
+        private const val propellerClosedAngle = 152.74
     }
 
-    override var body: Renderable? = null
-    private var frontRightArm: Renderable? = null
-    private var frontLeftArm: Renderable? = null
-    private var backLeftArm: Renderable? = null
-    private var backRightArm: Renderable? = null
-    private var frontRightPropeller: Renderable? = null
-    private var frontLeftPropeller: Renderable? = null
-    private var backLeftPropeller: Renderable? = null
-    private var backRightPropeller: Renderable? = null
+    private val body = models[0]
+    private val frontLeftArm = models[1]
+    private val frontRightArm = models[2]
+    private val backLeftArm = models[3]
+    private val backRightArm = models[4]
+    private val frontLeftPropeller = models[5]
+    private val frontRightPropeller = models[6]
+    private val backLeftPropeller = models[7]
+    private val backRightPropeller = models[8]
 
     private var aktion = Zustand.Closed
 
     init {
-        loadModels()
+        frontRightArm.parent = body
+        frontLeftArm.parent = body
+        backLeftArm.parent = body
+        backRightArm.parent = body
+        frontRightPropeller.parent = frontRightArm
+        frontLeftPropeller.parent = frontLeftArm
+        backLeftPropeller.parent = backLeftArm
+        backRightPropeller.parent = backRightArm
 
-        body?.parent = this
-        frontRightArm?.parent = body
-        frontLeftArm?.parent = body
-        backLeftArm?.parent = body
-        backRightArm?.parent = body
-        frontRightPropeller?.parent = frontRightArm
-        frontLeftPropeller?.parent = frontLeftArm
-        backLeftPropeller?.parent = backLeftArm
-        backRightPropeller?.parent = backRightArm
+        frontRightArm.translate(Vector3f(-0.45f, 0f, 0.5f))
+        frontRightArm.rotate(0f, Math.toRadians(30.0).toFloat(), 0f)
+        frontLeftArm.translate(Vector3f(0.45f, 0f, 0.5f))
+        frontLeftArm.rotate(0f, Math.toRadians(0.0).toFloat(), 0f)
+        backLeftArm.translate(Vector3f(0.45f, 0f, -0.5f))
+        backLeftArm.rotate(0f, Math.toRadians(185.0).toFloat(), 0f)
+        backRightArm.translate(Vector3f(-0.45f, 0f, -0.5f))
+        backRightArm.rotate(0f, Math.toRadians(215.0).toFloat(), 0f)
 
-        frontRightArm?.translate(Vector3f(-0.45f, 0f, 0.5f))
-        frontRightArm?.rotate(0f, Math.toRadians(30.0).toFloat(), 0f)
-        frontLeftArm?.translate(Vector3f(0.45f, 0f, 0.5f))
-        frontLeftArm?.rotate(0f, Math.toRadians(0.0).toFloat(), 0f)
-        backLeftArm?.translate(Vector3f(0.45f, 0f, -0.5f))
-        backLeftArm?.rotate(0f, Math.toRadians(185.0).toFloat(), 0f)
-        backRightArm?.translate(Vector3f(-0.45f, 0f, -0.5f))
-        backRightArm?.rotate(0f, Math.toRadians(215.0).toFloat(), 0f)
+        frontRightPropeller.translate(propellerTransform)
+        frontLeftPropeller.translate(propellerTransform)
+        backLeftPropeller.translate(propellerTransform)
+        backRightPropeller.translate(propellerTransform)
 
-        frontRightPropeller?.translate(propellerTransform)
-        frontLeftPropeller?.translate(propellerTransform)
-        backLeftPropeller?.translate(propellerTransform)
-        backRightPropeller?.translate(propellerTransform)
-
-    }
-
-    private fun loadModels() {
-        val models = ModelLoader.loadModelSameTextures(
-            listOf(
-                filepath + "droneBody.obj",
-                filepath + "droneArm.obj",
-                filepath + "droneArm.obj",
-                filepath + "droneArm.obj",
-                filepath + "droneArm.obj",
-                filepath + "propeller.obj",
-                filepath + "propeller.obj",
-                filepath + "propeller.obj",
-                filepath + "propeller.obj"
-            )
-        )
-        body = models?.get(0)
-        frontLeftArm = models?.get(1)
-        frontRightArm = models?.get(2)
-        backLeftArm = models?.get(3)
-        backRightArm = models?.get(4)
-        frontLeftPropeller = models?.get(5)
-        frontRightPropeller = models?.get(6)
-        backLeftPropeller = models?.get(7)
-        backRightPropeller = models?.get(8)
     }
 
     private fun spinDown(time: Float) {
@@ -102,58 +87,53 @@ class Drone() : Entity() {
 
     fun close(time: Float) {
         if (aktion == Zustand.Open) {
-            println("frontRightPropeller rotation ${frontRightPropeller?.rotationInsgesamt!!.y}")
             aktion = Zustand.FindingClosingPosition
         }
     }
 
     private fun rotatePropeller(speed: Float) {
-        frontRightPropeller?.rotate(0f, speed, 0f)
-        frontLeftPropeller?.rotate(0f, -speed, 0f)
-        backLeftPropeller?.rotate(0f, speed, 0f)
-        backRightPropeller?.rotate(0f, -speed, 0f)
+        frontRightPropeller.rotate(0f, speed, 0f)
+        frontLeftPropeller.rotate(0f, -speed, 0f)
+        backLeftPropeller.rotate(0f, speed, 0f)
+        backRightPropeller.rotate(0f, -speed, 0f)
     }
 
     private fun rotatePropeller(speed: Float, goal: Float) {
-        frontRightPropeller?.rotationInsgesamt?.let {
+        frontRightPropeller.rotationInsgesamt.let {
 
-
-            println("current ${it.y}")
-            println("current rotations ${(it.y / Math.toRadians(360.0)).toInt()}")
-            println("next step ${it.y + speed}")
-            println("next step rotations ${(it.y + speed / Math.toRadians(360.0)).toInt()}")
-
+//            println("current ${it.y}")
+//            println("current rotations ${(it.y / Math.toRadians(360.0)).toInt()}")
+//            println("next step ${it.y + speed}")
+//            println("next step rotations ${(it.y + speed / Math.toRadians(360.0)).toInt()}")
 
             var rotationNum = (it.y / Math.toRadians(360.0)).toInt()
             if (goal < it.y % Math.toRadians(360.0)) rotationNum += 1
-            println("reaching goal in rotation $rotationNum")
-            println("goal ${goal}")
+//            println("reaching goal in rotation $rotationNum")
+//            println("goal $goal")
 
             if ((it.y) < rotationNum * Math.toRadians(360.0) + goal &&
                 (it.y + speed) > rotationNum * Math.toRadians(360.0) + goal
             ) {
                 var differenz: Float = (goal.toDouble() - it.y % Math.toRadians(360.0)).toFloat()
-                println("moving only ${Math.toDegrees(differenz.toDouble())} instead")
+//                println("moving only ${Math.toDegrees(differenz.toDouble())} instead")
                 rotatePropeller(differenz)
 //                println("aktueller angle ${Math.toDegrees(it.y % Math.toRadians(360.0))}")
             } else {
                 rotatePropeller(speed)
             }
-
-
         }
 
     }
 
     private fun rotateArms(speed: Float) {
-        frontRightArm?.rotate(0f, speed, 0f)
-        frontLeftArm?.rotate(0f, -speed, 0f)
-        backLeftArm?.rotate(0f, speed * 135 / 105, 0f)
-        backRightArm?.rotate(0f, -speed * 135 / 105, 0f)
+        frontRightArm.rotate(0f, speed, 0f)
+        frontLeftArm.rotate(0f, -speed, 0f)
+        backLeftArm.rotate(0f, speed * 135 / 105, 0f)
+        backRightArm.rotate(0f, -speed * 135 / 105, 0f)
 
     }
 
-    fun update(dt: Float, time: Float) {
+    override fun update(dt: Float, time: Float) {
         val animationPercentage = animationPercentage(time)
 
         when (aktion) {
@@ -161,16 +141,9 @@ class Drone() : Entity() {
                 rotatePropeller(rotationsSpeed * dt)
             }
             Zustand.Closed -> {
-                frontRightPropeller?.rotationInsgesamt?.let {
-//                    if (it.y % Math.toRadians(360.0) in Math.toRadians(1.0)..Math.toRadians(179.0)) {
-//                        rotatePropeller(dt)
-//                    } else if (it.y % Math.toRadians(360.0) in Math.toRadians(181.0)..Math.toRadians(359.0)) {
-//                        rotatePropeller(-dt)
-//                    }
-                }
             }
             Zustand.FindingClosingPosition -> {
-                frontRightPropeller?.rotationInsgesamt?.let {
+                frontRightPropeller.rotationInsgesamt.let {
                     if (it.y % Math.toRadians(360.0) !in Math.toRadians(propellerClosedAngle - 1)..Math.toRadians(
                             propellerClosedAngle + 1
                         )
@@ -178,13 +151,11 @@ class Drone() : Entity() {
                         rotatePropeller(rotationsSpeed * dt, Math.toRadians(propellerClosedAngle).toFloat())
                     } else {
                         spinDown(time)
-                        println("aktueller winkel vor spindown ${Math.toDegrees(frontRightPropeller?.rotationInsgesamt?.y!!.toDouble()) % 360}")
                     }
                 }
             }
             Zustand.SpinningDown -> {
                 if (animationPercentage >= 1f) {
-                    println("aktueller winkel nach spindown ${Math.toDegrees(frontRightPropeller?.rotationInsgesamt?.y!!.toDouble()) % 360}")
                     aktion = Zustand.Closing
                 }
                 rotatePropeller(rotationsSpeed * dt * (1 - animationPercentage))
@@ -197,14 +168,14 @@ class Drone() : Entity() {
                 rotatePropeller(rotationsSpeed * dt * animationPercentage)
             }
             Zustand.Closing -> {
-                if (frontRightArm?.rotationInsgesamt!!.y <= Math.toRadians(30.0)) {
+                if (frontRightArm.rotationInsgesamt.y <= Math.toRadians(30.0)) {
                     aktion = Zustand.Closed
                 } else {
                     rotateArms(-dt)
                 }
             }
             Zustand.Opening -> {
-                if (frontRightArm?.rotationInsgesamt!!.y >= Math.toRadians(135.0)) {
+                if (frontRightArm.rotationInsgesamt.y >= Math.toRadians(135.0)) {
                     spinUp(time)
                 } else {
                     rotateArms(dt)
@@ -214,16 +185,16 @@ class Drone() : Entity() {
     }
 
     override fun render(shaderProgram: ShaderProgram) {
-        body?.render(shaderProgram)
-        frontRightArm?.render(shaderProgram)
-        frontLeftArm?.render(shaderProgram)
-        backLeftArm?.render(shaderProgram)
-        backRightArm?.render(shaderProgram)
+        body.render(shaderProgram)
+        frontRightArm.render(shaderProgram)
+        frontLeftArm.render(shaderProgram)
+        backLeftArm.render(shaderProgram)
+        backRightArm.render(shaderProgram)
 
-        frontRightPropeller?.render(shaderProgram)
-        frontLeftPropeller?.render(shaderProgram)
-        backLeftPropeller?.render(shaderProgram)
-        backRightPropeller?.render(shaderProgram)
+        frontRightPropeller.render(shaderProgram)
+        frontLeftPropeller.render(shaderProgram)
+        backLeftPropeller.render(shaderProgram)
+        backRightPropeller.render(shaderProgram)
     }
 
 

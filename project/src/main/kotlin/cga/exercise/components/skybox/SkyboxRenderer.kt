@@ -57,4 +57,11 @@ class SkyboxRenderer(
         GL11.glDepthMask(true)
         GL11.glCullFace(GL11.GL_BACK)
     }
+
+    fun cleanUp(){
+        cube.cleanUp()
+        skyboxShader.cleanUp()
+
+    }
+
 }
