@@ -5,13 +5,17 @@ import cga.exercise.game.Scene
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL11.glTexImage2D
+import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL13
 import org.lwjgl.opengl.GL30
 
 class ShadowRenderer(val scene: Scene) {
+    companion object {
+        const val SHADOW_WIDTH = 1024 * 16//TODO bessere loesung finden
+        const val SHADOW_HEIGHT = 1024 * 16//TODO bessere loesung finden
+    }
 
-    val depthMapFBO: Int //TODO ggf Unsigned
+    val depthMapFBO: Int
     val depthMap: Int
     var sunPos = Vector3f(0f, 20f, 0f)
     val simpleDepthShader =
@@ -21,17 +25,11 @@ class ShadowRenderer(val scene: Scene) {
     val near_plane = scene.camera.nPlane
     val far_plane = scene.camera.fPlane
 
-    companion object {
-        const val SHADOW_WIDTH = 1024
-        const val SHADOW_HEIGHT = 1024
-    }
-
     init {
         depthMapFBO = GL30.glGenFramebuffers()
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, depthMapFBO)
 
         depthMap = GL11.glGenTextures()
-        println(depthMap)
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, depthMap)
         glTexImage2D(
             GL11.GL_TEXTURE_2D,
@@ -46,8 +44,11 @@ class ShadowRenderer(val scene: Scene) {
         )
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST)
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST)
-        GL13.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL13.GL_CLAMP_TO_EDGE)
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL13.GL_CLAMP_TO_EDGE)
+        GL13.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL13.GL_CLAMP_TO_BORDER)
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL13.GL_CLAMP_TO_BORDER)
+
+        val borderColor = floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)
+        GL11.glTexParameterfv(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_BORDER_COLOR, borderColor)
 
         GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, GL30.GL_TEXTURE_2D, depthMap, 0)
         GL30.glDrawBuffer(GL30.GL_NONE)
@@ -56,8 +57,9 @@ class ShadowRenderer(val scene: Scene) {
     }
 
     fun render(dt: Float, time: Float) {
-        //first render pass
-        val depthProjection = Matrix4f().ortho(-10f, 10f, -10f, 10f, near_plane, far_plane)
+
+        val depthProjection =
+            Matrix4f().ortho(-200f, 200f, -200f, 200f, near_plane, far_plane) //TODO bessere loesung finden. debugshader hilft
         val depthView = Matrix4f().lookAt(sunPos, Vector3f(1f, 10f, 1f), Vector3f(0f, 1f, 0f))
         sunSpaceMatrix = depthProjection.mul(depthView)
 
@@ -71,15 +73,19 @@ class ShadowRenderer(val scene: Scene) {
         GL30.glActiveTexture(GL13.GL_TEXTURE0)
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
 
-//        scene.myMap.render(simpleDepthShader)
+        GL11.glCullFace(GL11.GL_FRONT)
+        scene.myMap.render(simpleDepthShader)
         scene.renderEntities(dt, time, simpleDepthShader)
-
+        GL11.glCullFace(GL11.GL_BACK)
 
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0)
 
         //reset viewport
         GL30.glViewport(0, 0, scene.window.windowWidth, scene.window.windowHeight)
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL30.GL_DEPTH_BUFFER_BIT)
+
+        GL13.glActiveTexture(GL13.GL_TEXTURE3)
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, depthMap)
     }
 
 

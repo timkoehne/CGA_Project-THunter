@@ -19,34 +19,28 @@ open class Mesh(
     attributes: Array<VertexAttribute>,
     var material: Material? = null
 ) {
-    //private data
-
     var vao = 0
     private var vbo = 0
     private var ibo = 0
     private var indexcount = 0
 
     init {
-        // setup vao
         vao = GL30.glGenVertexArrays()
         GL30.glBindVertexArray(vao)
 
-        //setup vbo
         vbo = GL15.glGenBuffers()
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo)
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexdata, GL15.GL_STATIC_DRAW)
 
-        //ibo
         ibo = GL15.glGenBuffers()
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, ibo)
         GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indexdata, GL15.GL_STATIC_DRAW)
         indexcount = indexdata.size
 
-        //vertex attribute
         for (num in attributes.indices) {
 
             GL20.glEnableVertexAttribArray(num)
-            GL20.glVertexAttribPointer( //vbo in vao speichern
+            GL20.glVertexAttribPointer(
                 num,
                 attributes[num].n,
                 attributes[num].type,
@@ -56,7 +50,6 @@ open class Mesh(
             )
         }
 
-        //unbind for safety
         GL30.glBindVertexArray(0)
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0)
@@ -67,11 +60,8 @@ open class Mesh(
      */
     fun render(shaderProgram: ShaderProgram) {
         GL30.glBindVertexArray(vao)
-
         material?.bind(shaderProgram)
-
-        GL11.glDrawElements(GL11.GL_TRIANGLES, indexcount, GL11.GL_UNSIGNED_INT, 0)
-
+        GL11.glDrawElements(renderMode, indexcount, GL11.GL_UNSIGNED_INT, 0)
         GL30.glBindVertexArray(0)
     }
 
@@ -81,9 +71,7 @@ open class Mesh(
         GL13.glActiveTexture(GL13.GL_TEXTURE0)
         GL11.glBindTexture(GL20.GL_TEXTURE_2D, texID)
         shaderProgram.setUniform("diff", 0)
-
-        GL11.glDrawElements(GL11.GL_TRIANGLES, indexcount, GL11.GL_UNSIGNED_INT, 0)
-
+        GL11.glDrawElements(renderMode, indexcount, GL11.GL_UNSIGNED_INT, 0)
         GL30.glBindVertexArray(0)
     }
 
@@ -97,6 +85,17 @@ open class Mesh(
     }
 
     companion object {
+
+        var renderMode = GL11.GL_TRIANGLES
+
+        fun renderLines(){
+            renderMode = GL11.GL_LINES
+        }
+        fun renderTriangles(){
+            renderMode = GL11.GL_TRIANGLES
+        }
+
+
         val stride: Int = 8 * 4
         val attrPos = VertexAttribute(3, GL11.GL_FLOAT, stride, 0) //position
         val attrTC = VertexAttribute(2, GL11.GL_FLOAT, stride, 3 * 4) //textureCoordinate

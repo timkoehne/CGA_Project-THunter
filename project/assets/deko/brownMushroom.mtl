@@ -1,0 +1,24 @@
+# Blender MTL File: 'None'
+# Material Count: 2
+
+newmtl Mushroom4_1
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 0.677455 0.391071
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd brownMushroom.png
+
+newmtl Mushroom4_2
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.774276 0.271528 0.059241
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd brownMushroom.png

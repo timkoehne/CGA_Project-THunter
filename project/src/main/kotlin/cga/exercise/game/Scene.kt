@@ -3,16 +3,21 @@ package cga.exercise.game
 import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.geometry.*
 import cga.exercise.components.entities.Cube
+import cga.exercise.components.entities.Drone
 import cga.exercise.components.entities.Sniper
+import cga.exercise.components.gui.GuiElement
+import cga.exercise.components.gui.GuiRenderer
 import cga.exercise.components.light.PointLight
 import cga.exercise.components.light.SpotLight
 import cga.exercise.components.map.MyMap
 import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.components.shadows.ShadowRenderer
+import cga.exercise.components.texture.Texture2D
 import cga.framework.GLError
 import cga.framework.GameWindow
 import cga.framework.ModelLoader
 import org.joml.Math
+import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.*
@@ -32,6 +37,8 @@ class Scene(val window: GameWindow) {
     val camera: TronCamera
     var bike: Renderable? = null
 
+    val guiRenderer = GuiRenderer(window)
+
     val myMap: MyMap
 
     var sniper: Renderable? = null
@@ -39,7 +46,10 @@ class Scene(val window: GameWindow) {
     lateinit var animals: MutableList<Renderable?>
     lateinit var cabins: MutableList<Renderable?>
 
-    var drone: Renderable? = null
+    lateinit var dekostuff: MutableList<Renderable?>
+
+
+    lateinit var drone: Drone
 
     lateinit var cube: Cube
 
@@ -48,15 +58,13 @@ class Scene(val window: GameWindow) {
 
     val shadowRenderer: ShadowRenderer
 
-
     //scene setup
     init {
         staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
         debugShader = ShaderProgram("project/assets/shaders/debug_vert.glsl", "project/assets/shaders/debug_frag.glsl")
-        debugShader.use();
-        debugShader.setUniform("depthMap", 0);
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
+        GLError.checkThrow()
 
         val backfaceCullingEnable = false
         if (backfaceCullingEnable) {
@@ -78,12 +86,19 @@ class Scene(val window: GameWindow) {
         shadowRenderer = ShadowRenderer(this)
 
         myMap = MyMap(
-            500, 500, 1f, camera, 6f, 18f, 2f,
-            2, 0.8f, 0.6f
+            500, 500, 1f, camera, 6f, 18f, 2f, 2, 0.8f, 0.6f
         )
 
         initializeEntities()
         initilizeLights()
+
+
+        guiRenderer.addElement(
+            GuiElement(
+                Texture2D.invoke("project/assets/textures/dirt.png", false), Vector2f(0.0f), Vector2f(0.5f)
+            )
+        )
+
 
     }
 
@@ -105,7 +120,6 @@ class Scene(val window: GameWindow) {
     fun initializeEntities() {
         cube = Cube()
         cube.translate(shadowRenderer.sunPos.sub(cube.getPosition()))
-
 
         bike = ModelLoader.loadModel(
             ("project/assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj"), Math.toRadians(-90f), Math.toRadians(90f), 0f
@@ -129,6 +143,20 @@ class Scene(val window: GameWindow) {
             renderable?.translate(Vector3f(index * 5f, myMap.getHeight(index * 5f, 30f), 30f))
         }
 
+        dekostuff = mutableListOf(
+            ModelLoader.loadModel("project/assets/deko/bigStone.obj", 0f, 0f, 0f),
+            ModelLoader.loadModel("project/assets/deko/brownMushroom.obj", 0f, 0f, 0f),
+            ModelLoader.loadModel("project/assets/deko/etwasKleinererStein.obj", 0f, 0f, 0f),
+            ModelLoader.loadModel("project/assets/deko/grassBueschel.obj", 0f, 0f, 0f),
+            ModelLoader.loadModel("project/assets/deko/redMushroom.obj", 0f, 0f, 0f),
+            ModelLoader.loadModel("project/assets/deko/stock.obj", 0f, 0f, 0f)
+        )
+        dekostuff.forEachIndexed { index, renderable ->
+            renderable?.translate(Vector3f(index * 5f, myMap.getHeight(index * 5f, 15f)+1f, 15f))
+        }
+
+
+
         animals = mutableListOf(
             ModelLoader.loadModel("project/assets/animals/bear.obj", 0f, Math.toRadians(180f), 0f),
             ModelLoader.loadModel("project/assets/animals/deerFemale.obj", 0f, Math.toRadians(180f), 0f),
@@ -142,7 +170,7 @@ class Scene(val window: GameWindow) {
             ModelLoader.loadModel("project/assets/animals/turkey.obj", 0f, Math.toRadians(180f), 0f)
         )
         animals.forEachIndexed { index, renderable ->
-            renderable?.translate(Vector3f(index * 3f, myMap.getHeight(index * 3f, 20f), 20f))
+            renderable?.translate(Vector3f(index * 3f, myMap.getHeight(index * 3f, 20f) + 1, 20f))
         }
 
         cabins = mutableListOf(
@@ -150,16 +178,18 @@ class Scene(val window: GameWindow) {
             ModelLoader.loadModel("project/assets/cabins/lowPolyLogCabin.obj", 0f, 0f, 0f)
         )
         cabins.forEachIndexed { index, renderable ->
-            renderable?.translate(Vector3f(index * 20f, myMap.getHeight(index * 20f, 40f), 40f))
+            renderable?.translate(Vector3f(index * 20f, myMap.getHeight(index * 20f, 60f), 60f))
         }
 
-        drone = ModelLoader.loadModel("project/assets/drone/drone.obj", 0f, 0f, 0f)
-        drone?.translate(Vector3f(5f, myMap.getHeight(5f, 5f) + 1f, 5f))
+        drone = Drone()
+//        drone = ModelLoader.loadModel("project/assets/drone/drone.obj", 0f, 0f, 0f)
+        drone.translate(Vector3f(5f, myMap.getHeight(5f, 5f) + 1f, 5f))
 
         sniper = Sniper()
         sniper?.translate(Vector3f(5f, myMap.getHeight(5f, 5f) + 1, 5f))
         sniper?.scale(Vector3f(0.5f))
         camera.parent = sniper
+        cube.parent = sniper
     }
 
     fun rainbowColor(time: Float): Vector3f {
@@ -183,17 +213,10 @@ class Scene(val window: GameWindow) {
     fun render(dt: Float, time: Float) {
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 
-//--------------------------
-
         shadowRenderer.render(dt, time)
 
-//--------------------------
-
-        GL13.glActiveTexture(GL13.GL_TEXTURE5)
-        glBindTexture(GL_TEXTURE_2D, shadowRenderer.depthMap)
         staticShader.use()
-        staticShader.setUniform("depthMap", 5)
-
+        staticShader.setUniform("depthMap", 3)
         staticShader.setUniform("viewPos", camera.getPosition())
         staticShader.setUniform("sunPos", shadowRenderer.sunPos)
         staticShader.setUniform("sunSpaceMatrix", shadowRenderer.sunSpaceMatrix, false)
@@ -202,44 +225,58 @@ class Scene(val window: GameWindow) {
         myMap.render(staticShader)
         cube.render(staticShader)
         renderEntities(dt, time, staticShader)
-        renderLights(dt, time, staticShader)
+//        renderLights(dt, time, staticShader)
+
         myMap.renderSkybox()
 
+//        guiRenderer.render()
 
 //        debugShader.use()
-//        debugShader.setUniform("near_plane", camera.nPlane)
-//        debugShader.setUniform("far_plane", camera.fPlane)
-//        GL13.glActiveTexture(GL13.GL_TEXTURE0)
-//        glBindTexture(GL_TEXTURE_2D, shadowRenderer.depthMap)
-//        renderQuad()
+//        renderSquare(shadowRenderer.depthMap)
 
     }
 
-    var quadVAO = 0
-    var quadVBO = 0
-    fun renderQuad() {
-        if (quadVAO == 0) {
-            val quadVertices = floatArrayOf(
-                // positions        // texture Coords
-                -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-                1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-                1.0f, -1.0f, 0.0f, 1.0f, 0.0f
+    fun renderSquare(texID: Int) {
+        var squareVAO = 0
+        var squareVBO = 0
+        if (squareVAO == 0) {
+            val squareVertices = floatArrayOf(
+                -1.0f,
+                1.0f,
+                0.0f,
+                0.0f,
+                1.0f,
+                -1.0f,
+                -1.0f,
+                0.0f,
+                0.0f,
+                0.0f,
+                1.0f,
+                1.0f,
+                0.0f,
+                1.0f,
+                1.0f,
+                1.0f,
+                -1.0f,
+                0.0f,
+                1.0f,
+                0.0f
             )
-            // setup plane VAO
-            quadVAO = GL30.glGenVertexArrays()
-            quadVBO = GL15C.glGenBuffers()
-            GL30.glBindVertexArray(quadVAO);
-            GL30.glBindBuffer(GL15.GL_ARRAY_BUFFER, quadVBO);
-            GL30.glBufferData(GL15.GL_ARRAY_BUFFER, quadVertices, GL15C.GL_STATIC_DRAW);
-            GL30.glEnableVertexAttribArray(0);
-            GL30.glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * 4, 0);
-            GL30.glEnableVertexAttribArray(1);
-            GL30.glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * 4, 12);
+            squareVAO = GL30.glGenVertexArrays()
+            squareVBO = GL15C.glGenBuffers()
+            GL30.glBindVertexArray(squareVAO)
+            GL30.glBindBuffer(GL15.GL_ARRAY_BUFFER, squareVBO)
+            GL30.glBufferData(GL15.GL_ARRAY_BUFFER, squareVertices, GL15C.GL_STATIC_DRAW)
+            GL30.glEnableVertexAttribArray(0)
+            GL30.glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * 4, 0)
+            GL30.glEnableVertexAttribArray(1)
+            GL30.glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * 4, 12)
         }
-        GL30.glBindVertexArray(quadVAO);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        GL30.glBindVertexArray(0);
+        GL30.glBindVertexArray(squareVAO)
+        GL13.glActiveTexture(GL13.GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_2D, texID)
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
+        GL30.glBindVertexArray(0)
     }
 
     fun renderLights(dt: Float, time: Float, shaderProgram: ShaderProgram) {
@@ -267,11 +304,12 @@ class Scene(val window: GameWindow) {
     fun renderEntities(dt: Float, time: Float, shaderProgram: ShaderProgram) {
         shaderProgram.use()
 
+        drone.render(shaderProgram)
         trees.forEach { it?.render(shaderProgram) }
+        dekostuff.forEach { it?.render(shaderProgram) }
         animals.forEach { it?.render(shaderProgram) }
         cabins.forEach { it?.render(shaderProgram) }
         sniper?.render(shaderProgram)
-        drone?.render(shaderProgram)
     }
 
     fun updateBike(dt: Float, time: Float) {
@@ -298,6 +336,11 @@ class Scene(val window: GameWindow) {
     fun update(dt: Float, time: Float) {
         myMap.update(dt, time)
 
+        drone.update(dt, time)
+
+        if (window.getKeyState(GLFW_KEY_N)) drone.open(time)
+        if (window.getKeyState(GLFW_KEY_M)) drone.close(time)
+
         if (window.getKeyState(GLFW_KEY_W)) sniper?.translate(Vector3f(0f, 0f, -5 * dt))
         if (window.getKeyState(GLFW_KEY_S)) sniper?.translate(Vector3f(0f, 0f, 5 * dt))
         if (window.getKeyState(GLFW_KEY_A)) sniper?.translate(Vector3f(-5 * dt, 0f, 0f))
@@ -311,8 +354,8 @@ class Scene(val window: GameWindow) {
         if (window.getKeyState(GLFW_KEY_J)) camera.rotate(0f, dt, 0f)
         if (window.getKeyState(GLFW_KEY_L)) camera.rotate(0f, -dt, 0f)
 
-        if (window.getKeyState(GLFW_KEY_0)) camera?.rotate(-2f * dt, 0f, 0f)
-        if (window.getKeyState(GLFW_KEY_P)) camera?.rotate(2f * dt, 0f, 0f)
+        if (window.getKeyState(GLFW_KEY_0)) Mesh.renderTriangles()
+        if (window.getKeyState(GLFW_KEY_P)) Mesh.renderLines()
 
 
 //        sniper?.translate(

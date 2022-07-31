@@ -34,7 +34,6 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
      * @param roll radiant angle around z-axis ccw
      */
     fun rotate(pitch: Float, yaw: Float, roll: Float) {
-
         rotationInsgesamt.add(Vector3f(pitch, yaw, roll))
 
 //        println(
@@ -63,7 +62,7 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
      * @param altMidpoint rotation center
      */
     fun rotateAroundPoint(pitch: Float, yaw: Float, roll: Float, altMidpoint: Vector3f) {
-        val to = altMidpoint.sub(getPosition())
+        val to = altMidpoint.sub(getWorldPosition())
 
         translate(to)
         rotate(pitch, yaw, roll)

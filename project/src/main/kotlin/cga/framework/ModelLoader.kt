@@ -20,14 +20,25 @@ object ModelLoader {
         val rm = RawModel()
         try {
             val aiScene = Assimp.aiImportFile(objPath, Assimp.aiProcess_Triangulate or Assimp.aiProcess_GenNormals)
-                    ?: return null
+                ?: return null
             // read materials
             for (m in 0 until aiScene.mNumMaterials()) {
                 val rmat = RawMaterial()
                 val tpath = AIString.calloc()
                 val sceneMat = aiScene.mMaterials() ?: return null
                 val mat = AIMaterial.create(sceneMat[m])
-                Assimp.aiGetMaterialTexture(mat, Assimp.aiTextureType_DIFFUSE, 0, tpath, null as IntBuffer?, null, null, null, null, null)
+                Assimp.aiGetMaterialTexture(
+                    mat,
+                    Assimp.aiTextureType_DIFFUSE,
+                    0,
+                    tpath,
+                    null as IntBuffer?,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+                )
                 // diffuse texture
                 var tpathj = tpath.dataString()
                 println(tpathj)
@@ -36,14 +47,36 @@ object ModelLoader {
                     rmat.diffTexIndex = rm.textures.size - 1
                 }
                 // specular texture
-                Assimp.aiGetMaterialTexture(mat, Assimp.aiTextureType_SPECULAR, 0, tpath, null as IntBuffer?, null, null, null, null, null)
+                Assimp.aiGetMaterialTexture(
+                    mat,
+                    Assimp.aiTextureType_SPECULAR,
+                    0,
+                    tpath,
+                    null as IntBuffer?,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+                )
                 tpathj = tpath.dataString()
                 if (rm.textures.contains(tpathj)) rmat.specTexIndex = rm.textures.indexOf(tpathj) else {
                     rm.textures.add(tpathj)
                     rmat.specTexIndex = rm.textures.size - 1
                 }
                 // emissive texture
-                Assimp.aiGetMaterialTexture(mat, Assimp.aiTextureType_EMISSIVE, 0, tpath, null as IntBuffer?, null, null, null, null, null)
+                Assimp.aiGetMaterialTexture(
+                    mat,
+                    Assimp.aiTextureType_EMISSIVE,
+                    0,
+                    tpath,
+                    null as IntBuffer?,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+                )
                 tpathj = tpath.dataString()
                 if (rm.textures.contains(tpathj)) rmat.emitTexIndex = rm.textures.indexOf(tpathj) else {
                     rm.textures.add(tpathj)
@@ -70,9 +103,9 @@ object ModelLoader {
                     val sceneTextureCoords = aiMesh.mTextureCoords(0) ?: return null
                     val aiTexCoord = if (aiMesh.mNumUVComponents(0) > 0) sceneTextureCoords[v] else null
                     val vert = Vertex(
-                            Vector3f(aiVert.x(), aiVert.y(), aiVert.z()),
-                            if (aiTexCoord != null) Vector2f(aiTexCoord.x(), aiTexCoord.y()) else Vector2f(0.0f, 0.0f),
-                            Vector3f(aiNormal.x(), aiNormal.y(), aiNormal.z())
+                        Vector3f(aiVert.x(), aiVert.y(), aiVert.z()),
+                        if (aiTexCoord != null) Vector2f(aiTexCoord.x(), aiTexCoord.y()) else Vector2f(0.0f, 0.0f),
+                        Vector3f(aiNormal.x(), aiNormal.y(), aiNormal.z())
                     )
                     mesh.vertices.add(vert)
                 }
@@ -135,6 +168,73 @@ object ModelLoader {
         return data
     }
 
+    fun loadModelSameTextures(objpaths: List<String>): MutableList<Renderable>? {
+
+        val models = mutableListOf<RawModel>()
+        for (objpath in objpaths) {
+            models.add(load(objpath) ?: return null)
+        }
+
+        val textures = ArrayList<Texture2D>()
+        val materials = ArrayList<Material>()
+        val stride = 8 * 4
+        val atr1 = VertexAttribute(3, GL11.GL_FLOAT, stride, 0)
+        val atr2 = VertexAttribute(2, GL11.GL_FLOAT, stride, 3 * 4)
+        val atr3 = VertexAttribute(3, GL11.GL_FLOAT, stride, 5 * 4)
+        val vertexAttributes = arrayOf(atr1, atr2, atr3)
+        // preprocessing rotation
+        val rot = Matrix3f()
+        // create textures
+        //default textures
+        val ddata = BufferUtils.createByteBuffer(4)
+        ddata.put(0.toByte()).put(0.toByte()).put(0.toByte()).put(0.toByte())
+        ddata.flip()
+        for (i in models[0].textures.indices) {
+            if (models[0].textures[i].isEmpty()) {
+                textures.add(Texture2D(ddata, 1, 1, true))
+            } else {
+                textures.add(
+                    Texture2D(
+                        objpaths[0].substring(0, objpaths[0].lastIndexOf('/') + 1) + models[0].textures[i],
+                        true
+                    )
+                )
+            }
+        }
+
+        // materials
+        for (i in models[0].materials.indices) {
+            materials.add(
+                Material(
+                    textures[models[0].materials[i].diffTexIndex],
+                    textures[models[0].materials[i].emitTexIndex],
+                    textures[models[0].materials[i].specTexIndex],
+                    models[0].materials[i].shininess,
+                    Vector2f(1.0f, 1.0f)
+                )
+            )
+        }
+        // meshes
+
+        val renderables = mutableListOf<Renderable>()
+        for (model in models) {
+            val meshes = ArrayList<Mesh>()
+            for (i in models[0].meshes.indices) {
+                meshes.add(
+                    Mesh(
+                        flattenVertexData(model.meshes[i].vertices, rot),
+                        flattenIndexData(model.meshes[i].indices),
+                        vertexAttributes,
+                        materials[model.meshes[i].materialIndex]
+                    )
+                )
+            }
+            renderables.add(Renderable(meshes))
+        }
+        // assemble the renderable
+        return renderables
+    }
+
     fun loadModel(objpath: String, pitch: Float, yaw: Float, roll: Float): Renderable? {
         val model = load(objpath) ?: return null
         val textures = ArrayList<Texture2D>()
@@ -161,18 +261,26 @@ object ModelLoader {
         }
         // materials
         for (i in model.materials.indices) {
-            materials.add(Material(textures[model.materials[i].diffTexIndex],
+            materials.add(
+                Material(
+                    textures[model.materials[i].diffTexIndex],
                     textures[model.materials[i].emitTexIndex],
                     textures[model.materials[i].specTexIndex],
                     model.materials[i].shininess,
-                    Vector2f(1.0f, 1.0f)))
+                    Vector2f(1.0f, 1.0f)
+                )
+            )
         }
         // meshes
         for (i in model.meshes.indices) {
-            meshes.add(Mesh(flattenVertexData(model.meshes[i].vertices, rot),
+            meshes.add(
+                Mesh(
+                    flattenVertexData(model.meshes[i].vertices, rot),
                     flattenIndexData(model.meshes[i].indices),
                     vertexAttributes,
-                    materials[model.meshes[i].materialIndex]))
+                    materials[model.meshes[i].materialIndex]
+                )
+            )
         }
         // assemble the renderable
         return Renderable(meshes)

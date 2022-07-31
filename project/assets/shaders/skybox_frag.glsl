@@ -49,7 +49,9 @@ void main(void){
 
     out_Color *= ambient;
 
-    if(out_Color.a < 0.5){
+    if (out_Color.a < 0.5){
         discard;
     }
+
+
 }

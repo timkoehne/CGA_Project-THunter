@@ -8,7 +8,7 @@ open class Renderable(var meshes: MutableList<Mesh>) : Transformable(), IRendera
     var color = Vector3f()
 
     override fun render(shaderProgram: ShaderProgram) {
-        shaderProgram.setUniform("model_matrix", getModelMatrix(), false)
+        shaderProgram.setUniform("model_matrix", getWorldModelMatrix(), false)
         shaderProgram.setUniform("fragColor", color)
         for (mesh in meshes) {
             mesh.render(shaderProgram)

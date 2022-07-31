@@ -73,18 +73,16 @@ vec3 ambientBerechnen(){
     return ambient * texture(diff, vertexData.textureCords).rgb;
 }
 
-vec3 diffuseBerechnen(vec3 normal, vec3 lightPos){
+vec3 diffuseBerechnen(vec3 normal, vec3 lightDir){
     vec3 matDiffuse = texture(diff, vertexData.textureCords).rgb;
-    vec3 lightDir = normalize(lightPos - vertexData.position);
 
     float cosa = max(dot(lightDir, normal), 0.0);
     return matDiffuse * cosa;
 }
 
-vec3 specularBerechnen(vec3 normal, vec3 lightPos){
+vec3 specularBerechnen(vec3 normal, vec3 lightDir){
     vec3 matSpecular = texture(spec, vertexData.textureCords).rgb;
 
-    vec3 lightDir = normalize(lightPos - vertexData.position);
     vec3 viewDir = normalize(viewPos - vertexData.position);
     float cosb = 0.0;
     vec3 halfwayDir = normalize(lightDir + viewDir);
@@ -113,28 +111,46 @@ vec3 specularBerechnen(vec3 normal, vec3 lightPos){
 //    return vec3(0, 0, 1);
 //}
 
-float shadowCalculation(vec4 fragPosLightSpace){
+float shadowCalculation(vec3 normal, vec3 lightDir, vec4 fragPosLightSpace){
+    vec2 texelSize = 1.0 / textureSize(depthMap, 0);
+    float bias = max(0.008 * (1.0 - dot(normal, lightDir)), 0.005);
+
     vec3 projCoords = (fragPosLightSpace.xyz * 0.5) + 0.5;
     float lightSpaceDepth = texture(depthMap, projCoords.xy).r;
     float cameraDepth = projCoords.z;
-    float shadow = cameraDepth > lightSpaceDepth  ? 1.0 : 0.0;
-    return shadow;
+
+    float shadow = 0.0;
+    if (cameraDepth > 1.0){
+        return shadow;
+    }
+
+    //percentage closer filtering
+    int filterSize = 5;
+    for (int x = -(filterSize / 2); x <= (filterSize / 2); x++) {
+        for (int y = -(filterSize / 2); y <= (filterSize / 2); y++){
+            float pcfShadow = texture(depthMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += (cameraDepth - bias) > pcfShadow ? 1.0 : 0.0;
+        }
+    }
+    return shadow / pow(filterSize, 2);
 }
+
+
 
 
 void main(){
     vec3 normal = normalize(vertexData.normal);
+    vec3 lightDir = normalize(sunPos - vertexData.position);
 
     vec3 lightColor = vec3(1);
 
+    float shadow = shadowCalculation(normal, lightDir, vertexData.fragPosLightSpace);
 
-    float shadow = shadowCalculation(vertexData.fragPosLightSpace);
-
-//    FragColor = vec4(emmisivBerechnen() * lightColor, 1.0);
+    //    FragColor = vec4(emmisivBerechnen() * lightColor, 1.0);
     FragColor = vec4(ambientBerechnen(), 1.0);
 
-    FragColor += (1-shadow) * (vec4(diffuseBerechnen(normal, sunPos), 0.0));
-    FragColor += (1-shadow) * (vec4(specularBerechnen(normal, sunPos), 0.0));
+    FragColor += (1-shadow) * (vec4(diffuseBerechnen(normal, lightDir), 0.0));
+    FragColor += (1-shadow) * (vec4(specularBerechnen(normal, lightDir), 0.0));
 
     FragColor = vec4(FragColor.rgb, 1);
 

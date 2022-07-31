@@ -26,7 +26,6 @@ class MyMap(
 
     val myClock: MyClock
 
-    private val skyboxShader: ShaderProgram
 
     init {
         proceduralGround = ProceduralGround.createGround(anzX, anzZ, abstand)
@@ -35,8 +34,6 @@ class MyMap(
         myClock =
             MyClock(sonnenaufgangUhrzeit, sonnenuntergangUhrzeit, fadeDauerIngameStunden, ingameStundenDauerInSekunden)
 
-        skyboxShader =
-            ShaderProgram("project/assets/shaders/skybox_vert.glsl", "project/assets/shaders/skybox_frag.glsl")
 
 //        skyboxStationary = SkyboxRenderer(
 //            listOf(
@@ -100,10 +97,8 @@ class MyMap(
     }
 
     fun renderSkybox() {
-        skyboxShader.use()
-        camera.bind(skyboxShader)
-        skyboxRotating?.render(skyboxShader, myClock.ingameTime)
-        skyboxStationary?.render(skyboxShader, myClock.ingameTime)
+        skyboxRotating?.render(myClock.ingameTime, camera)
+        skyboxStationary?.render(myClock.ingameTime, camera)
     }
 
 
