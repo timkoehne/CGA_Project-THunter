@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ArtifactsWorkspaceSettings">
+    <artifacts-to-build>
+      <artifact name="CGA_Project:jar" />
+    </artifacts-to-build>
+  </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="cfad8961-4a6e-4cae-bbc1-ff5fda151f4b" name="Changes" comment="very basic audio implementation und entity system ueberarbeitet">
+      <change afterPath="$PROJECT_DIR$/project/assets/shaders/instance_frag.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/assets/shaders/instance_vert.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/assets/sniper/sniper.mtl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/assets/sniper/sniper.obj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/assets/sniper/sniper.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/assets/textures/quadGrass.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/geometry/GrassInstance.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/geometry/Quad.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/map/ProceduralGround2.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/.gradle/7.4.2/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/project/.gradle/7.4.2/executionHistory/executionHistory.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/.gradle/7.4.2/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/project/.gradle/7.4.2/executionHistory/executionHistory.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/.gradle/7.4.2/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/project/.gradle/7.4.2/fileHashes/fileHashes.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/.gradle/7.4.2/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/project/.gradle/7.4.2/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/project/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/project/.gradle/file-system.probe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/assets/shaders/tron_frag.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/project/assets/shaders/tron_frag.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/Loader.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/Loader.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/entities/Cube.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/entities/Cube.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/entities/Entity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/entities/Entity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/entities/EntityManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/entities/EntityManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/geometry/Mesh.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/geometry/Mesh.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/map/MyMap.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/map/MyMap.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/map/ProceduralGround.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/map/ProceduralGround.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/shadows/ShadowRenderer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/shadows/ShadowRenderer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/game/Scene.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/game/Scene.kt" afterDir="false" />
+    </list>
+    <list id="432fd9af-5937-42ca-9ce5-fa23f791405d" name="Changes by Bernhard" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$/project">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$/project">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="project" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="project" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="project" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="project" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="other" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="project" type="f1a62948:ProjectNode" />
+                <item name="Run Configurations" type="7b0102dc:RunConfigurationsNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Class" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+    <option name="SET_USER_NAME_GLOBALLY" value="false" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2C5EceprX8iI2f2G4j0OjpMyNCa" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Tim/Dropbox/IdeaProjects/CGA_Project/project/assets/textures&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;SDKs&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.44827586&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.language.Kotlin&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Tim\Dropbox\IdeaProjects\CGA_Project\project\assets\textures" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Tim\Dropbox\IdeaProjects\CGA_Project\project\assets" />
+      <recent name="C:\Users\Tim\Dropbox\IdeaProjects\CGA_Project\project\assets\models" />
+    </key>
+    <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="cga.exercise.components.map" />
+      <recent name="cga.exercise.components.geometry.entities" />
+      <recent name="cga.exercise.components.geometry.skybox" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Kotlin.MainKt">
+    <configuration name="project [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/project" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="project [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/project" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="clean" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="project [fatJar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/project" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="fatJar" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="project [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/project" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="jar" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="MainKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cga.exercise.MainKt" />
+      <module name="project.main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Kotlin.MainKt" />
+        <item itemvalue="Gradle.project [build]" />
+        <item itemvalue="Gradle.project [clean]" />
+        <item itemvalue="Gradle.project [fatJar]" />
+        <item itemvalue="Gradle.project [jar]" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cfad8961-4a6e-4cae-bbc1-ff5fda151f4b" name="Changes" comment="" />
+      <created>1658084131568</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1658084131568</updated>
+      <workItem from="1658084137248" duration="7842000" />
+      <workItem from="1658130317145" duration="23992000" />
+      <workItem from="1658163824937" duration="9168000" />
+      <workItem from="1658404613080" duration="22809000" />
+      <workItem from="1658487526343" duration="16876000" />
+      <workItem from="1658563117677" duration="4293000" />
+      <workItem from="1658580075730" duration="14764000" />
+      <workItem from="1658601231692" duration="7749000" />
+      <workItem from="1658645959590" duration="3791000" />
+      <workItem from="1658652909664" duration="362000" />
+      <workItem from="1658653291056" duration="3310000" />
+      <workItem from="1658656674593" duration="1758000" />
+      <workItem from="1658663121039" duration="9730000" />
+      <workItem from="1658750456590" duration="9796000" />
+      <workItem from="1658765807996" duration="5439000" />
+      <workItem from="1658822758694" duration="3388000" />
+      <workItem from="1658835194076" duration="10485000" />
+      <workItem from="1658908201487" duration="3632000" />
+      <workItem from="1658916388830" duration="21095000" />
+      <workItem from="1659010749463" duration="19079000" />
+      <workItem from="1659079617517" duration="8847000" />
+      <workItem from="1659088568729" duration="23412000" />
+      <workItem from="1659119988922" duration="3382000" />
+      <workItem from="1659167407270" duration="28441000" />
+      <workItem from="1659251872475" duration="31611000" />
+      <workItem from="1659338212662" duration="38175000" />
+    </task>
+    <task id="LOCAL-00001" summary="basic stuff">
+      <created>1658087286264</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1658087286264</updated>
+    </task>
+    <task id="LOCAL-00002" summary="ProceduralGround.kt als Instanzbasierte Klasse, funktioniert aktuell noch nicht richtig">
+      <created>1658132115035</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1658132115035</updated>
+    </task>
+    <task id="LOCAL-00003" summary="skybox läd die texturen nicht richtig">
+      <created>1658510590358</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1658510590358</updated>
+    </task>
+    <task id="LOCAL-00004" summary="skybox funktioniert mit übergängen zwischen verschiedenen skyboxes für tag und nacht">
+      <created>1658652973330</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1658652973330</updated>
+    </task>
+    <task id="LOCAL-00005" summary="skybox funktioniert mit übergängen zwischen verschiedenen skyboxes für tag und nacht">
+      <created>1658653019783</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1658653019783</updated>
+    </task>
+    <task id="LOCAL-00006" summary="skybox funktioniert mit übergängen zwischen verschiedenen skyboxes für tag und nacht">
+      <created>1658653028159</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1658653028159</updated>
+    </task>
+    <task id="LOCAL-00007" summary="skybox converter kann eine zusammengefasste skybox textur in 6 einzelne texturen trennen">
+      <created>1658653112135</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1658653112135</updated>
+    </task>
+    <task id="LOCAL-00008" summary="skybox converter kann eine zusammengefasste skybox textur in 6 einzelne texturen trennen">
+      <created>1658653121962</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1658653121962</updated>
+    </task>
+    <task id="LOCAL-00009" summary="skybox converter kann eine zusammengefasste skybox textur in 6 einzelne texturen trennen">
+      <created>1658653145493</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1658653145493</updated>
+    </task>
+    <task id="LOCAL-00010" summary="doppelte Skybox mit stationaeren Elementen(Berge in der Entfernung) und drehenden Elementen (Wolken am Himmel) und Tag-Nacht-Zyklus">
+      <created>1658676831427</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1658676831427</updated>
+    </task>
+    <task id="LOCAL-00011" summary="basic shading using shadow mapping">
+      <created>1659090006693</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1659090006693</updated>
+    </task>
+    <task id="LOCAL-00012" summary="adding some models">
+      <created>1659090036719</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1659090036719</updated>
+    </task>
+    <task id="LOCAL-00013" summary="drone mit komplexen, abhaengigen transformationen">
+      <created>1659264436035</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1659264436035</updated>
+    </task>
+    <task id="LOCAL-00014" summary="very basic audio implementation und entity system ueberarbeitet">
+      <created>1659291834343</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1659291834343</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+        <option value="Space.CommitStatus" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CODE_SMELLS_PROFILE" value="Default" />
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="basic stuff" />
+    <MESSAGE value="ProceduralGround.kt als Instanzbasierte Klasse, funktioniert aktuell noch nicht richtig" />
+    <MESSAGE value="skybox läd die texturen nicht richtig" />
+    <MESSAGE value="skybox funktioniert mit übergängen zwischen verschiedenen skyboxes für tag und nacht" />
+    <MESSAGE value="skybox converter kann eine zusammengefasste skybox textur in 6 einzelne texturen trennen" />
+    <MESSAGE value="doppelte Skybox mit stationaeren Elementen(Berge in der Entfernung) und drehenden Elementen (Wolken am Himmel) und Tag-Nacht-Zyklus" />
+    <MESSAGE value="basic shading using shadow mapping" />
+    <MESSAGE value="adding some models" />
+    <MESSAGE value="drone mit komplexen, abhaengigen transformationen" />
+    <MESSAGE value="very basic audio implementation und entity system ueberarbeitet" />
+    <option name="LAST_COMMIT_MESSAGE" value="very basic audio implementation und entity system ueberarbeitet" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>

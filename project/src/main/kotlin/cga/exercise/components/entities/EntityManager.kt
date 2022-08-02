@@ -10,14 +10,14 @@ import org.joml.Math
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
 
-class EntityManager(camera: TronCamera, myMap: MyMap) {
+class EntityManager(val camera: TronCamera, val myMap: MyMap) {
     private var trees: MutableList<Entity>
     private var animals: MutableList<Entity>
     private var cabins: MutableList<Entity>
     private var dekostuff: MutableList<Entity>
 
     var sniper: Sniper
-    lateinit var drone: Drone
+    var drone: Drone
 
     init {
 
@@ -49,7 +49,6 @@ class EntityManager(camera: TronCamera, myMap: MyMap) {
         }
 
 
-
         animals = mutableListOf(
             Entity(ModelLoader.loadModel("project/assets/animals/bear.obj", 0f, Math.toRadians(180f), 0f)),
             Entity(ModelLoader.loadModel("project/assets/animals/deerFemale.obj", 0f, Math.toRadians(180f), 0f)),
@@ -67,7 +66,6 @@ class EntityManager(camera: TronCamera, myMap: MyMap) {
         }
 
         cabins = mutableListOf(
-            Entity(ModelLoader.loadModel("project/assets/cabins/logCabin.obj", 0f, 0f, 0f)),
             Entity(ModelLoader.loadModel("project/assets/cabins/lowPolyLogCabin.obj", 0f, 0f, 0f))
         )
         cabins.forEachIndexed { index, renderable ->
@@ -75,11 +73,10 @@ class EntityManager(camera: TronCamera, myMap: MyMap) {
         }
 
         drone = Drone()
-//        drone = ModelLoader.loadModel("project/assets/drone/drone.obj", 0f, 0f, 0f)
         drone.translate(Vector3f(5f, myMap.getHeight(5f, 5f) + 1f, 5f))
 
         sniper = Sniper()
-        sniper.translate(Vector3f(5f, myMap.getHeight(5f, 5f) + 1, 5f))
+//        sniper.translate(Vector3f(5f, myMap.getHeight(5f, 5f) + 1, 5f))
         sniper.scale(Vector3f(0.5f))
         camera.parent = sniper
     }
@@ -102,6 +99,8 @@ class EntityManager(camera: TronCamera, myMap: MyMap) {
     fun update(window: GameWindow, dt: Float, time: Float) {
         drone.update(dt, time)
 
+        trees.forEach { it.rotate(0f, dt, 0f) }
+
         if (window.getKeyState(GLFW.GLFW_KEY_N)) drone.open(time)
         if (window.getKeyState(GLFW.GLFW_KEY_M)) drone.close(time)
 
@@ -110,19 +109,27 @@ class EntityManager(camera: TronCamera, myMap: MyMap) {
         if (window.getKeyState(GLFW.GLFW_KEY_A)) sniper.translate(Vector3f(-5 * dt, 0f, 0f))
         if (window.getKeyState(GLFW.GLFW_KEY_D)) sniper.translate(Vector3f(5 * dt, 0f, 0f))
 
-        if (window.getKeyState(GLFW.GLFW_KEY_SPACE)) sniper.translate(Vector3f(0f, 5 * dt, 0f))
-        if (window.getKeyState(GLFW.GLFW_KEY_LEFT_SHIFT)) sniper.translate(Vector3f(0f, -5 * dt, 0f))
+//        if (window.getKeyState(GLFW.GLFW_KEY_SPACE)) sniper.translate(Vector3f(0f, 5 * dt, 0f))
+//        if (window.getKeyState(GLFW.GLFW_KEY_LEFT_SHIFT)) sniper.translate(Vector3f(0f, -5 * dt, 0f))
+
+        sniper.translate(
+            Vector3f(
+                0f, myMap.getHeight(
+                    sniper!!.getPosition().x, sniper!!.getPosition().z
+                ) - sniper!!.getPosition()!!.y + 1, 0f
+            )
+        )
 
 
-        //        sniper?.translate(
-//            Vector3f(
-//                0f, myMap.getHeight(
-//                    sniper!!.getPosition().x, sniper!!.getPosition().z
-//                ) - sniper!!.getPosition()!!.y + 1, 0f
-//            )
-//        )
+    }
 
-
+    fun cleanUp() {
+        trees.forEach { it.cleanUp() }
+        animals.forEach { it.cleanUp() }
+        cabins.forEach { it.cleanUp() }
+        dekostuff.forEach { it.cleanUp() }
+        sniper.cleanUp()
+        drone.cleanUp()
     }
 
 

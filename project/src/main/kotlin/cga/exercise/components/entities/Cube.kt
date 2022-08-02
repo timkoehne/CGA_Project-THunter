@@ -1,12 +1,12 @@
 package cga.exercise.components.entities
 
-import cga.exercise.components.geometry.ComplexModel
 import cga.exercise.components.shader.ShaderProgram
+import cga.framework.ModelLoader
 
-class Cube() : ComplexModel(filepath) {
+class Cube() : Entity(ModelLoader.loadModel(filepath, 0f, 0f, 0f)) {
 
     override fun render(shaderProgram: ShaderProgram) {
-            super.render(shaderProgram)
+        super.render(shaderProgram)
     }
 
     companion object {

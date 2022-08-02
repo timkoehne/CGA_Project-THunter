@@ -1,11 +1,13 @@
 package cga.exercise.components
 
+import org.joml.Matrix4f
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL12
 import org.lwjgl.opengl.GL13
 import org.lwjgl.stb.STBImage
 import java.nio.ByteBuffer
+import java.nio.FloatBuffer
 
 
 data class TextureData(var imagedata: ByteBuffer, var width: Int, var height: Int)
@@ -56,8 +58,6 @@ class Loader {
 
             return texID
         }
-
-
     }
 
 

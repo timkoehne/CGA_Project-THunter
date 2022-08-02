@@ -36,20 +36,17 @@ class Scene(val window: GameWindow) {
     private val staticShader: ShaderProgram
     private val debugShader: ShaderProgram
     val camera: TronCamera
-    var bike: Renderable? = null
 
     val guiRenderer = GuiRenderer(window)
-
     val myMap: MyMap
-
     val entityManager: EntityManager
-
     var audioMaster = AudioMaster()
+    val shadowRenderer: ShadowRenderer
+//    val grassInstance: GrassInstance
 
-    val lights = arrayListOf<PointLight>()
+    private val lights = arrayListOf<PointLight>()
     lateinit var spotlight: SpotLight
 
-    val shadowRenderer: ShadowRenderer
 
     //scene setup
     init {
@@ -79,7 +76,8 @@ class Scene(val window: GameWindow) {
         shadowRenderer = ShadowRenderer(this)
 
         myMap = MyMap(
-            500, 500, 1f, camera, 6f, 18f, 2f, 2, 0.8f, 0.6f
+            5, 1f, camera, 6f, 18f, 2f,
+            2, 0.8f, 0.6f
         )
 
         entityManager = EntityManager(camera, myMap)
@@ -95,11 +93,14 @@ class Scene(val window: GameWindow) {
         var audioSource = audioMaster.createAudioSource("project/assets/sounds/test.ogg")
         audioSource.play()
 
+//        grassInstance = GrassInstance(1, myMap)
+
+
     }
 
     fun initilizeLights() {
         lights.add(PointLight(Vector3f(0f, 0.75f, 0f), Vector3f(1f, 1f, 1f)))
-        lights[0].parent = bike
+//        lights[0].parent = bike
         lights.add(PointLight(Vector3f(-5f, 1f, -5f), Vector3f(1f, 1f, 1f)))
         lights.add(PointLight(Vector3f(+5f, 1f, -5f), Vector3f(1f, 1f, 1f)))
 
@@ -109,7 +110,7 @@ class Scene(val window: GameWindow) {
         )
         spotlight.translate(Vector3f(0f, 1f, -1.5f))
         spotlight.rotate(Math.toRadians(-20f), 0f, 0f)
-        spotlight.parent = bike
+//        spotlight.parent = bike
     }
 
     fun rainbowColor(time: Float): Vector3f {
@@ -136,6 +137,7 @@ class Scene(val window: GameWindow) {
         shadowRenderer.render(dt, time)
 
         staticShader.use()
+        staticShader.setUniform("celShadingLevels", 0)
         staticShader.setUniform("depthMap", 3)
         staticShader.setUniform("viewPos", camera.getPosition())
         staticShader.setUniform("sunPos", shadowRenderer.sun.getPosition())
@@ -143,6 +145,7 @@ class Scene(val window: GameWindow) {
 
         camera.bind(staticShader)
         myMap.render(staticShader)
+//        grassInstance.render(camera)
 
         shadowRenderer.sun.render(staticShader)
         entityManager.render(dt, time, staticShader)
@@ -156,34 +159,6 @@ class Scene(val window: GameWindow) {
 //        renderSquare(shadowRenderer.depthMap)
 
     }
-
-    fun renderSquare(texID: Int) {
-        var squareVAO = 0
-        var squareVBO = 0
-        if (squareVAO == 0) {
-            val squareVertices = floatArrayOf(
-                -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-                1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-                1.0f, -1.0f, 0.0f, 1.0f, 0.0f
-            )
-            squareVAO = GL30.glGenVertexArrays()
-            squareVBO = GL15C.glGenBuffers()
-            GL30.glBindVertexArray(squareVAO)
-            GL30.glBindBuffer(GL15.GL_ARRAY_BUFFER, squareVBO)
-            GL30.glBufferData(GL15.GL_ARRAY_BUFFER, squareVertices, GL15C.GL_STATIC_DRAW)
-            GL30.glEnableVertexAttribArray(0)
-            GL30.glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * 4, 0)
-            GL30.glEnableVertexAttribArray(1)
-            GL30.glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * 4, 12)
-        }
-        GL30.glBindVertexArray(squareVAO)
-        GL13.glActiveTexture(GL13.GL_TEXTURE0)
-        glBindTexture(GL_TEXTURE_2D, texID)
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
-        GL30.glBindVertexArray(0)
-    }
-
     fun renderLights(dt: Float, time: Float, shaderProgram: ShaderProgram) {
         shaderProgram.setUniform("anzLichter", lights.size)
         lights.forEachIndexed { index, it ->
@@ -206,31 +181,12 @@ class Scene(val window: GameWindow) {
         spotlight.bind(shaderProgram, camera.getCalculateViewMatrix())
     }
 
-    fun updateBike(dt: Float, time: Float) {
-//        if (window.getKeyState(GLFW_KEY_W))
-//            bike?.translate(Vector3f(0f, 0f, -5 * dt))
-//        if (window.getKeyState(GLFW_KEY_S))
-//            bike?.translate(Vector3f(0f, 0f, 5 * dt))
-//        if (window.getKeyState(GLFW_KEY_A))
-//            bike?.rotate(0f, dt, 0f)
-//        if (window.getKeyState(GLFW_KEY_D))
-//            bike?.rotate(0f, -dt, 0f)
-//
-//
-//        bike?.translate(
-//            Vector3f(
-//                0f, proceduralGround.getHeight(
-//                    bike!!.getPosition().x,
-//                    bike!!.getPosition().z
-//                ) - bike!!.getPosition()!!.y, 0f
-//            )
-//        )
-    }
-
     fun update(dt: Float, time: Float) {
         myMap.update(dt, time)
 
         entityManager.update(window, dt, time)
+
+//        println(camera.getWorldPosition())
 
         if (window.getKeyState(GLFW_KEY_I)) camera.translate(Vector3f(0f, 0f, -5 * dt))
         if (window.getKeyState(GLFW_KEY_K)) camera.translate(Vector3f(0f, 0f, 5 * dt))
@@ -244,7 +200,7 @@ class Scene(val window: GameWindow) {
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {}
 
     fun onMouseMove(xpos: Double, ypos: Double) {
-        entityManager.getPlayer().onMouseMove(prevX - xpos, prevY - ypos)
+        entityManager.getPlayer().onMouseMove(prevX - xpos, 0.0) //prevY - ypos
 
         prevX = xpos
         prevY = ypos
@@ -255,12 +211,10 @@ class Scene(val window: GameWindow) {
         staticShader.cleanUp()
         debugShader.cleanUp()
 
+        myMap.cleanUp()
+        entityManager.cleanUp()
         guiRenderer.cleanUp()
-
-
-
+        shadowRenderer.cleanUp()
         audioMaster.cleanUp()
-
-
     }
 }

@@ -1,14 +1,12 @@
 package cga.exercise.components.map
 
 import cga.exercise.components.camera.TronCamera
-import cga.exercise.components.geometry.Renderable
 import cga.exercise.components.skybox.SkyboxRenderer
 import cga.exercise.components.shader.ShaderProgram
 
 class MyMap(
-    anzX: Int,
-    anzZ: Int,
-    abstand: Float,
+    val numChunksSquare: Int,
+    val abstand: Float,
     val camera: TronCamera,
     sonnenaufgangUhrzeit: Float,
     sonnenuntergangUhrzeit: Float,
@@ -18,9 +16,8 @@ class MyMap(
     val ambientLightNachts: Float
 
 ) {
-
-    private val ground: Renderable
-    private val proceduralGround: ProceduralGround
+    //    private val ground: Renderable
+    private val proceduralGround: ProceduralGroundInfinite
     private var skyboxStationary: SkyboxRenderer? = null
     private var skyboxRotating: SkyboxRenderer? = null
 
@@ -28,8 +25,10 @@ class MyMap(
 
 
     init {
-        proceduralGround = ProceduralGround.createGround(anzX, anzZ, abstand)
-        ground = Renderable(mutableListOf(proceduralGround))
+//        proceduralGround = ProceduralGround.createGround(anzX, anzZ, abstand)
+//        proceduralGround = ProceduralGround2(camera, anzX, anzZ, abstand)
+        proceduralGround = ProceduralGroundInfinite(camera, numChunksSquare, abstand)
+//        ground = Renderable(mutableListOf(proceduralGround))
 
         myClock = MyClock(
             sonnenaufgangUhrzeit, sonnenuntergangUhrzeit,
@@ -75,25 +74,27 @@ class MyMap(
     }
 
     fun getHeight(x: Float, z: Float): Float {
-        return proceduralGround.getHeight(x, z)
+        return proceduralGround.getHeight(x, z) //TOD
     }
 
     fun update(dt: Float, time: Float) {
+
+        proceduralGround.update(dt, time)
+
         myClock.update(time)
         skyboxStationary?.update(dt)
         skyboxRotating?.update(dt)
     }
 
     fun render(shaderProgram: ShaderProgram) {
-        shaderProgram.use()
+        camera.bind(shaderProgram)
         shaderProgram.setUniform("ingameTime", myClock.ingameTime)
         shaderProgram.setUniform("sonnenaufgangUhrzeit", myClock.sonnenaufgangUhrzeit)
         shaderProgram.setUniform("sonnenuntergangUhrzeit", myClock.sonnenuntergangUhrzeit)
         shaderProgram.setUniform("fadeDauerIngameStunden", myClock.fadeDauerIngameStunden)
         shaderProgram.setUniform("ambientTag", ambientLightTagsueber)
         shaderProgram.setUniform("ambientNacht", ambientLightNachts)
-
-        ground.render(shaderProgram)
+        proceduralGround.render(shaderProgram)
     }
 
     fun renderSkybox() {
@@ -101,8 +102,8 @@ class MyMap(
         skyboxStationary?.render(myClock.ingameTime, camera)
     }
 
-    fun cleanUp(){
-        ground.cleanUp()
+    fun cleanUp() {
+        proceduralGround.cleanUp()
         skyboxRotating?.cleanUp()
         skyboxStationary?.cleanUp()
     }

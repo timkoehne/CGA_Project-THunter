@@ -7,7 +7,7 @@ import cga.exercise.components.geometry.VertexAttribute
 import cga.exercise.components.texture.Texture2D
 import org.lwjgl.opengl.GL11
 
-class ProceduralGround(
+class ProceduralGroundFixedSize(
     val anzX: Int,
     val anzZ: Int,
     val abstand: Float,
@@ -30,19 +30,19 @@ class ProceduralGround(
 
         val diff = Texture2D.invoke("project/assets/textures/grass.png", true)
         val emit = Texture2D.invoke("project/assets/textures/black.png", true)
-        val spec = Texture2D.invoke("project/assets/textures/black.png", true)
+        val spec = Texture2D.invoke("project/assets/textures/white.png", true)
 
         init {
             diff.setTexParams(GL11.GL_REPEAT, GL11.GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL11.GL_LINEAR)
             emit.setTexParams(GL11.GL_REPEAT, GL11.GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL11.GL_LINEAR)
             spec.setTexParams(GL11.GL_REPEAT, GL11.GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL11.GL_LINEAR)
-            
+
             material = Material(diff, emit, spec)
         }
 
-        fun createGround(anzX: Int, anzZ: Int, abstand: Float): ProceduralGround {
+        fun createGround(anzX: Int, anzZ: Int, abstand: Float): ProceduralGroundFixedSize {
             var vertexdata = FloatArray(stride * (anzX * anzZ))
-            var indexdata = IntArray((anzX * anzZ) * 6)
+            var indexdata = IntArray(((anzX - 1) * (anzZ - 1)) * 6)
 
             //Vertices erstellen
             for (z in 0 until anzZ) {
@@ -64,7 +64,7 @@ class ProceduralGround(
 
             //Vertices zu Grid kombinieren
             var anz = 0
-            for (z in 0 until anzZ) {
+            for (z in 0 until anzZ - 1) {
                 for (x in 0 until anzX - 1) {
                     //CCW um die Vertices
                     //Dreieck1
@@ -79,7 +79,7 @@ class ProceduralGround(
                 }
             }
 
-            return ProceduralGround(anzX, anzZ, abstand, vertexdata, indexdata, vertexAttributes)
+            return ProceduralGroundFixedSize(anzX, anzZ, abstand, vertexdata, indexdata, vertexAttributes)
         }
 
         private fun insertVertex(x: Int, z: Int, texture: Int, anzX: Int, vertexData: FloatArray, abstand: Float) {
@@ -108,6 +108,7 @@ class ProceduralGround(
                 }
             }
             //normal
+            //TODO normalen vom ground sind einfach grade nach oben
             vertexData[pos + 5] = 0f
             vertexData[pos + 6] = 1f
             vertexData[pos + 7] = 0f

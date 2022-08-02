@@ -12,13 +12,11 @@ class MyClock(
 
     fun update(time: Float) {
 
-//        println("ingametime $ingameTime")
-//        println("lastprint $lastPrint")
-
         ingameTime = (time / ingameStundenDauerInSekunden) % 24
 
-        if (lastPrint >= 23.5) {
-            println("test")
+        if ((time / ingameStundenDauerInSekunden) > ingameTag * 24 + ingameTime) {
+            ingameTag++
+            println("ingameTime: 0,00 Uhr")
             lastPrint = 0f
         }
 

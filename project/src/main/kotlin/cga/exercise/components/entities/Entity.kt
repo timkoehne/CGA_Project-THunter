@@ -36,5 +36,9 @@ open class Entity(var models: List<Renderable>) : Transformable(), IRenderable {
         rotate((yDiff * 0.002f).toFloat(), 0f, 0f)
     }
 
+    fun cleanUp(){
+        models.forEach { it.cleanUp() }
+    }
+
 
 }

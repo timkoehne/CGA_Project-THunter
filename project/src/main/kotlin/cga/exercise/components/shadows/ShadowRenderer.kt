@@ -5,10 +5,7 @@ import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.game.Scene
 import org.joml.Matrix4f
 import org.joml.Vector3f
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL11.*
-import org.lwjgl.opengl.GL13
-import org.lwjgl.opengl.GL30
+import org.lwjgl.opengl.*
 
 class ShadowRenderer(val scene: Scene) {
     companion object {
@@ -16,7 +13,7 @@ class ShadowRenderer(val scene: Scene) {
         const val SHADOW_HEIGHT = 1024 * 16//TODO bessere loesung finden
     }
 
-    lateinit var sun: Cube
+    var sun: Cube = Cube()
 
 
     val depthMapFBO: Int
@@ -29,8 +26,6 @@ class ShadowRenderer(val scene: Scene) {
     val far_plane = scene.camera.fPlane
 
     init {
-
-        sun = Cube()
         sun.translate(Vector3f(0f, 20f, 0f))
 
         depthMapFBO = GL30.glGenFramebuffers()
@@ -38,7 +33,7 @@ class ShadowRenderer(val scene: Scene) {
 
         depthMap = GL11.glGenTextures()
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, depthMap)
-        glTexImage2D(
+        GL11.glTexImage2D(
             GL11.GL_TEXTURE_2D,
             0,
             GL11.GL_DEPTH_COMPONENT,
@@ -67,8 +62,15 @@ class ShadowRenderer(val scene: Scene) {
     fun render(dt: Float, time: Float) {
 
         val depthProjection =
-            Matrix4f().ortho(-200f, 200f, -200f, 200f, near_plane, far_plane) //TODO bessere loesung finden. debugshader hilft
-        val depthView = Matrix4f().lookAt(sun.getPosition(), Vector3f(1f, 10f, 1f), Vector3f(0f, 1f, 0f))
+            Matrix4f().ortho(
+                -200f,
+                200f,
+                -200f,
+                200f,
+                near_plane,
+                far_plane
+            ) //TODO bessere loesung finden. debugshader hilft vermutlich
+        val depthView = Matrix4f().lookAt(sun.getPosition(), Vector3f(2f, 16f, 2f), Vector3f(0f, 1f, 0f))
         sunSpaceMatrix = depthProjection.mul(depthView)
 
         simpleDepthShader.use()
@@ -97,6 +99,14 @@ class ShadowRenderer(val scene: Scene) {
 
         GL13.glActiveTexture(GL13.GL_TEXTURE3)
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, depthMap)
+    }
+
+
+    fun cleanUp() {
+        simpleDepthShader.cleanUp()
+        GL11.glBindTexture(GL20.GL_TEXTURE_2D, 0)
+        GL15.glDeleteBuffers(depthMapFBO)
+        GL11.glDeleteTextures(depthMap)
     }
 
 

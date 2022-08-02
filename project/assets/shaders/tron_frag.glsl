@@ -17,6 +17,8 @@ uniform sampler2D emit, diff, spec, depthMap;
 uniform vec3 sunPos;
 uniform vec3 viewPos;
 
+uniform int celShadingLevels;
+
 in struct VertexData
 {
     vec3 position;
@@ -77,6 +79,11 @@ vec3 diffuseBerechnen(vec3 normal, vec3 lightDir){
     vec3 matDiffuse = texture(diff, vertexData.textureCords).rgb;
 
     float cosa = max(dot(lightDir, normal), 0.0);
+
+    if (celShadingLevels != 0){
+        cosa = floor(cosa * celShadingLevels)/celShadingLevels;
+    }
+
     return matDiffuse * cosa;
 }
 
@@ -87,6 +94,10 @@ vec3 specularBerechnen(vec3 normal, vec3 lightDir){
     float cosb = 0.0;
     vec3 halfwayDir = normalize(lightDir + viewDir);
     cosb = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+
+    if (celShadingLevels != 0){
+        cosb = floor(cosb * celShadingLevels)/celShadingLevels;
+    }
     vec3 specular = matSpecular * cosb;
     return specular;
 }
@@ -132,6 +143,7 @@ float shadowCalculation(vec3 normal, vec3 lightDir, vec4 fragPosLightSpace){
             shadow += (cameraDepth - bias) > pcfShadow ? 1.0 : 0.0;
         }
     }
+
     return shadow / pow(filterSize, 2);
 }
 
@@ -149,10 +161,13 @@ void main(){
     //    FragColor = vec4(emmisivBerechnen() * lightColor, 1.0);
     FragColor = vec4(ambientBerechnen(), 1.0);
 
+
+
     FragColor += (1-shadow) * (vec4(diffuseBerechnen(normal, lightDir), 0.0));
     FragColor += (1-shadow) * (vec4(specularBerechnen(normal, lightDir), 0.0));
 
-    FragColor = vec4(FragColor.rgb, 1);
+        FragColor = vec4(FragColor.rgb, 1);
+//    FragColor = vec4(1, 0, 0, 0);
 
 
 }

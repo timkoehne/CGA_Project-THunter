@@ -24,7 +24,7 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
      * @return world modelMatrix
      */
     fun getWorldModelMatrix(): Matrix4f {
-        return parent?.getWorldModelMatrix()?.mul(modelMatrix) ?: getModelMatrix();
+        return parent?.getWorldModelMatrix()?.mul(modelMatrix) ?: getModelMatrix()
     }
 
     /**
