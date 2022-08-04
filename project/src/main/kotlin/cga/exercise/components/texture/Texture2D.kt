@@ -78,7 +78,12 @@ class Texture2D(imageData: ByteBuffer, width: Int, height: Int, genMipMaps: Bool
     }
 
     override fun bind(textureUnit: Int) {
-        GL13.glActiveTexture(textureUnit)
+
+        if (textureUnit < 100) {
+            GL13.glActiveTexture(GL13.GL_TEXTURE0 + textureUnit)
+        } else {
+            GL13.glActiveTexture(textureUnit)
+        }
         GL11.glBindTexture(GL20.GL_TEXTURE_2D, texID)
     }
 

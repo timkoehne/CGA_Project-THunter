@@ -9,7 +9,7 @@ open class Renderable(var meshes: MutableList<Mesh>) : Transformable(), IRendera
 
     override fun render(shaderProgram: ShaderProgram) {
         shaderProgram.setUniform("model_matrix", getWorldModelMatrix(), false)
-        shaderProgram.setUniform("fragColor", color)
+        shaderProgram.setUniform("emimisivColor", color)
         for (mesh in meshes) {
             mesh.render(shaderProgram)
         }

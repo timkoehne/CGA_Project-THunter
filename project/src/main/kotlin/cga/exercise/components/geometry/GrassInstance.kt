@@ -7,6 +7,7 @@ import cga.exercise.components.texture.Texture2D
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL13
 import org.lwjgl.opengl.GL30
 import org.lwjgl.opengl.GL31
 import java.util.Random
@@ -39,14 +40,15 @@ class GrassInstance(amount: Int, private val myMap: MyMap) : Quad(amount, texure
     fun render(camera: TronCamera) {
         instanceShader.use()
 
-        texture.bind(0)
+
+        texture.bind(GL13.GL_TEXTURE0)
+        instanceShader.setUniform("image", 0)
 
         camera.bind(instanceShader)
-        instanceShader.setUniform("image", 0)
-        for (model in modelMatrizen) {
-            GL30.glBindVertexArray(vao)
-            GL31.glDrawElementsInstanced(GL11.GL_TRIANGLES, indexdata.size, GL11.GL_UNSIGNED_INT, 0, amount)
-        }
+//        for (model in modelMatrizen) {
+        GL30.glBindVertexArray(vao)
+        GL31.glDrawElementsInstanced(GL11.GL_TRIANGLES, indexdata.size, GL11.GL_UNSIGNED_INT, 0, amount)
+//        }
     }
 
 

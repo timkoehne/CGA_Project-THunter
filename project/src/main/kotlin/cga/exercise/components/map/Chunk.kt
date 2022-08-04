@@ -1,16 +1,13 @@
 package cga.exercise.components.map
 
-import cga.exercise.components.TerrainGenerator
 import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.geometry.Material
 import cga.exercise.components.geometry.Mesh
 import cga.exercise.components.geometry.Renderable
-import cga.exercise.components.geometry.VertexAttribute
 import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.components.texture.Texture2D
-import org.joml.Vector2f
 import org.joml.Vector3f
-import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL13
 
 class Chunk(val abstand: Float, var positionXZ: Vector3f) {
 
@@ -18,17 +15,23 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
         val heightGenerator = TerrainGenerator()
         const val chunkSize = 16
         private const val numVerticesPerSide = chunkSize + 1
-        val diff = Texture2D.invoke("project/assets/textures/grass.png", true)
+        val diff = Texture2D.invoke("project/assets/textures/texture pack/grass (4).png", true)
         val emit = Texture2D.invoke("project/assets/textures/black.png", true)
-        val spec = Texture2D.invoke("project/assets/textures/white.png", true)
-        val material: Material
+        val spec = Texture2D.invoke("project/assets/textures/black.png", true)
+        val material = Material(diff, emit, spec, 100f)
+
+
+        val dirt = Texture2D.invoke("project/assets/textures/texture pack/dirt (1).png", true)
+        val snow = Texture2D.invoke("project/assets/textures/texture pack/snow.png", true)
+        val sand = Texture2D.invoke("project/assets/textures/texture pack/sand.png", true)
+//        val grass = Texture2D.invoke("project/assets/textures/texture pack/", true)
+
 
         init {
             //diff.setTexParams(GL11.GL_REPEAT, GL11.GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL11.GL_LINEAR)
             //emit.setTexParams(GL11.GL_REPEAT, GL11.GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL11.GL_LINEAR)
             //spec.setTexParams(GL11.GL_REPEAT, GL11.GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL11.GL_LINEAR)
 
-            material = Material(diff, emit, spec)
         }
     }
 
@@ -57,7 +60,8 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
                     indexdata[gridVertCounter + 2] = (((z + 1) * numVerticesPerSide) + x) + 1 //einen nach rechts
                     //Dreieck2
                     indexdata[gridVertCounter + 3] = ((z * numVerticesPerSide) + x) //oben links anfangen
-                    indexdata[gridVertCounter + 4] = (((z + 1) * numVerticesPerSide) + x) + 1 //einen diagonal nach unten rechts
+                    indexdata[gridVertCounter + 4] =
+                        (((z + 1) * numVerticesPerSide) + x) + 1 //einen diagonal nach unten rechts
                     indexdata[gridVertCounter + 5] = (((z) * numVerticesPerSide) + x) + 1 //einen nach oben
                     gridVertCounter += 6
                 }
@@ -76,7 +80,6 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
         vertexdata[pos + 2] = grid[x][z].z
 
         //texture coords
-
         val worldZ = ((((grid[x][z].z - positionXZ.z) / abstand) + (numVerticesPerSide / 2))).toInt()
         val worldX = ((((grid[x][z].x - positionXZ.x) / abstand) + (numVerticesPerSide / 2))).toInt()
 
@@ -108,9 +111,22 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
 
         //normal
         //TODO normalen vom ground sind einfach grade nach oben
-        vertexdata[pos + 5] = 0f
-        vertexdata[pos + 6] = 1f
-        vertexdata[pos + 7] = 0f
+        val normal = calculateNormal(grid[x][z].x, grid[x][z].z)
+        vertexdata[pos + 5] = normal.x
+        vertexdata[pos + 6] = normal.y
+        vertexdata[pos + 7] = normal.z
+    }
+
+    private fun calculateNormal(x: Float, z: Float): Vector3f{
+        val heightLeft = heightGenerator.getTerrainHeight(x*abstand-1, z*abstand)
+        val heightRight = heightGenerator.getTerrainHeight(x*abstand+1, z*abstand)
+        val heightBelow = heightGenerator.getTerrainHeight(x*abstand, z*abstand-1)
+        val heightAbove = heightGenerator.getTerrainHeight(x*abstand, z*abstand+1)
+        val normal = Vector3f(heightLeft-heightRight, 2f, heightBelow-heightAbove)
+        normal.normalize()
+        return normal
+
+
     }
 
     fun vertexInGridErstellen(x: Int, z: Int) {
@@ -125,11 +141,20 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
     }
 
     fun render(camera: TronCamera, shaderProgram: ShaderProgram) {
+        shaderProgram.use()
         camera.bind(shaderProgram)
+
+        dirt.bind(GL13.GL_TEXTURE3)
+        shaderProgram.setUniform("dirtDiff", 3)
+        snow.bind(GL13.GL_TEXTURE4)
+        shaderProgram.setUniform("snowDiff", 4)
+        sand.bind(GL13.GL_TEXTURE5)
+        shaderProgram.setUniform("sandDiff", 5)
+
         mesh.render(shaderProgram)
     }
 
-    fun cleanUp(){
+    fun cleanUp() {
         mesh.cleanUp()
     }
 

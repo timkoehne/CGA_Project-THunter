@@ -12,7 +12,12 @@ uniform float sonnenaufgangUhrzeit;
 uniform float sonnenuntergangUhrzeit;
 uniform float fadeDauerIngameStunden;
 
-uniform sampler2D emit, diff, spec, depthMap;
+uniform sampler2D dirtDiff, snowDiff, sandDiff;
+uniform sampler2D diff, emit, spec, depthMap;
+
+uniform float sandUpperBound;
+uniform float dirtUpperBound;
+uniform float grassUpperBound;
 
 uniform vec3 sunPos;
 uniform vec3 viewPos;
@@ -58,8 +63,40 @@ vec3 emmisivBerechnen(){
     return texture(emit, vertexData.textureCords).rgb;
 }
 
+vec4 mixBasedOnDistance(sampler2D upperDiff, sampler2D lowerDiff, float lowerBound, float upperBound){
+    return mix(
+    texture(upperDiff, vertexData.textureCords),
+    texture(lowerDiff, vertexData.textureCords),
+    (vertexData.position.y-lowerBound) / (upperBound-lowerBound)
+    );
+}
+
+vec4 useCorrectDiff(){
+
+    float mixRange = 1.0f;
+    if (vertexData.position.y < sandUpperBound-mixRange){ //sand
+        return texture(sandDiff, vertexData.textureCords);
+
+    } else if (vertexData.position.y <= sandUpperBound){ //sand and dirt
+        return mixBasedOnDistance(sandDiff, dirtDiff, sandUpperBound - mixRange, sandUpperBound);
+
+    } else if (vertexData.position.y < dirtUpperBound-mixRange){ //dirt
+        return texture(dirtDiff, vertexData.textureCords);
+
+    } else if (vertexData.position.y <= dirtUpperBound){ //dirt and grass
+        return mixBasedOnDistance(dirtDiff, diff, dirtUpperBound - mixRange, dirtUpperBound);
+
+    } else if (vertexData.position.y < grassUpperBound-mixRange){ //grass
+        return texture(diff, vertexData.textureCords);
+
+    } else if (vertexData.position.y <= grassUpperBound){ //grass and snow
+        return mixBasedOnDistance(diff, snowDiff, grassUpperBound - mixRange, grassUpperBound);
+    }
+    return texture(snowDiff, vertexData.textureCords);
+}
+
 vec3 ambientBerechnen(){
-    return ambient * texture(diff, vertexData.textureCords).rgb;
+    return ambient * useCorrectDiff().rgb;
 }
 
 float sunIntensity(){
@@ -82,9 +119,8 @@ float sunIntensity(){
 }
 
 vec3 diffuseBerechnen(vec3 normal, vec3 lightDir){
-    vec3 matDiffuse = texture(diff, vertexData.textureCords).rgb;
-
-    float cosa = max(dot(-lightDir, normal), 0.0);
+    vec3 matDiffuse = useCorrectDiff().rgb;
+    float cosa = max(dot(lightDir, normal), 0.0);
 
     if (celShadingLevels != 0){
         cosa = floor(cosa * celShadingLevels)/celShadingLevels;
@@ -96,9 +132,7 @@ vec3 diffuseBerechnen(vec3 normal, vec3 lightDir){
 vec3 specularBerechnen(vec3 normal, vec3 lightDir){
     vec3 matSpecular = texture(spec, vertexData.textureCords).rgb;
 
-    //    vec3 viewDir = normalize(viewPos - vertexData.position);
-    vec3 viewDir = normalize(-viewPos);
-
+    vec3 viewDir = normalize(viewPos - vertexData.position);
     float cosb = 0.0;
     vec3 halfwayDir = normalize(lightDir + viewDir);
     cosb = pow(max(dot(normal, halfwayDir), 0.0), shininess);
@@ -157,14 +191,13 @@ float shadowCalculation(vec3 normal, vec3 lightDir, vec4 fragPosLightSpace){
 
 
 
-
 void main(){
 
     vec3 normal = normalize(vertexData.normal);
     FragColor = vec4(0, 0, 0, 1);
 
     //Sun
-    vec3 lightDir = -normalize(sunPos - vertexData.position); //light dir muss hier negativ sein und im ground positiv??
+    vec3 lightDir = normalize(sunPos - vertexData.position);//light dir muss hier positiv sein und in tron_frag negativ???
     float shadow = shadowCalculation(normal, lightDir, vertexData.fragPosLightSpace);
     FragColor += vec4(emmisivBerechnen() * emmisivColor, 0.0);
     FragColor += vec4(ambientBerechnen(), 0.0);

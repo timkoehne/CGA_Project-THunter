@@ -47,6 +47,7 @@ class ProceduralGroundInfinite(
     }
 
     fun render(shaderProgram: ShaderProgram) {
+        shaderProgram.use()
         val playerposXZ = Vector3f(camera.getWorldPosition().x, 0f, camera.getWorldPosition().z)
         for (z in -numChunksSquare / 2..numChunksSquare / 2) {
             for (x in -numChunksSquare / 2..numChunksSquare / 2) {
@@ -56,11 +57,10 @@ class ProceduralGroundInfinite(
                 val chunkIndex = chunkPosToIndex(chunkPos)
 //                println(" chunk$x|$z hat index $chunkIndex")
 
-                if (chunks[chunkIndex] != null) {
-                    chunks[chunkIndex]?.render(camera, shaderProgram)
-                } else {
+                if (chunks[chunkIndex] == null) {
                     chunks[chunkIndex] = Chunk(abstand, chunkPos)
                 }
+                chunks[chunkIndex]?.render(camera, shaderProgram)
             }
         }
     }

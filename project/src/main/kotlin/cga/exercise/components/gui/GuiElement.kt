@@ -9,7 +9,7 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.opengl.*
 
-class GuiElement(var texture: Texture2D, position: Vector2f = Vector2f(), scale: Vector2f = Vector2f(1f, 1f)) :
+class GuiElement(var texture: Texture2D, position: Vector2f = Vector2f(), scale: Vector2f = Vector2f(1f, 1f), val texID: Int) :
     Transformable() {
 
     companion object {
@@ -40,6 +40,7 @@ class GuiElement(var texture: Texture2D, position: Vector2f = Vector2f(), scale:
             GL30.glVertexAttribPointer(1, 2, GL11.GL_FLOAT, false, 5 * 4, 12)
         }
         GL30.glBindVertexArray(vao)
+
         texture.bind(GL13.GL_TEXTURE0)
         GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, 4)
         GL30.glBindVertexArray(0)
@@ -54,7 +55,11 @@ class GuiElement(var texture: Texture2D, position: Vector2f = Vector2f(), scale:
     }
 
     fun render(shaderProgram: ShaderProgram) {
-        texture.bind(GL13.GL_TEXTURE0)
+        //texture.bind(GL13.GL_TEXTURE0)
+
+        GL13.glActiveTexture(GL13.GL_TEXTURE0)
+        GL11.glBindTexture(GL20.GL_TEXTURE_2D, texID)
+
         shaderProgram.setUniform("model_matrix", getModelMatrix(), false)
         GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, 4)
     }

@@ -55,12 +55,12 @@ open class Mesh(
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0)
     }
 
-    fun uploadVertexData(){
+    fun uploadVertexData() {
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo)
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexdata, GL15.GL_STREAM_DRAW)
     }
 
-    fun uploadIndexData(){
+    fun uploadIndexData() {
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, ibo)
         GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indexdata, GL15.GL_STATIC_DRAW)
     }
@@ -71,17 +71,17 @@ open class Mesh(
     fun render(shaderProgram: ShaderProgram) {
         GL30.glBindVertexArray(vao)
         material?.bind(shaderProgram)
-        GL11.glDrawElements(renderMode, indexcount, GL11.GL_UNSIGNED_INT, 0)
+        GL11.glDrawElements(GL11.GL_TRIANGLES, indexcount, GL11.GL_UNSIGNED_INT, 0)
         GL30.glBindVertexArray(0)
     }
 
     fun render(shaderProgram: ShaderProgram, texID: Int) {
         GL30.glBindVertexArray(vao)
 
-        GL13.glActiveTexture(GL13.GL_TEXTURE0)
+        GL13.glActiveTexture(GL13.GL_TEXTURE2)
         GL11.glBindTexture(GL20.GL_TEXTURE_2D, texID)
-        shaderProgram.setUniform("diff", 0)
-        GL11.glDrawElements(renderMode, indexcount, GL11.GL_UNSIGNED_INT, 0)
+        shaderProgram.setUniform("diff", 2)
+        GL11.glDrawElements(GL11.GL_TRIANGLES, indexcount, GL11.GL_UNSIGNED_INT, 0)
         GL30.glBindVertexArray(0)
     }
 
@@ -96,13 +96,12 @@ open class Mesh(
 
     companion object {
 
-        var renderMode = GL11.GL_TRIANGLES
-
-        fun renderLines(){
-            renderMode = GL11.GL_LINES
+        fun renderLines() {
+            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE)
         }
-        fun renderTriangles(){
-            renderMode = GL11.GL_TRIANGLES
+
+        fun renderTriangles() {
+            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL)
         }
 
 

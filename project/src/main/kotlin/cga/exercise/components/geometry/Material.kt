@@ -18,14 +18,15 @@ class Material(
 
     fun bind(shaderProgram: ShaderProgram) {
 
-        diff.bind(GL13.GL_TEXTURE0)
-        shaderProgram.setUniform("diff", 0)
+        emit.bind(GL13.GL_TEXTURE0)
+        shaderProgram.setUniform("emit", 0)
 
-        emit.bind(GL13.GL_TEXTURE1)
-        shaderProgram.setUniform("emit", 1)
+        specular.bind(GL13.GL_TEXTURE1)
+        shaderProgram.setUniform("spec", 1)
 
-        specular.bind(GL13.GL_TEXTURE2)
-        shaderProgram.setUniform("spec", 2)
+        diff.bind(GL13.GL_TEXTURE2)
+        shaderProgram.setUniform("diff", 2)
+
 
         shaderProgram.setUniform("shininess", shininess)
         shaderProgram.setUniform("tcMultiplier", tcMultiplier)

@@ -7,11 +7,16 @@ import org.joml.Matrix4f
 import org.joml.Vector3f
 
 class TronCamera(
-    var fov: Float = Math.toRadians(90f),
+    var fov: Float = default_fov,
     var aspect: Float = 16 / 9f,
     var nPlane: Float = 0.01f,
     var fPlane: Float = 100.0f
 ) : Transformable(), ICamera {
+
+    companion object{
+        val default_fov = Math.toRadians(90f)
+        val zoom_fov = Math.toRadians(25f)
+    }
 
     override fun getCalculateViewMatrix(): Matrix4f {
         return Matrix4f().lookAt(getWorldPosition(), getWorldPosition().sub(getWorldZAxis()), getWorldYAxis())

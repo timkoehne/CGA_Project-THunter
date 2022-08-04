@@ -38,13 +38,8 @@ class SkyboxRenderer(
         GL11.glDepthMask(false)
         GL11.glCullFace(GL11.GL_FRONT)
         skyboxShader.use()
-        camera.bind(skyboxShader)
-        skyboxShader.setUniform("ingameTime", ingameTime)
-        skyboxShader.setUniform("ambientTag", myMap.ambientLightTagsueber)
-        skyboxShader.setUniform("ambientNacht", myMap.ambientLightNachts)
-        skyboxShader.setUniform("sonnenaufgangUhrzeit", myMap.myClock.sonnenaufgangUhrzeit)
-        skyboxShader.setUniform("sonnenuntergangUhrzeit", myMap.myClock.sonnenuntergangUhrzeit)
-        skyboxShader.setUniform("fadeDauerIngameStunden", myMap.myClock.fadeDauerIngameStunden)
+
+        myMap.setNeededUniforms(skyboxShader)
 
         GL13.glActiveTexture(GL13.GL_TEXTURE0)
         GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, dayTexID)

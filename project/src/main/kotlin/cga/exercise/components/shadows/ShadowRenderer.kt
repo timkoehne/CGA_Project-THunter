@@ -9,8 +9,8 @@ import org.lwjgl.opengl.*
 
 class ShadowRenderer(val scene: Scene) {
     companion object {
-        const val SHADOW_WIDTH = 1024 * 16//TODO bessere loesung finden
-        const val SHADOW_HEIGHT = 1024 * 16//TODO bessere loesung finden
+        const val SHADOW_WIDTH = 1024 * 4//TODO bessere loesung finden
+        const val SHADOW_HEIGHT = 1024 * 4//TODO bessere loesung finden
     }
 
     var sun: Cube = Cube()
@@ -63,10 +63,10 @@ class ShadowRenderer(val scene: Scene) {
 
         val depthProjection =
             Matrix4f().ortho(
-                -200f,
-                200f,
-                -200f,
-                200f,
+                -50f,
+                50f,
+                -20f,
+                20f,
                 near_plane,
                 far_plane
             ) //TODO bessere loesung finden. debugshader hilft vermutlich
@@ -76,17 +76,17 @@ class ShadowRenderer(val scene: Scene) {
         simpleDepthShader.use()
         simpleDepthShader.setUniform("lightSpaceMatrix", sunSpaceMatrix, false)
 
-        GL30.glViewport(0, 0, ShadowRenderer.SHADOW_WIDTH, ShadowRenderer.SHADOW_HEIGHT)
+        GL30.glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT)
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, depthMapFBO)
 
         GL30.glClear(GL30.GL_DEPTH_BUFFER_BIT)
-        GL30.glActiveTexture(GL13.GL_TEXTURE0)
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
+        GL30.glActiveTexture(GL13.GL_TEXTURE10)
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 10)
 
         GL11.glCullFace(GL11.GL_FRONT)
 
         //TODO was soll alles hier gerendert werden?? evtl uebergeben?
-        scene.myMap.render(simpleDepthShader)
+        scene.myMap.renderWithoutGroundShader(simpleDepthShader)
         scene.entityManager.render(dt, time, simpleDepthShader)
 
         GL11.glCullFace(GL11.GL_BACK)
@@ -97,7 +97,7 @@ class ShadowRenderer(val scene: Scene) {
         GL30.glViewport(0, 0, scene.window.windowWidth, scene.window.windowHeight)
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL30.GL_DEPTH_BUFFER_BIT)
 
-        GL13.glActiveTexture(GL13.GL_TEXTURE3)
+        GL13.glActiveTexture(GL13.GL_TEXTURE10)
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, depthMap)
     }
 

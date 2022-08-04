@@ -1,6 +1,5 @@
 package cga.exercise.components.map
 
-import cga.exercise.components.TerrainGenerator
 import cga.exercise.components.geometry.Material
 import cga.exercise.components.geometry.Mesh
 import cga.exercise.components.geometry.VertexAttribute

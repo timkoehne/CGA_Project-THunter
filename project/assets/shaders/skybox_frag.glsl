@@ -47,11 +47,6 @@ void main(void){
         ambient = ambientNacht;
     }
 
-    out_Color *= ambient;
-
-    if (out_Color.a < 0.5){
-        discard;
-    }
-
-
+    //skybox ambient deaktiviert
+    out_Color *= 1;
 }

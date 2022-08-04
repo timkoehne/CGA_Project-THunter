@@ -189,6 +189,10 @@ abstract class GameWindow(
         return GLFW.glfwGetKey(m_window, key) == GLFW.GLFW_PRESS
     }
 
+    fun getMouseButtonState(button: Int): Boolean{
+        return GLFW.glfwGetMouseButton(m_window, button) == GLFW.GLFW_PRESS
+    }
+
     /**
      * Toggles cursor capture mode
      * @param visible if false, the cursor becomes invisible and is captured by the window.
@@ -244,14 +248,14 @@ abstract class GameWindow(
      * @param action    GLFW action name
      * @param mode      GLFW modifiers
      */
-    protected fun onMouseButton(button: Int, action: Int, mode: Int) {}
+    protected open fun onMouseButton(button: Int, action: Int, mode: Int) {}
 
     /**
      * Is called when a scroll event occurs
      * @param xoffset   x offset of the mouse wheel
      * @param yoffset   y offset of the mouse wheel
      */
-    protected fun onMouseScroll(xoffset: Double, yoffset: Double) {}
+    protected open fun onMouseScroll(xoffset: Double, yoffset: Double) {}
 
     /**
      * Is called when a key is pressed or released

@@ -1,5 +1,6 @@
 package cga.exercise.components.geometry
 
+import cga.exercise.components.camera.TronCamera
 import org.joml.*
 import org.lwjgl.assimp.AICamera
 import java.util.*

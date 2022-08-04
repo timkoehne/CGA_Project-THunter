@@ -72,14 +72,12 @@ abstract class Quad(val amount: Int, val texture: Texture2D, myMap: MyMap) : Tra
         GL30.glBindVertexArray(vao)
 
         vbo = GL15.glGenBuffers()
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo)
+        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vbo)
 
         val matrixBuffer = BufferUtils.createFloatBuffer(amount)
         modelMatrizen.forEachIndexed { index, matrix4f -> matrix4f.get(index * 16, matrixBuffer) }
 
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, matrixBuffer, GL15.GL_STREAM_DRAW)
-
-
+        GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, matrixBuffer, GL15.GL_STREAM_DRAW)
 
         ibo = GL15.glGenBuffers()
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, ibo)
@@ -101,16 +99,16 @@ abstract class Quad(val amount: Int, val texture: Texture2D, myMap: MyMap) : Tra
 
         //transformation_matrix is the size of 4 * sizeof(vec4) and uses 4 vertrexattributes
         GL20.glEnableVertexAttribArray(0)
-        GL20.glVertexAttribPointer(0, 4, GL11.GL_FLOAT, false, 4 * vec4fSize, 0 * floatSize.toLong())
+        GL20.glVertexAttribPointer(0, 4, GL11.GL_FLOAT, false, 4 * vec4fSize, 0 * vec4fSize.toLong())
 
         GL20.glEnableVertexAttribArray(1)
-        GL20.glVertexAttribPointer(1, 4, GL11.GL_FLOAT, false, 4 * vec4fSize, 4 * floatSize.toLong())
+        GL20.glVertexAttribPointer(1, 4, GL11.GL_FLOAT, false, 4 * vec4fSize, 4 * vec4fSize.toLong())
 
         GL20.glEnableVertexAttribArray(2)
-        GL20.glVertexAttribPointer(2, 4, GL11.GL_FLOAT, false, 4 * vec4fSize, 8 * floatSize.toLong())
+        GL20.glVertexAttribPointer(2, 4, GL11.GL_FLOAT, false, 4 * vec4fSize, 8 * vec4fSize.toLong())
 
         GL20.glEnableVertexAttribArray(3)
-        GL20.glVertexAttribPointer(3, 4, GL11.GL_FLOAT, false, 4 * vec4fSize, 12 * floatSize.toLong())
+        GL20.glVertexAttribPointer(3, 4, GL11.GL_FLOAT, false, 4 * vec4fSize, 12 * vec4fSize.toLong())
 
         GL33.glVertexAttribDivisor(0, 1)
         GL33.glVertexAttribDivisor(1, 1)

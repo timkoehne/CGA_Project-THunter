@@ -1,7 +1,7 @@
 package cga.exercise.game
 
 import cga.exercise.audio.AudioMaster
-import cga.exercise.audio.AudioSource
+import cga.exercise.components.map.TerrainGenerator
 import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.entities.*
 import cga.exercise.components.geometry.*
@@ -9,20 +9,18 @@ import cga.exercise.components.gui.GuiElement
 import cga.exercise.components.gui.GuiRenderer
 import cga.exercise.components.light.PointLight
 import cga.exercise.components.light.SpotLight
+import cga.exercise.components.map.MyClock
 import cga.exercise.components.map.MyMap
 import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.components.shadows.ShadowRenderer
 import cga.exercise.components.texture.Texture2D
 import cga.framework.GLError
 import cga.framework.GameWindow
-import cga.framework.ModelLoader
 import org.joml.Math
 import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.*
-import org.lwjgl.opengl.GL11.*
-import org.lwjgl.openal.*
 
 
 /**
@@ -32,9 +30,9 @@ class Scene(val window: GameWindow) {
 
     private var prevX: Double = window.windowWidth / 2.0
     private var prevY: Double = window.windowHeight / 2.0
+    private var scrollValue: Double = 0.0
 
     private val staticShader: ShaderProgram
-    private val debugShader: ShaderProgram
     val camera: TronCamera
 
     val guiRenderer = GuiRenderer(window)
@@ -51,24 +49,23 @@ class Scene(val window: GameWindow) {
     //scene setup
     init {
         staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
-        debugShader = ShaderProgram("project/assets/shaders/debug_vert.glsl", "project/assets/shaders/debug_frag.glsl")
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
+        GL11.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
         GLError.checkThrow()
 
         val backfaceCullingEnable = false
         if (backfaceCullingEnable) {
-            glEnable(GL_CULL_FACE); GLError.checkThrow()
-            glFrontFace(GL_CCW); GLError.checkThrow()
-            glCullFace(GL_BACK); GLError.checkThrow()
+            GL11.glEnable(GL11.GL_CULL_FACE); GLError.checkThrow()
+            GL11.glFrontFace(GL11.GL_CCW); GLError.checkThrow()
+            GL11.glCullFace(GL11.GL_BACK); GLError.checkThrow()
         } else {
-            glDisable(GL_CULL_FACE); GLError.checkThrow()
-            glFrontFace(GL_CCW); GLError.checkThrow()
-            glCullFace(GL_BACK); GLError.checkThrow()
+            GL11.glDisable(GL11.GL_CULL_FACE); GLError.checkThrow()
+            GL11.glFrontFace(GL11.GL_CCW); GLError.checkThrow()
+            GL11.glCullFace(GL11.GL_BACK); GLError.checkThrow()
         }
 
-        glEnable(GL_DEPTH_TEST); GLError.checkThrow()
-        glDepthFunc(GL_LESS); GLError.checkThrow()
+        GL11.glEnable(GL11.GL_DEPTH_TEST); GLError.checkThrow()
+        GL11.glDepthFunc(GL11.GL_LESS); GLError.checkThrow()
 
         camera = TronCamera()
         camera.translate(Vector3f(-1.0f, 1.3f, 1.9f))
@@ -76,17 +73,20 @@ class Scene(val window: GameWindow) {
         shadowRenderer = ShadowRenderer(this)
 
         myMap = MyMap(
-            5, 1f, camera, 6f, 18f, 2f,
-            2, 0.8f, 0.6f
+            7, 1f, this, 6f, 18f, 2f,
+            2, 0.1f, 0.9f
         )
 
-        entityManager = EntityManager(camera, myMap)
+        entityManager = EntityManager(camera, this)
 
         initilizeLights()
 
         guiRenderer.addElement(
             GuiElement(
-                Texture2D.invoke("project/assets/textures/dirt.png", false), Vector2f(0.0f), Vector2f(0.5f)
+                Texture2D.invoke("project/assets/textures/dirt.png", false),
+                Vector2f(1 - (0.2f / 1.77f), 0.9f),
+                Vector2f(0.2f / 1.77f, 0.2f),
+                shadowRenderer.depthMap
             )
         )
 
@@ -99,10 +99,10 @@ class Scene(val window: GameWindow) {
     }
 
     fun initilizeLights() {
-        lights.add(PointLight(Vector3f(0f, 0.75f, 0f), Vector3f(1f, 1f, 1f)))
-//        lights[0].parent = bike
-        lights.add(PointLight(Vector3f(-5f, 1f, -5f), Vector3f(1f, 1f, 1f)))
-        lights.add(PointLight(Vector3f(+5f, 1f, -5f), Vector3f(1f, 1f, 1f)))
+        lights.add(PointLight(Vector3f(0f, 0.75f, 0f), Vector3f(0.3f)))
+        lights[0].parent = entityManager.getPlayer()
+        lights.add(PointLight(Vector3f(-5f, 2f, -5f), Vector3f(1f, 1f, 1f)))
+        lights.add(PointLight(Vector3f(+5f, 2f, -5f), Vector3f(1f, 1f, 1f)))
 
 
         spotlight = SpotLight(
@@ -110,7 +110,7 @@ class Scene(val window: GameWindow) {
         )
         spotlight.translate(Vector3f(0f, 1f, -1.5f))
         spotlight.rotate(Math.toRadians(-20f), 0f, 0f)
-//        spotlight.parent = bike
+        spotlight.parent = entityManager.getPlayer()
     }
 
     fun rainbowColor(time: Float): Vector3f {
@@ -131,40 +131,57 @@ class Scene(val window: GameWindow) {
         }
     }
 
+
+    fun setNeededUniforms(shaderProgram: ShaderProgram) {
+        shaderProgram.use()
+        camera.bind(shaderProgram)
+        shaderProgram.setUniform("celShadingLevels", 0)
+        shaderProgram.setUniform("depthMap", 10)
+        shaderProgram.setUniform("viewPos", camera.getPosition())
+        shaderProgram.setUniform("sunPos", shadowRenderer.sun.getPosition())
+        shaderProgram.setUniform("sunSpaceMatrix", shadowRenderer.sunSpaceMatrix, false)
+        shaderProgram.setUniform("anzLichter", lights.size)
+        spotlight.bind(shaderProgram, camera.getCalculateViewMatrix())
+
+        //Map
+        shaderProgram.setUniform("ingameTime", myMap.myClock.ingameTime)
+        shaderProgram.setUniform("sonnenaufgangUhrzeit", myMap.myClock.sonnenaufgangUhrzeit)
+        shaderProgram.setUniform("sonnenuntergangUhrzeit", myMap.myClock.sonnenuntergangUhrzeit)
+        shaderProgram.setUniform("fadeDauerIngameStunden", myMap.myClock.fadeDauerIngameStunden)
+        shaderProgram.setUniform("ambient", myMap.ambient)
+        shaderProgram.setUniform("maxSunIntensity", myMap.maxSunIntensity)
+
+        shaderProgram.setUniform("sandUpperBound", 0.10f * TerrainGenerator.terrainMaxHeight)
+        shaderProgram.setUniform("dirtUpperBound", 0.30f * TerrainGenerator.terrainMaxHeight)
+        shaderProgram.setUniform("grassUpperBound", 0.95f * TerrainGenerator.terrainMaxHeight)
+    }
+
     fun render(dt: Float, time: Float) {
-        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
 
         shadowRenderer.render(dt, time)
 
         staticShader.use()
-        staticShader.setUniform("celShadingLevels", 0)
-        staticShader.setUniform("depthMap", 3)
-        staticShader.setUniform("viewPos", camera.getPosition())
-        staticShader.setUniform("sunPos", shadowRenderer.sun.getPosition())
-        staticShader.setUniform("sunSpaceMatrix", shadowRenderer.sunSpaceMatrix, false)
+        this.setNeededUniforms(staticShader)
 
-        camera.bind(staticShader)
-        myMap.render(staticShader)
 //        grassInstance.render(camera)
 
         shadowRenderer.sun.render(staticShader)
         entityManager.render(dt, time, staticShader)
-//        renderLights(dt, time, staticShader)
+        renderLights(dt, time, staticShader)
 
+
+        myMap.render(dt, time)
         myMap.renderSkybox()
-
-//        guiRenderer.render()
-
-//        debugShader.use()
-//        renderSquare(shadowRenderer.depthMap)
+        guiRenderer.render()
 
     }
+
     fun renderLights(dt: Float, time: Float, shaderProgram: ShaderProgram) {
-        shaderProgram.setUniform("anzLichter", lights.size)
         lights.forEachIndexed { index, it ->
             run {
                 if (index == 0) {
-                    it.color = rainbowColor(time).mul(0.3f)
+//                    it.color = rainbowColor(time).mul(0.3f)
                 } else {
                     val formula = Math.sin(time) * 1.8f
                     if (formula > 0) {
@@ -173,6 +190,13 @@ class Scene(val window: GameWindow) {
                         it.color = Vector3f(1f, 0f, 0f)
                     }
                     it.translate(Vector3f(0f, 0f, -5 * dt).mul(formula))
+                    it.translate(
+                        Vector3f(
+                            0f,
+                            (myMap.getHeight(it.getPosition().x, it.getPosition().z) + 1) - it.getPosition().y,
+                            0f
+                        )
+                    )
                 }
                 it.bind(shaderProgram, index)
             }
@@ -182,6 +206,11 @@ class Scene(val window: GameWindow) {
     }
 
     fun update(dt: Float, time: Float) {
+
+
+//        println("playerpos: ${entityManager.getPlayer().getWorldPosition()}")
+
+
         myMap.update(dt, time)
 
         entityManager.update(window, dt, time)
@@ -195,9 +224,45 @@ class Scene(val window: GameWindow) {
 
         if (window.getKeyState(GLFW_KEY_0)) Mesh.renderTriangles()
         if (window.getKeyState(GLFW_KEY_P)) Mesh.renderLines()
+
     }
 
-    fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {}
+    fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {
+        if (key == GLFW_KEY_T && action == GLFW_PRESS) {
+            MyClock.stopTime = !MyClock.stopTime
+        }
+    }
+
+    fun onMouseButton(button: Int, action: Int, mods: Int) {
+        //action kann GL_PRESS oder GL_RELEASE sein
+        //mods sind modifier keys wie shift und ctrl
+
+
+        if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+            camera.fov = TronCamera.zoom_fov
+        } else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
+            camera.fov = TronCamera.default_fov
+        }
+
+        //        #define 	GLFW_MOUSE_BUTTON_1 --- int 0
+        //        #define 	GLFW_MOUSE_BUTTON_2 --- int 1
+        //        #define 	GLFW_MOUSE_BUTTON_3 --- int 2
+        //        #define 	GLFW_MOUSE_BUTTON_4 --- int 3
+        //        #define 	GLFW_MOUSE_BUTTON_5 --- int 4
+        //        #define 	GLFW_MOUSE_BUTTON_6 --- int 5
+        //        #define 	GLFW_MOUSE_BUTTON_7 --- int 6
+        //        #define 	GLFW_MOUSE_BUTTON_8 --- int 7
+        //        #define 	GLFW_MOUSE_BUTTON_LAST GLFW_MOUSE_BUTTON_8
+        //        #define 	GLFW_MOUSE_BUTTON_LEFT GLFW_MOUSE_BUTTON_1
+        //        #define 	GLFW_MOUSE_BUTTON_RIGHT GLFW_MOUSE_BUTTON_2
+        //        #define 	GLFW_MOUSE_BUTTON_MIDDLE GLFW_MOUSE_BUTTON_3
+
+        println("mouse button press: $button $action $mods")
+    }
+
+    fun onMouseScroll(xoffset: Double, yoffset: Double) {
+        scrollValue += yoffset
+    }
 
     fun onMouseMove(xpos: Double, ypos: Double) {
         entityManager.getPlayer().onMouseMove(prevX - xpos, 0.0) //prevY - ypos
@@ -209,7 +274,6 @@ class Scene(val window: GameWindow) {
     fun cleanup() {
 
         staticShader.cleanUp()
-        debugShader.cleanUp()
 
         myMap.cleanUp()
         entityManager.cleanUp()

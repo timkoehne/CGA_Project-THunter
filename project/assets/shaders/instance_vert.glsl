@@ -10,6 +10,7 @@ uniform mat4 view;
 
 void main(){
 
-    gl_Position = projection * view * model_matrix * vec4(1.0);
-//    texCords = aTexCords;
+
+    gl_Position = projection * view * model_matrix * vec4(1.0) + vec4(gl_InstanceID, 0, 0, 0);
+    //    texCords = aTexCords;
 }
