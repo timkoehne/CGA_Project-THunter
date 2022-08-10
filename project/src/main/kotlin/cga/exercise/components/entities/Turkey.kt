@@ -4,17 +4,17 @@ import cga.exercise.components.map.MyMap
 import cga.exercise.components.entities.movementai.JumpMovementAI
 import cga.exercise.components.entities.movementai.MovementAI
 import cga.framework.ModelLoader
-import org.joml.Random
 
-class Deer(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath[random.nextInt(2)]), myMap) {
+class Turkey(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath), myMap) {
 
     val movementAI: JumpMovementAI = JumpMovementAI(this)
 
-    override val movementSpeed: Float = 5f
+    override val movementSpeed: Float = 3f
+    override val weight = 0.3f
+    override val jumpSpeed = 4f
 
     companion object {
-        val random = Random()
-        val filepath = listOf("project/assets/animals/deerFemale.obj", "project/assets/animals/deerMale.obj")
+        val filepath = "project/assets/animals/turkey.obj"
 
     }
 

@@ -119,7 +119,7 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
         grassTilesGenerieren(anzGrass)
 
         val anzTrees: Int = random.nextInt(3) + 6
-        tilesGenerieren(anzTrees, Models.trees, possibleTreePositions, treePositions, treeTiles, -1f)
+        //tilesGenerieren(anzTrees, Models.trees, possibleTreePositions, treePositions, treeTiles, -1f)
 
         val anzStones: Int = random.nextInt(2)
         tilesGenerieren(anzStones, Models.stones, possibleStonePositions, null, stoneTiles, -1f)

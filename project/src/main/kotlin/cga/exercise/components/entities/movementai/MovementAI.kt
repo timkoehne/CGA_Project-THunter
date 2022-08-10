@@ -1,4 +1,4 @@
-package cga.exercise.movementai
+package cga.exercise.components.entities.movementai
 
 import cga.exercise.components.entities.Entity
 import cga.exercise.components.geometry.Transformable
@@ -11,7 +11,7 @@ open class MovementAI(val entity: Entity) {
     private val random: Random = Random()
 
     private val maxDistance = 10f
-    private val maxRotationAngle = 90.0 //in a cone infront of the entity
+    private val maxRotationAngle = 180.0 //in a cone infront of the entity
     private val maxSleepDuration = 2f
 
     private var rotationGoal: Float = 0f
@@ -23,7 +23,7 @@ open class MovementAI(val entity: Entity) {
 
         //find new goal
         if (walkingDistance in -0.1..0.1) {
-            rotationGoal = ((random.nextFloat() - 0.5f) * 2) * Math.toRadians(maxRotationAngle).toFloat()
+            rotationGoal = ((random.nextFloat() - 0.5f) * 2) * (Math.toRadians(maxRotationAngle)/2).toFloat()
             walkingDistance = random.nextFloat() * maxDistance
             sleepDuration = random.nextFloat() * maxSleepDuration
         }

@@ -1,4 +1,4 @@
-package cga.exercise.movementai
+package cga.exercise.components.entities.movementai
 
 import cga.exercise.components.entities.Entity
 

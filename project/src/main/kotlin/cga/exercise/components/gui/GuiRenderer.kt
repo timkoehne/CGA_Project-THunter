@@ -84,7 +84,7 @@ class GuiRenderer(
         )
         guiElements.add(wantedPosterButton)
 
-        timer = Timer(10f)
+        timer = Timer(300f)
         guiElements.add(timer)
 
 
