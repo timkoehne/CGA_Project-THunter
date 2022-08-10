@@ -12,71 +12,68 @@ import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
 
 class EntityManager(val camera: TronCamera, val scene: Scene) {
-    private var trees: MutableList<Entity>
     private var animals: MutableList<Entity>
     private var cabins: MutableList<Entity>
-    private var dekostuff: MutableList<Entity>
 
     var sniper: Sniper
     var drone: Drone
 
+    var testReh: Deer
+
+
     init {
 
-        trees = mutableListOf(
-            Entity(ModelLoader.loadModel("project/assets/trees/tree1.1.obj", 0f, 0f, 0f)),
-            Entity(ModelLoader.loadModel("project/assets/trees/tree1.1rot.obj", 0f, 0f, 0f)),
-            Entity(ModelLoader.loadModel("project/assets/trees/tree1.obj", 0f, 0f, 0f)),
-            Entity(ModelLoader.loadModel("project/assets/trees/tree1rot.obj", 0f, 0f, 0f)),
-            Entity(ModelLoader.loadModel("project/assets/trees/tree5.obj", 0f, 0f, 0f)),
-            Entity(ModelLoader.loadModel("project/assets/trees/tree6.obj", 0f, 0f, 0f)),
-            Entity(ModelLoader.loadModel("project/assets/trees/tree9.obj", 0f, 0f, 0f)),
-            Entity(ModelLoader.loadModel("project/assets/trees/tree10.obj", 0f, 0f, 0f)),
-            Entity(ModelLoader.loadModel("project/assets/trees/tree11.obj", 0f, 0f, 0f))
-        )
-        trees.forEachIndexed { index, renderable ->
-            renderable.translate(Vector3f(index * 5f, scene.myMap.getHeight(index * 5f, 30f), 30f))
-        }
 
-        dekostuff = mutableListOf(
-            Entity(ModelLoader.loadModel("project/assets/deko/bigStone.obj", 0f, 0f, 0f)),
-            Entity(ModelLoader.loadModel("project/assets/deko/brownMushroom.obj", 0f, 0f, 0f)),
-            Entity(ModelLoader.loadModel("project/assets/deko/etwasKleinererStein.obj", 0f, 0f, 0f)),
-            Entity(ModelLoader.loadModel("project/assets/deko/grassBueschel.obj", 0f, 0f, 0f)),
-            Entity(ModelLoader.loadModel("project/assets/deko/redMushroom.obj", 0f, 0f, 0f)),
-            Entity(ModelLoader.loadModel("project/assets/deko/stock.obj", 0f, 0f, 0f))
-        )
-        dekostuff.forEachIndexed { index, renderable ->
-            renderable.translate(Vector3f(index * 5f, scene.myMap.getHeight(index * 5f, 15f) + 1f, 15f))
-        }
-
+        testReh = Deer(scene.myMap)
 
         animals = mutableListOf(
-            Entity(ModelLoader.loadModel("project/assets/animals/bear.obj", 0f, Math.toRadians(180f), 0f)),
-            Entity(ModelLoader.loadModel("project/assets/animals/deerFemale.obj", 0f, Math.toRadians(180f), 0f)),
-            Entity(ModelLoader.loadModel("project/assets/animals/deerMale.obj", 0f, Math.toRadians(180f), 0f)),
-            Entity(ModelLoader.loadModel("project/assets/animals/fox.obj", 0f, Math.toRadians(180f), 0f)),
-            Entity(ModelLoader.loadModel("project/assets/animals/gecko.obj", 0f, Math.toRadians(180f), 0f)),
-            Entity(ModelLoader.loadModel("project/assets/animals/hare.obj", 0f, Math.toRadians(180f), 0f)),
-            Entity(ModelLoader.loadModel("project/assets/animals/mountainLion.obj", 0f, Math.toRadians(180f), 0f)),
-            Entity(ModelLoader.loadModel("project/assets/animals/opossum.obj", 0f, Math.toRadians(180f), 0f)),
-            Entity(ModelLoader.loadModel("project/assets/animals/racoon.obj", 0f, Math.toRadians(180f), 0f)),
-            Entity(ModelLoader.loadModel("project/assets/animals/turkey.obj", 0f, Math.toRadians(180f), 0f))
+            Entity(ModelLoader.loadModel("project/assets/animals/bear.obj", 0f, Math.toRadians(180f), 0f), scene.myMap),
+            Entity(
+                ModelLoader.loadModel("project/assets/animals/deerFemale.obj", 0f, Math.toRadians(180f), 0f),
+                scene.myMap
+            ),
+            Entity(
+                ModelLoader.loadModel("project/assets/animals/deerMale.obj", 0f, Math.toRadians(180f), 0f),
+                scene.myMap
+            ),
+            Entity(ModelLoader.loadModel("project/assets/animals/fox.obj", 0f, Math.toRadians(180f), 0f), scene.myMap),
+            Entity(
+                ModelLoader.loadModel("project/assets/animals/gecko.obj", 0f, Math.toRadians(180f), 0f),
+                scene.myMap
+            ),
+            Entity(ModelLoader.loadModel("project/assets/animals/hare.obj", 0f, Math.toRadians(180f), 0f), scene.myMap),
+            Entity(
+                ModelLoader.loadModel("project/assets/animals/mountainLion.obj", 0f, Math.toRadians(180f), 0f),
+                scene.myMap
+            ),
+            Entity(
+                ModelLoader.loadModel("project/assets/animals/opossum.obj", 0f, Math.toRadians(180f), 0f),
+                scene.myMap
+            ),
+            Entity(
+                ModelLoader.loadModel("project/assets/animals/racoon.obj", 0f, Math.toRadians(180f), 0f),
+                scene.myMap
+            ),
+            Entity(
+                ModelLoader.loadModel("project/assets/animals/turkey.obj", 0f, Math.toRadians(180f), 0f),
+                scene.myMap
+            )
         )
         animals.forEachIndexed { index, renderable ->
             renderable.translate(Vector3f(index * 3f, scene.myMap.getHeight(index * 3f, 20f) + 1, 20f))
         }
 
         cabins = mutableListOf(
-            Entity(ModelLoader.loadModel("project/assets/cabins/lowPolyLogCabin.obj", 0f, 0f, 0f))
+            Entity(ModelLoader.loadModel("project/assets/cabins/lowPolyLogCabin.obj", 0f, 0f, 0f), scene.myMap)
         )
         cabins.forEachIndexed { index, renderable ->
             renderable.translate(Vector3f(index * 20f, scene.myMap.getHeight(index * 20f, 60f), 60f))
         }
 
-        drone = Drone()
+        drone = Drone(scene.myMap)
         drone.translate(Vector3f(5f, scene.myMap.getHeight(5f, 5f) + 1f, 5f))
 
-        sniper = Sniper()
+        sniper = Sniper(scene.myMap)
 //        sniper.translate(Vector3f(5f, myMap.getHeight(5f, 5f) + 1, 5f))
         sniper.scale(Vector3f(0.5f))
         camera.parent = sniper
@@ -91,9 +88,10 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
 
         scene.setNeededUniforms(shaderProgram)
 
+        testReh.render(shaderProgram)
+
+
         drone.render(shaderProgram)
-        trees.forEach { it.render(shaderProgram) }
-        dekostuff.forEach { it.render(shaderProgram) }
         animals.forEach { it.render(shaderProgram) }
         cabins.forEach { it.render(shaderProgram) }
         sniper.render(shaderProgram)
@@ -102,7 +100,12 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
     fun update(window: GameWindow, dt: Float, time: Float) {
         drone.update(dt, time)
 
-        trees.forEach { it.rotate(0f, dt, 0f) }
+        testReh.update(dt, time)
+
+
+        sniper.update(dt, time)
+
+
 
         if (window.getKeyState(GLFW.GLFW_KEY_N)) drone.open(time)
         if (window.getKeyState(GLFW.GLFW_KEY_M)) drone.close(time)
@@ -112,25 +115,15 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
         if (window.getKeyState(GLFW.GLFW_KEY_A)) sniper.translate(Vector3f(-5 * dt, 0f, 0f))
         if (window.getKeyState(GLFW.GLFW_KEY_D)) sniper.translate(Vector3f(5 * dt, 0f, 0f))
 
-        if (window.getKeyState(GLFW.GLFW_KEY_SPACE)) sniper.translate(Vector3f(0f, 5 * dt, 0f))
-        if (window.getKeyState(GLFW.GLFW_KEY_LEFT_SHIFT)) sniper.translate(Vector3f(0f, -5 * dt, 0f))
-
-//        sniper.translate(
-//            Vector3f(
-//                0f, myMap.getHeight(
-//                    sniper!!.getPosition().x, sniper!!.getPosition().z
-//                ) - sniper!!.getPosition()!!.y + 1, 0f
-//            )
-//        )
+        if (window.getKeyState(GLFW.GLFW_KEY_SPACE)) sniper.jump(dt, time)
+//        if (window.getKeyState(GLFW.GLFW_KEY_LEFT_SHIFT)) sniper.translate(Vector3f(0f, -5 * dt, 0f))
 
 
     }
 
     fun cleanUp() {
-        trees.forEach { it.cleanUp() }
         animals.forEach { it.cleanUp() }
         cabins.forEach { it.cleanUp() }
-        dekostuff.forEach { it.cleanUp() }
         sniper.cleanUp()
         drone.cleanUp()
     }

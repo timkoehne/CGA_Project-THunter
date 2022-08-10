@@ -5,7 +5,6 @@ import cga.exercise.components.map.TerrainGenerator
 import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.entities.*
 import cga.exercise.components.geometry.*
-import cga.exercise.components.gui.GuiElement
 import cga.exercise.components.gui.GuiRenderer
 import cga.exercise.components.light.PointLight
 import cga.exercise.components.light.SpotLight
@@ -13,11 +12,9 @@ import cga.exercise.components.map.MyClock
 import cga.exercise.components.map.MyMap
 import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.components.shadows.ShadowRenderer
-import cga.exercise.components.texture.Texture2D
 import cga.framework.GLError
 import cga.framework.GameWindow
 import org.joml.Math
-import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.*
@@ -35,7 +32,7 @@ class Scene(val window: GameWindow) {
     private val staticShader: ShaderProgram
     val camera: TronCamera
 
-    val guiRenderer = GuiRenderer(window)
+    val guiRenderer: GuiRenderer
     val myMap: MyMap
     val entityManager: EntityManager
     var audioMaster = AudioMaster()
@@ -70,28 +67,22 @@ class Scene(val window: GameWindow) {
         camera = TronCamera()
         camera.translate(Vector3f(-1.0f, 1.3f, 1.9f))
 
-        shadowRenderer = ShadowRenderer(this)
 
         myMap = MyMap(
-            7, 1f, this, 6f, 18f, 2f,
-            2, 0.1f, 0.9f
+            5, 1f, this, 6f, 18f, 2f, 2, 0.1f, 0.9f
         )
+
+        shadowRenderer = ShadowRenderer(this)
 
         entityManager = EntityManager(camera, this)
 
         initilizeLights()
 
-        guiRenderer.addElement(
-            GuiElement(
-                Texture2D.invoke("project/assets/textures/dirt.png", false),
-                Vector2f(1 - (0.2f / 1.77f), 0.9f),
-                Vector2f(0.2f / 1.77f, 0.2f),
-                shadowRenderer.depthMap
-            )
-        )
 
         var audioSource = audioMaster.createAudioSource("project/assets/sounds/test.ogg")
         audioSource.play()
+
+        guiRenderer = GuiRenderer(this, window)
 
 //        grassInstance = GrassInstance(1, myMap)
 
@@ -101,14 +92,14 @@ class Scene(val window: GameWindow) {
     fun initilizeLights() {
         lights.add(PointLight(Vector3f(0f, 0.75f, 0f), Vector3f(0.3f)))
         lights[0].parent = entityManager.getPlayer()
-        lights.add(PointLight(Vector3f(-5f, 2f, -5f), Vector3f(1f, 1f, 1f)))
-        lights.add(PointLight(Vector3f(+5f, 2f, -5f), Vector3f(1f, 1f, 1f)))
+//        lights.add(PointLight(Vector3f(-5f, 2f, -5f), Vector3f(1f, 1f, 1f)))
+//        lights.add(PointLight(Vector3f(+5f, 2f, -5f), Vector3f(1f, 1f, 1f)))
 
 
         spotlight = SpotLight(
             Vector3f(), Vector3f(1f, 1f, 1f), Math.toRadians(10f), Math.toRadians(45f)
         )
-        spotlight.translate(Vector3f(0f, 1f, -1.5f))
+        spotlight.translate(Vector3f(-0f, 1f, -1.5f))
         spotlight.rotate(Math.toRadians(-20f), 0f, 0f)
         spotlight.parent = entityManager.getPlayer()
     }
@@ -173,6 +164,10 @@ class Scene(val window: GameWindow) {
 
         myMap.render(dt, time)
         myMap.renderSkybox()
+        myMap.renderEntities(staticShader)
+
+
+
         guiRenderer.render()
 
     }
@@ -192,9 +187,7 @@ class Scene(val window: GameWindow) {
                     it.translate(Vector3f(0f, 0f, -5 * dt).mul(formula))
                     it.translate(
                         Vector3f(
-                            0f,
-                            (myMap.getHeight(it.getPosition().x, it.getPosition().z) + 1) - it.getPosition().y,
-                            0f
+                            0f, (myMap.getHeight(it.getPosition().x, it.getPosition().z) + 1) - it.getPosition().y, 0f
                         )
                     )
                 }
@@ -209,13 +202,13 @@ class Scene(val window: GameWindow) {
 
 
 //        println("playerpos: ${entityManager.getPlayer().getWorldPosition()}")
-
+//        println(camera.getWorldPosition())
 
         myMap.update(dt, time)
 
         entityManager.update(window, dt, time)
 
-//        println(camera.getWorldPosition())
+        guiRenderer.update(dt, time)
 
         if (window.getKeyState(GLFW_KEY_I)) camera.translate(Vector3f(0f, 0f, -5 * dt))
         if (window.getKeyState(GLFW_KEY_K)) camera.translate(Vector3f(0f, 0f, 5 * dt))
@@ -224,38 +217,47 @@ class Scene(val window: GameWindow) {
 
         if (window.getKeyState(GLFW_KEY_0)) Mesh.renderTriangles()
         if (window.getKeyState(GLFW_KEY_P)) Mesh.renderLines()
-
     }
 
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {
         if (key == GLFW_KEY_T && action == GLFW_PRESS) {
             MyClock.stopTime = !MyClock.stopTime
         }
+
+
+        if (key == GLFW_KEY_E && action == GLFW_PRESS) {
+            guiRenderer.wantedPoster.toggle()
+            guiRenderer.wantedPosterButton.toggle()
+        }
+
+
+
+
+        if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+            guiRenderer.ammoAnzeige.reload()
+        }
+
+
     }
 
     fun onMouseButton(button: Int, action: Int, mods: Int) {
         //action kann GL_PRESS oder GL_RELEASE sein
         //mods sind modifier keys wie shift und ctrl
 
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+            guiRenderer.ammoAnzeige.shoot()
+            guiRenderer.wantedPoster.hit()
+        }
 
         if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
             camera.fov = TronCamera.zoom_fov
+            guiRenderer.sniperScope.enable()
+            guiRenderer.crosshair.disable()
         } else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
             camera.fov = TronCamera.default_fov
+            guiRenderer.sniperScope.disable()
+            guiRenderer.crosshair.enable()
         }
-
-        //        #define 	GLFW_MOUSE_BUTTON_1 --- int 0
-        //        #define 	GLFW_MOUSE_BUTTON_2 --- int 1
-        //        #define 	GLFW_MOUSE_BUTTON_3 --- int 2
-        //        #define 	GLFW_MOUSE_BUTTON_4 --- int 3
-        //        #define 	GLFW_MOUSE_BUTTON_5 --- int 4
-        //        #define 	GLFW_MOUSE_BUTTON_6 --- int 5
-        //        #define 	GLFW_MOUSE_BUTTON_7 --- int 6
-        //        #define 	GLFW_MOUSE_BUTTON_8 --- int 7
-        //        #define 	GLFW_MOUSE_BUTTON_LAST GLFW_MOUSE_BUTTON_8
-        //        #define 	GLFW_MOUSE_BUTTON_LEFT GLFW_MOUSE_BUTTON_1
-        //        #define 	GLFW_MOUSE_BUTTON_RIGHT GLFW_MOUSE_BUTTON_2
-        //        #define 	GLFW_MOUSE_BUTTON_MIDDLE GLFW_MOUSE_BUTTON_3
 
         println("mouse button press: $button $action $mods")
     }

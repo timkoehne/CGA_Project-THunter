@@ -3,7 +3,8 @@ package cga.exercise.components.texture
 import cga.exercise.components.Loader
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.*
-import org.lwjgl.opengl.GL11.GL_TEXTURE_2D
+import org.lwjgl.opengl.GL11.*
+import org.lwjgl.opengl.GL46.GL_MAX_TEXTURE_MAX_ANISOTROPY
 import org.lwjgl.stb.STBImage
 import java.nio.ByteBuffer
 
@@ -12,7 +13,7 @@ import java.nio.ByteBuffer
  * Created by Fabian on 16.09.2017.
  */
 class Texture2D(imageData: ByteBuffer, width: Int, height: Int, genMipMaps: Boolean) : ITexture {
-    private var texID: Int = -1
+    var texID: Int = -1
         private set
 
     init {
@@ -25,13 +26,23 @@ class Texture2D(imageData: ByteBuffer, width: Int, height: Int, genMipMaps: Bool
 
     companion object {
 
+        private val geladeneTexturen = HashMap<String, Texture2D>()
+
         //create texture from file
         //don't support compressed textures for now
         //instead stick to pngs
         operator fun invoke(path: String, genMipMaps: Boolean): Texture2D {
+
+            if (geladeneTexturen.containsKey(path)) {
+//                println("Textur wurde aus dem Cache geladen: $path")
+                return geladeneTexturen[path]!!
+            }
+
             var t = Loader.decodeTextureFile(path, true)
-            return Texture2D(t.imagedata, t.width, t.height, genMipMaps)
+            val texture = Texture2D(t.imagedata, t.width, t.height, genMipMaps)
+            geladeneTexturen[path] = texture
             STBImage.stbi_image_free(t.imagedata)
+            return texture
 
         }
     }
@@ -74,6 +85,10 @@ class Texture2D(imageData: ByteBuffer, width: Int, height: Int, genMipMaps: Bool
             EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT,
             16.0f
         ) //kein unterschied?
+
+
+        println("max anisotropic $GL_MAX_TEXTURE_MAX_ANISOTROPY")
+
         unbind()
     }
 

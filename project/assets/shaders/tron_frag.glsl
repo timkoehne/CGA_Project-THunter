@@ -1,7 +1,7 @@
 #version 330 core
 
-uniform float shininess, cosInnen, cosAussen;
-uniform vec3 emmisivColor, lightColorSpot, spotlightDir;
+uniform float shininess;
+uniform vec3 emmisivColor, lightColorSpot;
 uniform int anzLichter;
 
 uniform float ambient;
@@ -27,13 +27,20 @@ in struct VertexData
     vec4 fragPosLightSpace;
 } vertexData;
 
-in struct Light
+uniform struct Light
 {
-    vec3 toCamera;
-    vec3 toLight;
+    vec3 lightPos;
     vec3 lightColor;
 } lights[5];
-in vec3 toSpotlight;
+
+uniform struct Spotlight
+{
+    vec3 lightPos;
+    vec3 lightColor;
+    vec3 lightDir;
+    float cosInnen;
+    float cosAussen;
+} spotlight;
 
 out vec4 FragColor;
 
@@ -83,8 +90,7 @@ float sunIntensity(){
 
 vec3 diffuseBerechnen(vec3 normal, vec3 lightDir){
     vec3 matDiffuse = texture(diff, vertexData.textureCords).rgb;
-
-    float cosa = max(dot(-lightDir, normal), 0.0);
+    float cosa = max(dot(lightDir, normal), 0.0);
 
     if (celShadingLevels != 0){
         cosa = floor(cosa * celShadingLevels)/celShadingLevels;
@@ -96,9 +102,7 @@ vec3 diffuseBerechnen(vec3 normal, vec3 lightDir){
 vec3 specularBerechnen(vec3 normal, vec3 lightDir){
     vec3 matSpecular = texture(spec, vertexData.textureCords).rgb;
 
-    //    vec3 viewDir = normalize(viewPos - vertexData.position);
-    vec3 viewDir = normalize(-viewPos);
-
+    vec3 viewDir = normalize(viewPos - vertexData.position);
     float cosb = 0.0;
     vec3 halfwayDir = normalize(lightDir + viewDir);
     cosb = pow(max(dot(normal, halfwayDir), 0.0), shininess);
@@ -111,23 +115,14 @@ vec3 specularBerechnen(vec3 normal, vec3 lightDir){
 }
 
 float angleIntensity(){
-    float theta = dot(normalize(toSpotlight), normalize(-spotlightDir));
-    if (theta > cosInnen){
+    vec3 lightDir = normalize(spotlight.lightPos - vertexData.position);
+    float theta = dot(lightDir, normalize(-spotlight.lightDir));
+    if (theta > spotlight.cosInnen){
         return 1;
-    } else if (theta > cosAussen){
-        return clamp((theta - cosAussen) / (cosInnen - cosAussen), 0, 1);
+    } else if (theta > spotlight.cosAussen){
+        return clamp((theta - spotlight.cosAussen) / (spotlight.cosInnen - spotlight.cosAussen), 0, 1);
     }
     return 0;
-}
-
-vec3 angleIntensityColorTest(){
-    float theta = dot(normalize(toSpotlight), normalize(-spotlightDir));
-    if (theta > cosInnen){
-        return vec3(1, 0, 0);
-    } else if (theta > cosAussen){
-        return vec3(0, 1, 0);
-    }
-    return vec3(0, 0, 1);
 }
 
 float shadowCalculation(vec3 normal, vec3 lightDir, vec4 fragPosLightSpace){
@@ -164,22 +159,24 @@ void main(){
     FragColor = vec4(0, 0, 0, 1);
 
     //Sun
-    vec3 lightDir = -normalize(sunPos - vertexData.position); //light dir muss hier negativ sein und im ground positiv??
+    vec3 lightDir = normalize(sunPos - vertexData.position);
     float shadow = shadowCalculation(normal, lightDir, vertexData.fragPosLightSpace);
-    FragColor += vec4(emmisivBerechnen() * emmisivColor, 0.0);
+//    FragColor += vec4(emmisivBerechnen(), 0.0);
     FragColor += vec4(ambientBerechnen(), 0.0);
     FragColor += (1-shadow) * (vec4(diffuseBerechnen(normal, lightDir), 0.0)) * sunIntensity();
     FragColor += (1-shadow) * (vec4(specularBerechnen(normal, lightDir), 0.0)) * sunIntensity();
 
 
     //spotlight
-    FragColor += (vec4(diffuseBerechnen(normal, toSpotlight) * attenuation(toSpotlight) * angleIntensity(), 0.0));
-    FragColor += (vec4(specularBerechnen(normal, toSpotlight) * attenuation(toSpotlight) * angleIntensity(), 0.0));
+    lightDir = spotlight.lightPos - vertexData.position;
+    FragColor += (vec4(diffuseBerechnen(normal, normalize(lightDir)) * attenuation(lightDir) * angleIntensity(), 0.0));
+    FragColor += (vec4(specularBerechnen(normal, normalize(lightDir)) * attenuation(lightDir) * angleIntensity(), 0.0));
 
     //einfache lightquellen
     for (int i = 0; i < anzLichter; i++){
-        FragColor += (vec4(diffuseBerechnen(normal, lights[i].toLight) * lights[i].lightColor * attenuation(lights[i].toLight), 0.0));
-        FragColor += (vec4(specularBerechnen(normal, lights[i].toLight) * lights[i].lightColor * attenuation(lights[i].toLight), 0.0));
+        lightDir = lights[i].lightPos - vertexData.position;
+        FragColor += (vec4(diffuseBerechnen(normal, normalize(lightDir)) * lights[i].lightColor * attenuation(lightDir), 0.0));
+        FragColor += (vec4(specularBerechnen(normal, normalize(lightDir)) * lights[i].lightColor * attenuation(lightDir), 0.0));
     }
 
 

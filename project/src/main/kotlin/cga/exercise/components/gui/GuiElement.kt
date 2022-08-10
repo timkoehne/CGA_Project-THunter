@@ -1,7 +1,5 @@
 package cga.exercise.components.gui
 
-import cga.exercise.components.geometry.Mesh
-import cga.exercise.components.geometry.Renderable
 import cga.exercise.components.geometry.Transformable
 import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.components.texture.Texture2D
@@ -9,8 +7,22 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.opengl.*
 
-class GuiElement(var texture: Texture2D, position: Vector2f = Vector2f(), scale: Vector2f = Vector2f(1f, 1f), val texID: Int) :
-    Transformable() {
+open class GuiElement(
+    var texID: Int?,
+    position: Vector2f = Vector2f(),
+    scale: Vector2f = Vector2f(0.3f, 0.3f)
+) : Transformable() {
+
+
+    constructor(
+        texture: Texture2D,
+        position: Vector2f = Vector2f(),
+        scale: Vector2f = Vector2f(0.3f, 0.3f)
+    ) : this(
+        texture.texID,
+        position,
+        scale
+    )
 
     companion object {
         val squareVertices = floatArrayOf(
@@ -23,6 +35,9 @@ class GuiElement(var texture: Texture2D, position: Vector2f = Vector2f(), scale:
 
     var vao = 0
     var vbo = 0
+    private var isShowing: Boolean = true
+    var children = mutableListOf<GuiElement>()
+
 
     init {
         translate(position)
@@ -41,7 +56,11 @@ class GuiElement(var texture: Texture2D, position: Vector2f = Vector2f(), scale:
         }
         GL30.glBindVertexArray(vao)
 
-        texture.bind(GL13.GL_TEXTURE0)
+        if (texID != null) {
+            GL13.glActiveTexture(GL13.GL_TEXTURE0)
+            GL11.glBindTexture(GL20.GL_TEXTURE_2D, texID!!)
+        }
+
         GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, 4)
         GL30.glBindVertexArray(0)
     }
@@ -54,14 +73,34 @@ class GuiElement(var texture: Texture2D, position: Vector2f = Vector2f(), scale:
         scale(Vector3f(scale.x, scale.y, 1f))
     }
 
-    fun render(shaderProgram: ShaderProgram) {
-        //texture.bind(GL13.GL_TEXTURE0)
+    fun enable() {
+        isShowing = true
+    }
 
-        GL13.glActiveTexture(GL13.GL_TEXTURE0)
-        GL11.glBindTexture(GL20.GL_TEXTURE_2D, texID)
+    fun disable() {
+        isShowing = false
+    }
 
-        shaderProgram.setUniform("model_matrix", getModelMatrix(), false)
-        GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, 4)
+    fun toggle() {
+        isShowing = !isShowing
+    }
+
+    open fun update(dt: Float, time: Float) {
+
+    }
+
+    open fun render(shaderProgram: ShaderProgram) {
+        if (isShowing) {
+
+            children.forEach { it.render(shaderProgram) }
+
+            if (texID != null) {
+                GL13.glActiveTexture(GL13.GL_TEXTURE0)
+                GL11.glBindTexture(GL20.GL_TEXTURE_2D, texID!!)
+                shaderProgram.setUniform("model_matrix", getWorldModelMatrix(), false)
+                GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, 4)
+            }
+        }
     }
 
 

@@ -86,7 +86,9 @@ class MyMap(
     }
 
     fun render(dt: Float, time: Float) {
-        renderWithoutGroundShader(groundShader)
+        groundShader.use()
+        setNeededUniforms(groundShader)
+        proceduralGround.render(groundShader)
         scene.renderLights(dt, time, groundShader)
     }
 
@@ -98,7 +100,17 @@ class MyMap(
         shaderProgram.use()
         setNeededUniforms(shaderProgram)
         proceduralGround.render(shaderProgram)
+        proceduralGround.renderEntites(shaderProgram)
     }
+
+    fun renderEntities(shaderProgram: ShaderProgram){
+        shaderProgram.use()
+        proceduralGround.renderEntites(shaderProgram)
+    }
+
+
+
+
 
     fun renderSkybox() {
         skyboxRotating?.render(myClock.ingameTime, scene.camera)

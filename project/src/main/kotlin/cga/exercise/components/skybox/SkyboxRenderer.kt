@@ -17,7 +17,7 @@ class SkyboxRenderer(
 ) {
 
     private val skyboxShader: ShaderProgram
-    private val cube = Cube()
+    private val cube = Cube(myMap)
     private val dayTexID: Int = Loader.loadCubeMap(dayTextures)
     private val nightTexID: Int = Loader.loadCubeMap(nightTextures)
 

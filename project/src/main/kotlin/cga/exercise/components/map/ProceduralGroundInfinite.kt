@@ -5,6 +5,7 @@ import cga.exercise.components.map.Chunk.Companion.chunkSize
 import cga.exercise.components.shader.ShaderProgram
 import org.joml.Vector3f
 import org.joml.Vector3i
+import kotlin.concurrent.thread
 import kotlin.math.floor
 
 class ProceduralGroundInfinite(
@@ -52,11 +53,8 @@ class ProceduralGroundInfinite(
         for (z in -numChunksSquare / 2..numChunksSquare / 2) {
             for (x in -numChunksSquare / 2..numChunksSquare / 2) {
                 val chunkPos = getChunkPos(playerposXZ, x, z)
-//                println(" chunk$x|$z ist an position $chunkPos")
 
                 val chunkIndex = chunkPosToIndex(chunkPos)
-//                println(" chunk$x|$z hat index $chunkIndex")
-
                 if (chunks[chunkIndex] == null) {
                     chunks[chunkIndex] = Chunk(abstand, chunkPos)
                 }
@@ -64,6 +62,20 @@ class ProceduralGroundInfinite(
             }
         }
     }
+
+    fun renderEntites(shaderProgram: ShaderProgram) {
+        shaderProgram.use()
+        val playerposXZ = Vector3f(camera.getWorldPosition().x, 0f, camera.getWorldPosition().z)
+        for (z in -numChunksSquare / 2..numChunksSquare / 2) {
+            for (x in -numChunksSquare / 2..numChunksSquare / 2) {
+                val chunkPos = getChunkPos(playerposXZ, x, z)
+
+                val chunkIndex = chunkPosToIndex(chunkPos)
+                chunks[chunkIndex]?.renderEntities(camera, shaderProgram)
+            }
+        }
+    }
+
 
     fun update(dt: Float, time: Float) {
 

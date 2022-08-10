@@ -41,7 +41,7 @@ object ModelLoader {
                 )
                 // diffuse texture
                 var tpathj = tpath.dataString()
-                println(tpathj)
+//                println(tpathj)
                 if (rm.textures.contains(tpathj)) rmat.diffTexIndex = rm.textures.indexOf(tpathj) else {
                     rm.textures.add(tpathj)
                     rmat.diffTexIndex = rm.textures.size - 1
@@ -234,8 +234,8 @@ object ModelLoader {
         return renderables
     }
 
-    fun loadModel(objpath: String) {
-        loadModel(objpath, 0f, 0f, 0f)
+    fun loadModel(objpath: String): Renderable {
+        return loadModel(objpath, 0f, 0f, 0f)
     }
 
     fun loadModel(objpath: String, pitch: Float, yaw: Float, roll: Float): Renderable {

@@ -9,10 +9,20 @@ import cga.framework.GameWindow
 import org.joml.Vector2f
 import org.lwjgl.opengl.*
 
-class GuiRenderer(private val window: GameWindow, private val guiElements: MutableList<GuiElement> = mutableListOf()) {
+class GuiRenderer(
+    scene: Scene,
+    private val window: GameWindow,
+    private val guiElements: MutableList<GuiElement> = mutableListOf()
+) {
 
-    val aspectRatio: Float
-        get() = window.windowHeight.toFloat() / window.windowWidth
+    val sniperScope: GuiElement
+    val crosshair: GuiElement
+    val youWin: GuiElement
+    val youLoose: GuiElement
+    val wantedPoster: WantedPoster
+    val wantedPosterButton: GuiElement
+    val ammoAnzeige: AmmoAnzeige
+    val timer: Timer
 
     companion object {
         val squareVertices = floatArrayOf(
@@ -23,12 +33,12 @@ class GuiRenderer(private val window: GameWindow, private val guiElements: Mutab
         )
     }
 
-    val guiShader: ShaderProgram
+    val guiShader: ShaderProgram =
+        ShaderProgram("project/assets/shaders/gui_vert.glsl", "project/assets/shaders/gui_frag.glsl")
     var vao = 0
     var vbo = 0
 
     init {
-        guiShader = ShaderProgram("project/assets/shaders/gui_vert.glsl", "project/assets/shaders/gui_frag.glsl")
         vao = GL30.glGenVertexArrays()
         vbo = GL15C.glGenBuffers()
         GL30.glBindVertexArray(vao)
@@ -38,10 +48,76 @@ class GuiRenderer(private val window: GameWindow, private val guiElements: Mutab
         GL30.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 5 * 4, 0)
         GL30.glEnableVertexAttribArray(1)
         GL30.glVertexAttribPointer(1, 2, GL11.GL_FLOAT, false, 5 * 4, 12)
+
+
+        val sunView = GuiElement(
+            scene.shadowRenderer.depthMap,
+            Vector2f(-1 + (0.2f / 1.77f), 0.9f),
+            Vector2f(0.2f / scene.camera.aspect, 0.2f)
+        )
+        guiElements.add(sunView)
+
+        crosshair = GuiElement(
+            Texture2D.invoke("project/assets/textures/crosshair2.png", true),
+            Vector2f(),
+            Vector2f(0.1f / scene.camera.aspect, 0.1f)
+        )
+        guiElements.add(crosshair)
+
+
+        sniperScope = GuiElement(
+            Texture2D.invoke("project/assets/textures/scope.png", true),
+            Vector2f(0f, 0f),
+            Vector2f(2f / scene.camera.aspect, 1f)
+        )
+        sniperScope.disable()
+        guiElements.add(sniperScope)
+
+        wantedPoster = WantedPoster()
+        guiElements.add(wantedPoster)
+        wantedPoster.disable()
+
+        wantedPosterButton = GuiElement(
+            Texture2D.invoke("project/assets/textures/rolle.png", true),
+            Vector2f(1 - 0.15f, 1 - 0.15f),
+            Vector2f(0.15f / scene.camera.aspect, 0.15f)
+        )
+        guiElements.add(wantedPosterButton)
+
+        timer = Timer(10f)
+        guiElements.add(timer)
+
+
+        youWin = GuiElement(Texture2D.invoke("project/assets/textures/win.png", true))
+        youWin.translate(Vector2f(0f, 1.5f))
+        youWin.scale(Vector2f(1f, 0.7f))
+        youWin.disable()
+        guiElements.add(youWin)
+
+        youLoose = GuiElement(Texture2D.invoke("project/assets/textures/loose.png", true))
+        youLoose.translate(Vector2f(0f, 1.5f))
+        youLoose.scale(Vector2f(1f, 0.7f))
+        youLoose.disable()
+        guiElements.add(youLoose)
+
+        ammoAnzeige = AmmoAnzeige()
+        guiElements.add(ammoAnzeige)
+
+
     }
 
-    fun addElement(guiElement: GuiElement) {
-        guiElements.add(guiElement)
+    fun update(dt: Float, time: Float) {
+        guiElements.forEach { it.update(dt, time) }
+
+        if (timer.timeInSekunden <= 0) {
+            youLoose.enable()
+        }
+
+        if (wantedPoster.killCounter >= 6) {
+            youWin.enable()
+        }
+
+
     }
 
     fun render() {
@@ -54,7 +130,7 @@ class GuiRenderer(private val window: GameWindow, private val guiElements: Mutab
         GL30.glBindVertexArray(0)
     }
 
-    fun cleanUp(){
+    fun cleanUp() {
         if (vbo != 0) GL15.glDeleteBuffers(vbo)
         if (vao != 0) GL30.glDeleteVertexArrays(vao)
     }

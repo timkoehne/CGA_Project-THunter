@@ -133,6 +133,8 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
         )
     }
 
+
+
     /**
      * Returns x-axis of object coordinate system
      * Hint: first normalized column of model matrix

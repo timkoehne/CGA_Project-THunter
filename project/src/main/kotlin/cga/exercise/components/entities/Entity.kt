@@ -1,34 +1,34 @@
 package cga.exercise.components.entities
 
+import cga.exercise.components.entities.traits.GravityTrait
+import cga.exercise.components.entities.traits.IGravityTrait
 import cga.exercise.components.geometry.IRenderable
 import cga.exercise.components.geometry.Renderable
 import cga.exercise.components.geometry.Transformable
+import cga.exercise.components.map.MyMap
 import cga.exercise.components.shader.ShaderProgram
-import cga.framework.ModelLoader
 
-open class Entity(var models: List<Renderable>) : Transformable(), IRenderable {
+open class Entity(var models: List<Renderable>, val myMap: MyMap) : Transformable(), IRenderable, IGravityTrait {
+    constructor(model: Renderable, myMap: MyMap) : this(listOf(model), myMap)
 
-    constructor(model: Renderable): this(listOf(model))
+    open val movementSpeed: Float = 5f
+    open val jumpSpeed = 8f
+    open val weight = 1f
 
-    var animationStartTime = 0f
-    private val animationDuration = 1.0f
+    override val gravityTrait = GravityTrait(this, myMap)
 
     init {
         models.forEach { it.parent = this }
     }
 
-    fun animationPercentage(time: Float): Float {
-        return (time - animationStartTime) / animationDuration
-    }
-
-     override fun render(shaderProgram: ShaderProgram) {
+    override fun render(shaderProgram: ShaderProgram) {
         for (model in models) {
             model.render(shaderProgram)
         }
     }
 
-    open fun update(dt: Float, time: Float){
-
+    override fun update(dt: Float, time: Float) {
+        gravityTrait.update(dt, time)
     }
 
     open fun onMouseMove(xDiff: Double, yDiff: Double) {
@@ -36,7 +36,7 @@ open class Entity(var models: List<Renderable>) : Transformable(), IRenderable {
         rotate((yDiff * 0.002f).toFloat(), 0f, 0f)
     }
 
-    fun cleanUp(){
+    fun cleanUp() {
         models.forEach { it.cleanUp() }
     }
 

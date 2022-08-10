@@ -13,7 +13,7 @@ class ShadowRenderer(val scene: Scene) {
         const val SHADOW_HEIGHT = 1024 * 4//TODO bessere loesung finden
     }
 
-    var sun: Cube = Cube()
+    var sun: Cube = Cube(scene.myMap)
 
 
     val depthMapFBO: Int

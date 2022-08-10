@@ -14,7 +14,6 @@
           <stringArguments>
             <stringArg name="classpath">
               <args>
-                <arg>$MODULE_DIR$/../../project/build/classes/kotlin/main</arg>
                 <arg>$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-assimp/3.2.3/f62aa07a20afbdd3097efc296c4841e0d29700eb/lwjgl-assimp-3.2.3.jar</arg>
                 <arg>$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.2.3/5e520d5c290c8b012545a8d34fa5db5ab051ea53/lwjgl-glfw-3.2.3.jar</arg>
                 <arg>$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.2.3/106742e805803ab9eab8e343f0fb31a3d263903c/lwjgl-openal-3.2.3.jar</arg>
