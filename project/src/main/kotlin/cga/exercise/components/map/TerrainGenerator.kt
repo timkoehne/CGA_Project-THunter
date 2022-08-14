@@ -61,7 +61,7 @@ class TerrainGenerator() {
             ) * (terrainMaxHeight / roughness.pow(num - 1))
         }
 
-        total += 1
+        total += 2
 
         return total
     }

@@ -39,7 +39,7 @@ class Models {
             "project/assets/deko/stock.obj"
         )
 
-        val accessories = mutableListOf<String>(
+        val accessories = mutableListOf(
             "project/assets/accessories/brownMushroomPile.obj",
             "project/assets/accessories/redMushroomPile.obj"
         )
@@ -115,14 +115,14 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
 
         mesh = groundMeshGenerieren()
 
-        val anzGrass: Int = (random.nextFloat() * 100).toInt()
+        val anzGrass: Int = (random.nextFloat() * 250).toInt()
         grassTilesGenerieren(anzGrass)
 
         val anzTrees: Int = random.nextInt(3) + 6
-        //tilesGenerieren(anzTrees, Models.trees, possibleTreePositions, treePositions, treeTiles, -1f)
+        tilesGenerieren(anzTrees, Models.trees, possibleTreePositions, treePositions, treeTiles, -0.5f)
 
         val anzStones: Int = random.nextInt(2)
-        tilesGenerieren(anzStones, Models.stones, possibleStonePositions, null, stoneTiles, -1f)
+        tilesGenerieren(anzStones, Models.stones, possibleStonePositions, null, stoneTiles, -0.5f)
 
         val anzAccessories: Int = random.nextInt(2) + 3
         tilesGenerieren(anzAccessories, Models.accessories, possibleAccessoryPositions, null, accessoryTiles, 0f)
@@ -209,7 +209,9 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
         var x: Float
         var z: Float
         for (i in 0..anzGrass) {
-            grass = Foliage(ModelLoader.loadModel("project/assets/deko/grassBueschel.obj", 0f, 0f, 0f))
+            grass = Foliage(
+                ModelLoader.loadModel("project/assets/deko/grassBueschel.obj", 0f, 0f, 0f)
+            )
             x = (random.nextFloat() * numVerticesPerSide)
             z = (random.nextFloat() * numVerticesPerSide)
 
@@ -222,7 +224,8 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
                     ), positionXZ.z + ((z - numVerticesPerSide / 2) * abstand)
                 )
             )
-            grass.scale(Vector3f(random.nextFloat() * 0.2f + 0.5f))
+            grass.scale(Vector3f(random.nextFloat() * 0.5f + 0.3f))
+            grass.rotate(0f, random.nextFloat() * Math.toRadians(360.0).toFloat(), 0f)
         }
     }
 
@@ -290,9 +293,9 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
         )
     }
 
-    fun render(camera: TronCamera, shaderProgram: ShaderProgram) {
+    fun render(shaderProgram: ShaderProgram) {
         shaderProgram.use()
-        camera.bind(shaderProgram)
+//        camera.bind(shaderProgram)
 
         grassTiles.forEach { it.render(shaderProgram) }
 
@@ -306,9 +309,8 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
         mesh.render(shaderProgram)
     }
 
-    fun renderEntities(camera: TronCamera, shaderProgram: ShaderProgram) {
+    fun renderEntities(shaderProgram: ShaderProgram) {
         shaderProgram.use()
-        camera.bind(shaderProgram)
 
         treeTiles.forEach { it.render(shaderProgram) }
         accessoryTiles.forEach { it.render(shaderProgram) }

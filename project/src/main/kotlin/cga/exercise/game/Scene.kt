@@ -1,6 +1,7 @@
 package cga.exercise.game
 
 import cga.exercise.audio.AudioMaster
+import cga.exercise.components.camera.OrbitCamera
 import cga.exercise.components.map.TerrainGenerator
 import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.entities.*
@@ -8,7 +9,6 @@ import cga.exercise.components.geometry.*
 import cga.exercise.components.gui.GuiRenderer
 import cga.exercise.components.light.PointLight
 import cga.exercise.components.light.SpotLight
-import cga.exercise.components.map.MyClock
 import cga.exercise.components.map.MyMap
 import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.components.shadows.ShadowRenderer
@@ -30,7 +30,11 @@ class Scene(val window: GameWindow) {
     private var scrollValue: Double = 0.0
 
     private val staticShader: ShaderProgram
-    val camera: TronCamera
+
+    var camera: TronCamera
+
+    val flyThroughCamera: TronCamera
+    val orbitCamera: OrbitCamera
 
     val guiRenderer: GuiRenderer
     val myMap: MyMap
@@ -64,17 +68,34 @@ class Scene(val window: GameWindow) {
         GL11.glEnable(GL11.GL_DEPTH_TEST); GLError.checkThrow()
         GL11.glDepthFunc(GL11.GL_LESS); GLError.checkThrow()
 
-        camera = TronCamera()
-        camera.translate(Vector3f(-1.0f, 1.3f, 1.9f))
+        flyThroughCamera = TronCamera()
+        orbitCamera = OrbitCamera()
+        camera = flyThroughCamera
+
+//        flyThroughCamera.translate(Vector3f(-1.0f, 1.3f, 1.9f))
+        flyThroughCamera.translate(Vector3f(0f, 1.6f, 0f))
 
 
         myMap = MyMap(
-            5, 1f, this, 6f, 18f, 2f, 2, 0.1f, 0.9f
+            5, 1f, this, 6f, 18f,
+            2f, 2, 0.1f, 0.9f
         )
+        orbitCamera.myMap = myMap
+
+
+        entityManager = EntityManager(camera, this)
+        orbitCamera.parent = entityManager.drone
+
+        spotlight = SpotLight(
+            Vector3f(), Vector3f(1f, 1f, 1f), Math.toRadians(10f), Math.toRadians(45f)
+        )
+        spotlight.translate(Vector3f(-0f, 1f, -0.75f))
+        spotlight.rotate(Math.toRadians(-35f), 0f, 0f)
+        spotlight.parent = entityManager.drone
+
 
         shadowRenderer = ShadowRenderer(this)
 
-        entityManager = EntityManager(camera, this)
 
         initilizeLights()
 
@@ -84,24 +105,20 @@ class Scene(val window: GameWindow) {
 
         guiRenderer = GuiRenderer(this, window)
 
+        entityManager.character.reloadingAnimationTrait.ammoAnzeige = guiRenderer.ammoAnzeige
+
+
 //        grassInstance = GrassInstance(1, myMap)
 
 
     }
 
     fun initilizeLights() {
-        lights.add(PointLight(Vector3f(0f, 0.75f, 0f), Vector3f(0.3f)))
-        lights[0].parent = entityManager.getPlayer()
+        lights.add(PointLight(Vector3f(0f, -0.75f, 0f), Vector3f(0.3f)))
+        lights[0].parent = entityManager.player
 //        lights.add(PointLight(Vector3f(-5f, 2f, -5f), Vector3f(1f, 1f, 1f)))
 //        lights.add(PointLight(Vector3f(+5f, 2f, -5f), Vector3f(1f, 1f, 1f)))
-
-
-        spotlight = SpotLight(
-            Vector3f(), Vector3f(1f, 1f, 1f), Math.toRadians(10f), Math.toRadians(45f)
-        )
-        spotlight.translate(Vector3f(-0f, 1f, -1.5f))
-        spotlight.rotate(Math.toRadians(-20f), 0f, 0f)
-        spotlight.parent = entityManager.getPlayer()
+//        spotlight.parent = entityManager.player
     }
 
     fun rainbowColor(time: Float): Vector3f {
@@ -121,7 +138,6 @@ class Scene(val window: GameWindow) {
             else -> Vector3f(Math.abs(Math.sin(time)), Math.abs(Math.sin(time)), Math.abs(Math.sin(time))) //sonst weiss
         }
     }
-
 
     fun setNeededUniforms(shaderProgram: ShaderProgram) {
         shaderProgram.use()
@@ -144,7 +160,7 @@ class Scene(val window: GameWindow) {
 
         shaderProgram.setUniform("sandUpperBound", 0.10f * TerrainGenerator.terrainMaxHeight)
         shaderProgram.setUniform("dirtUpperBound", 0.30f * TerrainGenerator.terrainMaxHeight)
-        shaderProgram.setUniform("grassUpperBound", 0.95f * TerrainGenerator.terrainMaxHeight)
+        shaderProgram.setUniform("grassUpperBound", 1.0f * TerrainGenerator.terrainMaxHeight)
     }
 
     fun render(dt: Float, time: Float) {
@@ -161,12 +177,9 @@ class Scene(val window: GameWindow) {
         entityManager.render(dt, time, staticShader)
         renderLights(dt, time, staticShader)
 
-
         myMap.render(dt, time)
         myMap.renderSkybox()
         myMap.renderEntities(staticShader)
-
-
 
         guiRenderer.render()
 
@@ -194,15 +207,11 @@ class Scene(val window: GameWindow) {
                 it.bind(shaderProgram, index)
             }
         }
-
         spotlight.bind(shaderProgram, camera.getCalculateViewMatrix())
     }
 
     fun update(dt: Float, time: Float) {
 
-
-//        println("playerpos: ${entityManager.getPlayer().getWorldPosition()}")
-//        println(camera.getWorldPosition())
 
         myMap.update(dt, time)
 
@@ -219,9 +228,14 @@ class Scene(val window: GameWindow) {
         if (window.getKeyState(GLFW_KEY_P)) Mesh.renderLines()
     }
 
+    fun switchCamera() {
+        camera = if (camera == flyThroughCamera) orbitCamera else flyThroughCamera
+    }
+
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {
-        if (key == GLFW_KEY_T && action == GLFW_PRESS) {
-            MyClock.stopTime = !MyClock.stopTime
+        if (key == GLFW_KEY_C && action == GLFW_PRESS) {
+            entityManager.switchPlayer()
+            switchCamera()
         }
 
 
@@ -234,7 +248,10 @@ class Scene(val window: GameWindow) {
 
 
         if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-            guiRenderer.ammoAnzeige.reload()
+
+            if(entityManager.player == entityManager.character){
+                (entityManager.player as Character).reload()
+            }
         }
 
 
@@ -244,30 +261,46 @@ class Scene(val window: GameWindow) {
         //action kann GL_PRESS oder GL_RELEASE sein
         //mods sind modifier keys wie shift und ctrl
 
-        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-            guiRenderer.ammoAnzeige.shoot()
-            guiRenderer.wantedPoster.hit()
-        }
+        if (entityManager.player == entityManager.character) {
+            if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+                guiRenderer.ammoAnzeige.shoot()
+                guiRenderer.wantedPoster.hit()
+            }
 
-        if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-            camera.fov = TronCamera.zoom_fov
-            guiRenderer.sniperScope.enable()
-            guiRenderer.crosshair.disable()
-        } else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
-            camera.fov = TronCamera.default_fov
-            guiRenderer.sniperScope.disable()
-            guiRenderer.crosshair.enable()
+            if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+                camera.fov = TronCamera.zoom_fov
+                guiRenderer.sniperScope.enable()
+                guiRenderer.crosshair.disable()
+            } else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
+                camera.fov = TronCamera.default_fov
+                guiRenderer.sniperScope.disable()
+                guiRenderer.crosshair.enable()
+            }
         }
 
         println("mouse button press: $button $action $mods")
     }
 
     fun onMouseScroll(xoffset: Double, yoffset: Double) {
-        scrollValue += yoffset
+        if (camera is OrbitCamera) {
+            orbitCamera.updateRadius(yoffset * 0.1f)
+        }
+//        scrollValue += yoffset
     }
 
     fun onMouseMove(xpos: Double, ypos: Double) {
-        entityManager.getPlayer().onMouseMove(prevX - xpos, 0.0) //prevY - ypos
+
+//        println(camera.getModelMatrix())
+
+
+        if (camera is OrbitCamera) {
+            (camera as OrbitCamera).updateTheta((prevY - ypos) * 0.1f)
+            (camera as OrbitCamera).updatePhi((prevX - xpos) * 0.1f)
+
+        } else {
+            entityManager.player.onMouseMove(prevX - xpos, prevY - ypos)
+        }
+
 
         prevX = xpos
         prevY = ypos

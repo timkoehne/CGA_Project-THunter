@@ -1,11 +1,14 @@
 package cga.exercise.components.entities
 
 import DroneAnimationTrait
+import cga.exercise.components.camera.OrbitCamera
 import cga.exercise.components.entities.traits.IDroneAnimationTrait
 import cga.exercise.components.map.MyMap
 import cga.exercise.components.shader.ShaderProgram
+import cga.framework.GameWindow
 import cga.framework.ModelLoader
 import org.joml.Vector3f
+import org.lwjgl.glfw.GLFW
 
 class Drone(myMap: MyMap) : Entity(
     ModelLoader.loadModelSameTextures(
@@ -30,6 +33,7 @@ class Drone(myMap: MyMap) : Entity(
 
     override val animationTrait = DroneAnimationTrait(this)
 
+
     val body = models[0]
     val frontLeftArm = models[1]
     val frontRightArm = models[2]
@@ -49,6 +53,8 @@ class Drone(myMap: MyMap) : Entity(
         frontLeftPropeller.parent = frontLeftArm
         backLeftPropeller.parent = backLeftArm
         backRightPropeller.parent = backRightArm
+
+        body.rotate(0f, Math.toRadians(180.0).toFloat(), 0f)
 
         frontRightArm.translate(Vector3f(-0.45f, 0f, 0.5f))
         frontRightArm.rotate(0f, Math.toRadians(30.0).toFloat(), 0f)
@@ -89,6 +95,21 @@ class Drone(myMap: MyMap) : Entity(
         frontLeftPropeller.render(shaderProgram)
         backLeftPropeller.render(shaderProgram)
         backRightPropeller.render(shaderProgram)
+    }
+
+    override fun movementControl(dt: Float, time: Float, window: GameWindow) {
+
+        if (animationTrait.state == DroneAnimationTrait.State.Open) {
+
+            if (window.getKeyState(GLFW.GLFW_KEY_W)) translate(Vector3f(0f, 0f, -5 * dt))
+            if (window.getKeyState(GLFW.GLFW_KEY_S)) translate(Vector3f(0f, 0f, 5 * dt))
+            if (window.getKeyState(GLFW.GLFW_KEY_A)) rotate(0f, 2.3f * dt, 0f)
+            if (window.getKeyState(GLFW.GLFW_KEY_D)) rotate(0f, -2.3f * dt, 0f)
+
+            if (window.getKeyState(GLFW.GLFW_KEY_SPACE)) translate(Vector3f(0f, 5 * dt, 0f))
+            if (window.getKeyState(GLFW.GLFW_KEY_LEFT_SHIFT)) translate(Vector3f(0f, -5 * dt, 0f))
+        }
+
     }
 
 

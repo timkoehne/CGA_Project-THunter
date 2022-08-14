@@ -31,6 +31,8 @@ class Timer(var timeInSekunden: Float) : GuiElement(background, defaultPosition,
         val colon = GuiElement(Texture2D.invoke("project/assets/textures/clock/colon.png", true))
     }
 
+    private var pauseTimer = false
+
     init {
         children.add(GuiElement(numberTextures[0]))
         children.add(GuiElement(numberTextures[0]))
@@ -49,7 +51,10 @@ class Timer(var timeInSekunden: Float) : GuiElement(background, defaultPosition,
 
     override fun update(dt: Float, time: Float) {
         super.update(dt, time)
-        timeInSekunden -= dt
+
+        if (!pauseTimer) {
+            timeInSekunden -= dt
+        }
         displayTime()
     }
 
@@ -69,6 +74,11 @@ class Timer(var timeInSekunden: Float) : GuiElement(background, defaultPosition,
             children[3].texID = numberTextures[digit2].texID
             children[4].texID = numberTextures[digit3].texID
         }
+    }
+
+    fun pause(changeTo: Boolean = !pauseTimer) {
+//        println(pauseTimer)
+        pauseTimer = changeTo
     }
 
 

@@ -18,15 +18,15 @@ open class GravityTrait(entity: Entity, val myMap: MyMap) : Trait(entity) {
     private var jumpUpDuration: Float = 0.20f
 
     override fun update(dt: Float, time: Float) {
-        val pos = entity.getPosition()
+        val pos = entity.getWorldPosition()
 
         when (state) {
             State.OnTheGround -> {
-                entity.translate(
+                entity.preTranslate(
                     Vector3f(
-                        0f, myMap.getHeight(
+                        0f, (myMap.getHeight(
                             pos.x, pos.z
-                        ) - pos.y, 0f
+                        ) + entity.height) - pos.y, 0f
                     )
                 )
             }
@@ -34,15 +34,17 @@ open class GravityTrait(entity: Entity, val myMap: MyMap) : Trait(entity) {
 
                 //during the jump
                 if (time < jumpStartTime + jumpUpDuration) {
-                    entity.translate(Vector3f(0f, (entity.jumpSpeed) * dt, 0f))
+                    entity.preTranslate(Vector3f(0f, (entity.jumpSpeed) * dt, 0f))
                 } else {
                     //after the jump
                     state = State.Falling
                 }
             }
             State.Falling -> {
-                entity.translate(Vector3f(0f, -(gravitySpeed * entity.weight * dt), 0f))
-                if (pos.y <= myMap.getHeight(pos.x, pos.z)) {
+                entity.preTranslate(Vector3f(0f, -(gravitySpeed * entity.weight * dt), 0f))
+
+
+                if (pos.y <= myMap.getHeight(pos.x, pos.z) + entity.height) {
                     state = State.OnTheGround
                 }
             }

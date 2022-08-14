@@ -1,9 +1,11 @@
 package cga.exercise.components.map
 
 import cga.exercise.components.camera.TronCamera
+import cga.exercise.components.entities.Entity
 import cga.exercise.components.skybox.SkyboxRenderer
 import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.game.Scene
+import org.joml.Vector3f
 
 class MyMap(
     val numChunksSquare: Int,
@@ -27,7 +29,7 @@ class MyMap(
 
     init {
         groundShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/ground_frag.glsl")
-        proceduralGround = ProceduralGroundInfinite(scene.camera, numChunksSquare, abstand)
+        proceduralGround = ProceduralGroundInfinite(this, numChunksSquare, abstand)
 
         myClock = MyClock(
             sonnenaufgangUhrzeit, sonnenuntergangUhrzeit,
@@ -70,6 +72,10 @@ class MyMap(
                 "project/assets/textures/skybox/night-rotating/back.png"
             ), this, true
         )
+    }
+
+    fun getCamera(): TronCamera{
+        return scene.camera
     }
 
     fun getHeight(x: Float, z: Float): Float {

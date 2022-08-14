@@ -18,6 +18,16 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
         return Matrix4f(modelMatrix)
     }
 
+    fun lookAlong(viewDir: Vector3f) {
+        modelMatrix.setLookAlong(viewDir, getWorldYAxis())
+    }
+
+    fun setPosition(pos: Vector3f) {
+        modelMatrix.set(3, 0, pos.x)
+        modelMatrix.set(3, 1, pos.y)
+        modelMatrix.set(3, 2, pos.z)
+    }
+
     /**
      * Returns multiplication of world and object model matrices.
      * Multiplication has to be recursive for all parents.
@@ -49,6 +59,7 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
 
     }
 
+
     fun worldRotate(pitch: Float, yaw: Float, roll: Float) {
         modelMatrix.rotateLocalX(pitch)
         modelMatrix.rotateLocalY(yaw)
@@ -63,11 +74,17 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
      * @param altMidpoint rotation center
      */
     fun rotateAroundPoint(pitch: Float, yaw: Float, roll: Float, altMidpoint: Vector3f) {
-        val to = altMidpoint.sub(getWorldPosition())
 
-        translate(to)
-        rotate(pitch, yaw, roll)
-        translate(to.mul(-1f))
+        val tmp = Matrix4f()
+        tmp.translate(altMidpoint)
+        tmp.rotateXYZ(pitch, yaw, roll)
+        tmp.translate(Vector3f(altMidpoint).negate())
+        modelMatrix = tmp.mul(modelMatrix)
+
+//        val to = altMidpoint.sub(getWorldPosition())
+//        translate(to)
+//        rotate(pitch, yaw, roll)
+//        translate(to.mul(-1f))
 
 //        translate(to)
 //        to.rotateX(pitch)
@@ -132,7 +149,6 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
             world.get(3, 2)
         )
     }
-
 
 
     /**

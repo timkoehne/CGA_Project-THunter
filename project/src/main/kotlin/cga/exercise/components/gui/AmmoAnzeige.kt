@@ -6,17 +6,12 @@ import org.joml.Vector2f
 class AmmoAnzeige : GuiElement(null, Vector2f(1f - 0.05f, -1f), Vector2f(0.2f, 0.2f)) {
 
     val maxAmmo = 5
-    var aktuelleAmmo: Int = maxAmmo
+    var currentAmmoIndex: Int = maxAmmo - 1
     var nachladeZeit: Float = 1f
 
-    var state = State.Usable
     var reloadingStartTime: Float = -1f
 
     companion object {
-
-        enum class State {
-            Reloading, Usable
-        }
 
         val reloadingDuration = 1f
 
@@ -34,39 +29,21 @@ class AmmoAnzeige : GuiElement(null, Vector2f(1f - 0.05f, -1f), Vector2f(0.2f, 0
     }
 
     fun shoot() {
-        if (aktuelleAmmo > 0) {
-            aktuelleAmmo--
-            children[aktuelleAmmo].texID = bulletEmpty.texID
+        if (currentAmmoIndex >= 0) {
+            children[currentAmmoIndex].texID = bulletEmpty.texID
+            currentAmmoIndex--
         }
     }
 
-    fun reload() {
-        state = State.Reloading
-        reloadingStartTime = -1f
-
+    fun reloadOneBullet() {
+        if(reloadAllowed()){
+            currentAmmoIndex++
+            children[currentAmmoIndex].texID = bullet.texID
+        }
     }
 
-    override fun update(dt: Float, time: Float) {
-
-        //letzte kugel
-        if (aktuelleAmmo == maxAmmo) {
-            state = State.Usable
-        }
-
-        if (state == State.Reloading) {
-            //anfang des nachladens
-            if (reloadingStartTime == -1f) {
-                reloadingStartTime = time
-                children[aktuelleAmmo].texID = bullet.texID
-                aktuelleAmmo++
-
-                //weitere kugeln
-            } else if (time > reloadingStartTime + reloadingDuration) {
-                children[aktuelleAmmo].texID = bullet.texID
-                reloadingStartTime = time
-                aktuelleAmmo++
-            }
-        }
+    fun reloadAllowed(): Boolean {
+        return currentAmmoIndex < maxAmmo - 1
     }
 
 }

@@ -1,6 +1,7 @@
 package cga.exercise.components.map
 
 import cga.exercise.components.camera.TronCamera
+import cga.exercise.components.entities.Entity
 import cga.exercise.components.map.Chunk.Companion.chunkSize
 import cga.exercise.components.shader.ShaderProgram
 import org.joml.Vector3f
@@ -9,16 +10,19 @@ import kotlin.concurrent.thread
 import kotlin.math.floor
 
 class ProceduralGroundInfinite(
-    val camera: TronCamera,
+    val myMap: MyMap,
     val numChunksSquare: Int,
     val abstand: Float
 ) {
+
     var chunks: HashMap<Vector3i, Chunk> = HashMap<Vector3i, Chunk>()
     //TODO aktuell werden chunks geladen bis das programm beendet wird und nie entladen
 
 
     init {
-        val playerposXZ = Vector3f(camera.getWorldPosition().x, 0f, camera.getWorldPosition().z)
+        val playerposXZ = Vector3f(myMap.getCamera().getWorldPosition().x, 0f, myMap.getCamera().getWorldPosition().z)
+
+
 
         for (z in -numChunksSquare / 2..numChunksSquare / 2) {
             for (x in -numChunksSquare / 2..numChunksSquare / 2) {
@@ -49,7 +53,7 @@ class ProceduralGroundInfinite(
 
     fun render(shaderProgram: ShaderProgram) {
         shaderProgram.use()
-        val playerposXZ = Vector3f(camera.getWorldPosition().x, 0f, camera.getWorldPosition().z)
+        val playerposXZ = Vector3f(myMap.getCamera().getWorldPosition().x, 0f, myMap.getCamera().getWorldPosition().z)
         for (z in -numChunksSquare / 2..numChunksSquare / 2) {
             for (x in -numChunksSquare / 2..numChunksSquare / 2) {
                 val chunkPos = getChunkPos(playerposXZ, x, z)
@@ -58,20 +62,21 @@ class ProceduralGroundInfinite(
                 if (chunks[chunkIndex] == null) {
                     chunks[chunkIndex] = Chunk(abstand, chunkPos)
                 }
-                chunks[chunkIndex]?.render(camera, shaderProgram)
+                chunks[chunkIndex]?.render(shaderProgram)
             }
         }
     }
 
     fun renderEntites(shaderProgram: ShaderProgram) {
         shaderProgram.use()
-        val playerposXZ = Vector3f(camera.getWorldPosition().x, 0f, camera.getWorldPosition().z)
+        val playerposXZ = Vector3f(myMap.getCamera().getWorldPosition().x, 0f, myMap.getCamera().getWorldPosition().z)
         for (z in -numChunksSquare / 2..numChunksSquare / 2) {
             for (x in -numChunksSquare / 2..numChunksSquare / 2) {
                 val chunkPos = getChunkPos(playerposXZ, x, z)
 
                 val chunkIndex = chunkPosToIndex(chunkPos)
-                chunks[chunkIndex]?.renderEntities(camera, shaderProgram)
+                //camera
+                chunks[chunkIndex]?.renderEntities(shaderProgram)
             }
         }
     }

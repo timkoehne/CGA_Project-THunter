@@ -14,9 +14,20 @@ import org.lwjgl.assimp.*
 import org.lwjgl.opengl.GL11
 import java.nio.IntBuffer
 import java.util.*
+import kotlin.collections.HashMap
 
 object ModelLoader {
+
+    val modelList = HashMap<String, RawModel>()
+
+
     private fun load(objPath: String): RawModel? {
+
+        if (modelList[objPath] != null) {
+//            println("reusing cached model for $objPath")
+            return modelList[objPath]?.copy()
+        }
+
         val rm = RawModel()
         try {
             val aiScene = Assimp.aiImportFile(objPath, Assimp.aiProcess_Triangulate or Assimp.aiProcess_GenNormals)
@@ -138,6 +149,9 @@ object ModelLoader {
         } catch (ex: Exception) {
             throw Exception("Something went terribly wrong. Thanks java.\n" + ex.message)
         }
+
+        modelList[objPath] = rm.copy()
+
         return rm
     }
 
@@ -251,7 +265,7 @@ object ModelLoader {
         // preprocessing rotation
         val rot = Matrix3f().rotateZ(roll).rotateY(yaw).rotateX(pitch)
         // create textures
-//default textures
+        //default textures
         val ddata = BufferUtils.createByteBuffer(4)
         ddata.put(0.toByte()).put(0.toByte()).put(0.toByte()).put(0.toByte())
         ddata.flip()

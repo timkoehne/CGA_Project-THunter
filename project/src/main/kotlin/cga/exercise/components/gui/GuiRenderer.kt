@@ -110,10 +110,12 @@ class GuiRenderer(
         guiElements.forEach { it.update(dt, time) }
 
         if (timer.timeInSekunden <= 0) {
+            timer.pause(true)
             youLoose.enable()
         }
 
         if (wantedPoster.killCounter >= 6) {
+            timer.pause(true)
             youWin.enable()
         }
 

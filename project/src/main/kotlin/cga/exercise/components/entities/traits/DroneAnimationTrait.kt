@@ -7,7 +7,7 @@ import org.joml.Vector3f
 class DroneAnimationTrait(val drone: Drone) : Trait(drone) {
 
     var animationStartTime = 0f
-    private var state = State.Closed
+    var state = State.Closed
 
     companion object {
         const val rotationsSpeed = 20f

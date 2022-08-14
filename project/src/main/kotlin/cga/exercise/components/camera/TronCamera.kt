@@ -3,17 +3,21 @@ package cga.exercise.components.camera
 import cga.exercise.components.geometry.Transformable
 import cga.exercise.components.shader.ShaderProgram
 import org.joml.Math
+import org.joml.Math.sin
 import org.joml.Matrix4f
 import org.joml.Vector3f
+import kotlin.math.cos
 
-class TronCamera(
+open class TronCamera(
     var fov: Float = default_fov,
     var aspect: Float = 16 / 9f,
     var nPlane: Float = 0.01f,
     var fPlane: Float = 100.0f
 ) : Transformable(), ICamera {
+    var theta = 0f
+    var phi = Math.toRadians(90f)
 
-    companion object{
+    companion object {
         val default_fov = Math.toRadians(90f)
         val zoom_fov = Math.toRadians(25f)
     }

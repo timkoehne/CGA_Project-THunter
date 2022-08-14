@@ -10,9 +10,7 @@ class Hare(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath), myMap) {
     val movementAI = JumpMovementAI(this)
 
     override val movementSpeed: Float = 4f
-    override val jumpSpeed: Float
-        get() = super.jumpSpeed
-    override val weight = 0.3f
+    override val weight = 0.5f
 
     companion object {
         val filepath = "project/assets/animals/hare.obj"
