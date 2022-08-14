@@ -5,7 +5,7 @@ import cga.exercise.components.entities.movementai.JumpMovementAI
 import cga.exercise.components.entities.movementai.MovementAI
 import cga.framework.ModelLoader
 
-class Bear(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath), myMap) {
+class Bear(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath), myMap, hitbox) {
 
     val movementAI: JumpMovementAI = JumpMovementAI(this)
 
@@ -15,6 +15,7 @@ class Bear(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath), myMap) {
 
     companion object {
         val filepath = "project/assets/animals/bear.obj"
+        private val hitbox = "project/assets/animals/bearcube.obj"
 
     }
 

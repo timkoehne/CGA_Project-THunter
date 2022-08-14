@@ -13,14 +13,18 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
     var drone: Drone
 
     var testReh: MutableList<Entity> = mutableListOf()
+    var testFox: Entity = Fox(scene.myMap)
 
     var player: Entity
 
 
     init {
         for (i in 0..50) {
-            testReh.add(Hare(scene.myMap))
+            testReh.add(Raccoon(scene.myMap))
         }
+
+        testFox.rotate(0f, Math.toRadians(90.0).toFloat(), 0f)
+
 
         drone = Drone(scene.myMap)
         drone.translate(Vector3f(5f, scene.myMap.getHeight(5f, 5f) + 1f, 5f))
@@ -55,6 +59,7 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
         scene.setNeededUniforms(shaderProgram)
 
         testReh.forEach { it.render(shaderProgram) }
+        testFox.render(shaderProgram)
 
 
         drone.render(shaderProgram)
@@ -68,6 +73,8 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
         drone.update(dt, time)
 
         testReh.forEach { it.update(dt, time) }
+        testFox.update(dt, time)
+
 
         character.update(dt, time)
 

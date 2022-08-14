@@ -119,13 +119,29 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
         grassTilesGenerieren(anzGrass)
 
         val anzTrees: Int = random.nextInt(3) + 6
-        tilesGenerieren(anzTrees, Models.trees, possibleTreePositions, treePositions, treeTiles, -0.5f)
+        tilesGenerieren(
+            anzTrees,
+            Models.trees,
+            Foliage.treeCollsionPath,
+            possibleTreePositions,
+            treePositions,
+            treeTiles,
+            -0.5f
+        )
 
         val anzStones: Int = random.nextInt(2)
-        tilesGenerieren(anzStones, Models.stones, possibleStonePositions, null, stoneTiles, -0.5f)
+        tilesGenerieren(
+            anzStones,
+            Models.stones,
+            null,
+            possibleStonePositions,
+            null,
+            stoneTiles,
+            -0.5f
+        )
 
         val anzAccessories: Int = random.nextInt(2) + 3
-        tilesGenerieren(anzAccessories, Models.accessories, possibleAccessoryPositions, null, accessoryTiles, 0f)
+        tilesGenerieren(anzAccessories, Models.accessories, null, possibleAccessoryPositions, null, accessoryTiles, 0f)
 
     }
 
@@ -165,6 +181,7 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
     fun tilesGenerieren(
         num: Int,
         models: List<String>,
+        collisionBoxString: String?,
         possiblePositions: List<Vector3f>,
         occupiedPositions: MutableList<Vector3f>?,
         foliageList: MutableList<Foliage>,
@@ -175,7 +192,7 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
         var x: Float
         var z: Float
         for (i in 0 until num) {
-            foliage = Foliage(ModelLoader.loadModel(models[random.nextInt(models.size)]))
+            foliage = Foliage(ModelLoader.loadModel(models[random.nextInt(models.size)]), collisionBoxString)
 
 
 
@@ -201,6 +218,7 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
                 )
             )
             foliage.rotate(0f, random.nextFloat() * Math.toRadians(360.0).toFloat(), 0f)
+            foliage.collisionBox?.setPosition(foliage.getPosition())
         }
     }
 

@@ -15,7 +15,6 @@ class Fox(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath), myMap, hitbox)
     companion object {
         val filepath = "project/assets/animals/fox.obj"
         private val hitbox = "project/assets/animals/foxcube.obj"
-
     }
 
     init {

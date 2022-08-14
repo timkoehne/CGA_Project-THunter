@@ -211,18 +211,9 @@ class Scene(val window: GameWindow) {
     }
 
     fun update(dt: Float, time: Float) {
-
-
         myMap.update(dt, time)
-
         entityManager.update(window, dt, time)
-
         guiRenderer.update(dt, time)
-
-        if (window.getKeyState(GLFW_KEY_I)) camera.translate(Vector3f(0f, 0f, -5 * dt))
-        if (window.getKeyState(GLFW_KEY_K)) camera.translate(Vector3f(0f, 0f, 5 * dt))
-        if (window.getKeyState(GLFW_KEY_J)) camera.rotate(0f, dt, 0f)
-        if (window.getKeyState(GLFW_KEY_L)) camera.rotate(0f, -dt, 0f)
 
         if (window.getKeyState(GLFW_KEY_0)) Mesh.renderTriangles()
         if (window.getKeyState(GLFW_KEY_P)) Mesh.renderLines()
@@ -238,22 +229,17 @@ class Scene(val window: GameWindow) {
             switchCamera()
         }
 
-
         if (key == GLFW_KEY_E && action == GLFW_PRESS) {
             guiRenderer.wantedPoster.toggle()
             guiRenderer.wantedPosterButton.toggle()
         }
 
-
-
-
         if (key == GLFW_KEY_R && action == GLFW_PRESS) {
 
-            if(entityManager.player == entityManager.character){
+            if (entityManager.player == entityManager.character) {
                 (entityManager.player as Character).reload()
             }
         }
-
 
     }
 
@@ -289,14 +275,9 @@ class Scene(val window: GameWindow) {
     }
 
     fun onMouseMove(xpos: Double, ypos: Double) {
-
-//        println(camera.getModelMatrix())
-
-
         if (camera is OrbitCamera) {
             (camera as OrbitCamera).updateTheta((prevY - ypos) * 0.1f)
             (camera as OrbitCamera).updatePhi((prevX - xpos) * 0.1f)
-
         } else {
             entityManager.player.onMouseMove(prevX - xpos, prevY - ypos)
         }
