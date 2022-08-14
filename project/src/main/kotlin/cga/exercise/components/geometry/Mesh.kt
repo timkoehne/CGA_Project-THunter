@@ -1,7 +1,10 @@
 package cga.exercise.components.geometry
 
 import cga.exercise.components.shader.ShaderProgram
+import org.joml.Vector3f
 import org.lwjgl.opengl.*
+import org.lwjgl.opengl.GL11.GL_POLYGON_MODE
+import kotlin.math.min
 
 /**
  * Creates a Mesh object from vertexdata, intexdata and a given set of vertex attributes
@@ -84,6 +87,52 @@ open class Mesh(
         GL11.glDrawElements(GL11.GL_TRIANGLES, indexcount, GL11.GL_UNSIGNED_INT, 0)
         GL30.glBindVertexArray(0)
     }
+
+    fun minVertex(): Vector3f {
+        return Vector3f(minX(), minY(), minZ())
+    }
+
+    private fun minX(): Float {
+        var minValue = vertexdata[0]
+        vertexdata.forEachIndexed { index, value -> if (index % 8 == 0 && value < minValue) minValue = value }
+        return minValue
+    }
+
+    private fun minY(): Float {
+        var minValue = vertexdata[1]
+        vertexdata.forEachIndexed { index, value -> if (index % 8 == 1 && value < minValue) minValue = value }
+        return minValue
+    }
+
+    private fun minZ(): Float {
+        var minValue = vertexdata[2]
+        vertexdata.forEachIndexed { index, value -> if (index % 8 == 2 && value < minValue) minValue = value }
+        return minValue
+    }
+
+    fun maxVertex(): Vector3f {
+        return Vector3f(maxX(), maxY(), maxZ())
+    }
+
+    private fun maxX(): Float {
+        var maxValue = vertexdata[0]
+        vertexdata.forEachIndexed { index, value -> if (index % 8 == 0 && value > maxValue) maxValue = value }
+        return maxValue
+    }
+
+    private fun maxY(): Float {
+        var maxValue = vertexdata[1]
+        vertexdata.forEachIndexed { index, value -> if (index % 8 == 1 && value > maxValue) maxValue = value }
+        return maxValue
+    }
+
+    private fun maxZ(): Float {
+        var maxValue = vertexdata[2]
+        vertexdata.forEachIndexed { index, value -> if (index % 8 == 2 && value > maxValue) maxValue = value }
+        return maxValue
+    }
+
+
 
     /**
      * Deletes the previously allocated OpenGL objects for this mesh

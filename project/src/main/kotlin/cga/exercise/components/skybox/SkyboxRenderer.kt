@@ -1,6 +1,6 @@
 package cga.exercise.components.skybox
 
-import cga.exercise.components.Loader
+import cga.exercise.components.Util
 import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.entities.Cube
 import cga.exercise.components.map.MyMap
@@ -18,8 +18,8 @@ class SkyboxRenderer(
 
     private val skyboxShader: ShaderProgram
     private val cube = Cube(myMap)
-    private val dayTexID: Int = Loader.loadCubeMap(dayTextures)
-    private val nightTexID: Int = Loader.loadCubeMap(nightTextures)
+    private val dayTexID: Int = Util.loadCubeMap(dayTextures)
+    private val nightTexID: Int = Util.loadCubeMap(nightTextures)
 
 
     init {

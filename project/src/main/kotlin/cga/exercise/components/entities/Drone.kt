@@ -23,12 +23,14 @@ class Drone(myMap: MyMap) : Entity(
             filepath + "propeller.obj",
             filepath + "propeller.obj"
         )
-    ), myMap
+    ), myMap, hitbox
 ), IDroneAnimationTrait {
 
     companion object {
         val propellerTransform = Vector3f(0.135f, 0f, -0.405f)
         private const val filepath = "project/assets/drone/parts/"
+
+        private val hitbox = "project/assets/drone/drone hitbox.obj"
     }
 
     override val animationTrait = DroneAnimationTrait(this)
@@ -45,6 +47,7 @@ class Drone(myMap: MyMap) : Entity(
     val backRightPropeller = models[8]
 
     init {
+
         frontRightArm.parent = body
         frontLeftArm.parent = body
         backLeftArm.parent = body
@@ -81,33 +84,27 @@ class Drone(myMap: MyMap) : Entity(
     }
 
     override fun update(dt: Float, time: Float) {
+        super.update(dt, time)
         animationTrait.update(dt, time)
+
+
     }
 
     override fun render(shaderProgram: ShaderProgram) {
-        body.render(shaderProgram)
-        frontRightArm.render(shaderProgram)
-        frontLeftArm.render(shaderProgram)
-        backLeftArm.render(shaderProgram)
-        backRightArm.render(shaderProgram)
-
-        frontRightPropeller.render(shaderProgram)
-        frontLeftPropeller.render(shaderProgram)
-        backLeftPropeller.render(shaderProgram)
-        backRightPropeller.render(shaderProgram)
+        super.render(shaderProgram)
     }
 
     override fun movementControl(dt: Float, time: Float, window: GameWindow) {
 
         if (animationTrait.state == DroneAnimationTrait.State.Open) {
 
-            if (window.getKeyState(GLFW.GLFW_KEY_W)) translate(Vector3f(0f, 0f, -5 * dt))
-            if (window.getKeyState(GLFW.GLFW_KEY_S)) translate(Vector3f(0f, 0f, 5 * dt))
+            if (window.getKeyState(GLFW.GLFW_KEY_W)) moveForward(dt)
+            if (window.getKeyState(GLFW.GLFW_KEY_S)) moveForward(dt)
             if (window.getKeyState(GLFW.GLFW_KEY_A)) rotate(0f, 2.3f * dt, 0f)
             if (window.getKeyState(GLFW.GLFW_KEY_D)) rotate(0f, -2.3f * dt, 0f)
 
-            if (window.getKeyState(GLFW.GLFW_KEY_SPACE)) translate(Vector3f(0f, 5 * dt, 0f))
-            if (window.getKeyState(GLFW.GLFW_KEY_LEFT_SHIFT)) translate(Vector3f(0f, -5 * dt, 0f))
+            if (window.getKeyState(GLFW.GLFW_KEY_SPACE)) moveUp(dt)
+            if (window.getKeyState(GLFW.GLFW_KEY_LEFT_SHIFT)) moveDown(dt)
         }
 
     }

@@ -5,7 +5,7 @@ import cga.exercise.components.map.MyMap
 import cga.exercise.components.entities.movementai.MovementAI
 import cga.framework.ModelLoader
 
-class MountainLion(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath), myMap) {
+class MountainLion(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath), myMap, hitbox) {
 
     val movementAI = JumpMovementAI(this)
 
@@ -15,6 +15,7 @@ class MountainLion(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath), myMap
 
     companion object {
         val filepath = "project/assets/animals/mountainLion.obj"
+        private val hitbox = "project/assets/animals/mountainLioncube.obj"
 
     }
 

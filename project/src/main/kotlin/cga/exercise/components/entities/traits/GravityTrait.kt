@@ -13,9 +13,21 @@ open class GravityTrait(entity: Entity, val myMap: MyMap) : Trait(entity) {
 
     private val gravitySpeed = 8f
 
-    private var state = State.OnTheGround
+    private var state = State.Falling
     private var jumpStartTime: Float = -1f
     private var jumpUpDuration: Float = 0.20f
+    private var gravityEnabled = true
+
+    fun enable() {
+        gravityEnabled = true
+        println(gravityEnabled)
+    }
+
+    fun disable() {
+        gravityEnabled = false
+        println(gravityEnabled)
+        jump()
+    }
 
     override fun update(dt: Float, time: Float) {
         val pos = entity.getWorldPosition()
@@ -32,6 +44,10 @@ open class GravityTrait(entity: Entity, val myMap: MyMap) : Trait(entity) {
             }
             State.JumpingUp -> {
 
+                if (jumpStartTime == -1f) {
+                    jumpStartTime = time
+                }
+
                 //during the jump
                 if (time < jumpStartTime + jumpUpDuration) {
                     entity.preTranslate(Vector3f(0f, (entity.jumpSpeed) * dt, 0f))
@@ -41,9 +57,9 @@ open class GravityTrait(entity: Entity, val myMap: MyMap) : Trait(entity) {
                 }
             }
             State.Falling -> {
-                entity.preTranslate(Vector3f(0f, -(gravitySpeed * entity.weight * dt), 0f))
-
-
+                if (gravityEnabled) {
+                    entity.preTranslate(Vector3f(0f, -(gravitySpeed * entity.weight * dt), 0f))
+                }
                 if (pos.y <= myMap.getHeight(pos.x, pos.z) + entity.height) {
                     state = State.OnTheGround
                 }
@@ -51,10 +67,10 @@ open class GravityTrait(entity: Entity, val myMap: MyMap) : Trait(entity) {
         }
     }
 
-    fun jump(dt: Float, time: Float) {
+    fun jump() {
         if (state == State.OnTheGround) {
             state = State.JumpingUp
-            jumpStartTime = time
+            jumpStartTime = -1f
         }
     }
 

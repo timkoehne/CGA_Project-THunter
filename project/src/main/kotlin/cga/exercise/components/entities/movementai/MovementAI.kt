@@ -42,7 +42,7 @@ open class MovementAI(val entity: Entity) {
     }
 
     open fun onMove(dt: Float, time: Float) {
-        entity.translate(Vector3f(0f, 0f, entity.movementSpeed * dt))
+        entity.moveForward(dt)
         walkingDistance -= entity.movementSpeed * dt
 
     }

@@ -4,7 +4,7 @@ import cga.exercise.components.map.MyMap
 import cga.exercise.components.entities.movementai.MovementAI
 import cga.framework.ModelLoader
 
-class Raccoon(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath), myMap) {
+class Raccoon(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath), myMap, hitbox) {
 
     val movementAI = MovementAI(this)
 
@@ -13,6 +13,7 @@ class Raccoon(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath), myMap) {
 
     companion object {
         val filepath = "project/assets/animals/raccoon.obj"
+        private val hitbox = "project/assets/animals/raccooncube.obj"
 
     }
 

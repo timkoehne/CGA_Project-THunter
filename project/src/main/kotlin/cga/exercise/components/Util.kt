@@ -1,20 +1,28 @@
 package cga.exercise.components
 
-import org.joml.Matrix4f
+import org.joml.Vector3f
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL12
 import org.lwjgl.opengl.GL13
 import org.lwjgl.stb.STBImage
 import java.nio.ByteBuffer
-import java.nio.FloatBuffer
 
 
 data class TextureData(var imagedata: ByteBuffer, var width: Int, var height: Int)
 
-class Loader {
+class Util {
 
     companion object {
+
+        fun largestValueInVector(vec: Vector3f): Float {
+            var largest = vec[0]
+            if (vec[1] > largest) largest = vec[1]
+            if (vec[2] > largest) largest = vec[2]
+            return largest
+        }
+
+
         fun decodeTextureFile(filepath: String, flip: Boolean): TextureData {
             val x = BufferUtils.createIntBuffer(1)
             val y = BufferUtils.createIntBuffer(1)

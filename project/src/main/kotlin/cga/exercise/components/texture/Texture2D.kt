@@ -1,7 +1,6 @@
 package cga.exercise.components.texture
 
-import cga.exercise.components.Loader
-import org.lwjgl.BufferUtils
+import cga.exercise.components.Util
 import org.lwjgl.opengl.*
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL46.GL_MAX_TEXTURE_MAX_ANISOTROPY
@@ -38,7 +37,7 @@ class Texture2D(imageData: ByteBuffer, width: Int, height: Int, genMipMaps: Bool
                 return geladeneTexturen[path]!!
             }
 
-            var t = Loader.decodeTextureFile(path, true)
+            var t = Util.decodeTextureFile(path, true)
             val texture = Texture2D(t.imagedata, t.width, t.height, genMipMaps)
             geladeneTexturen[path] = texture
             STBImage.stbi_image_free(t.imagedata)

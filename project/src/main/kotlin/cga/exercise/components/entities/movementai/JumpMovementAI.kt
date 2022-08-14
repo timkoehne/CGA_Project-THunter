@@ -6,7 +6,7 @@ class JumpMovementAI(entity: Entity): MovementAI(entity) {
 
     override fun onMove(dt: Float, time: Float) {
         super.onMove(dt, time)
-        entity.jump(dt, time)
+        entity.jump()
     }
 
 

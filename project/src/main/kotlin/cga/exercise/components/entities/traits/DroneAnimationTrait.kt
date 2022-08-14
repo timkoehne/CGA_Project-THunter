@@ -41,6 +41,7 @@ class DroneAnimationTrait(val drone: Drone) : Trait(drone) {
                         rotatePropeller(rotationsSpeed * dt, Math.toRadians(propellerClosedAngle).toFloat())
                     } else {
                         spinDown(time)
+                        drone.gravityTrait.enable()
                     }
                 }
             }
@@ -54,6 +55,7 @@ class DroneAnimationTrait(val drone: Drone) : Trait(drone) {
             State.SpinningUp -> {
                 if (animationPercentage >= 1f) {
                     state = State.Open
+                    drone.gravityTrait.disable()
                 }
                 rotatePropeller(rotationsSpeed * dt * animationPercentage)
             }
