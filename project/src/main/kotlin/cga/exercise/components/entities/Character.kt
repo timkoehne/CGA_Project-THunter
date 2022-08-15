@@ -1,5 +1,6 @@
 package cga.exercise.components.entities
 
+import cga.exercise.components.entities.movementcontroller.MovementController
 import cga.exercise.components.entities.traits.IReloadAnimationTrait
 import cga.exercise.components.entities.traits.ReloadingAnimationTrait
 import cga.exercise.components.map.MyMap
@@ -20,7 +21,7 @@ class Character(myMap: MyMap) : Entity(mutableListOf(firstPersonView, thirdPerso
 
     }
 
-
+    override val movementController = MovementController(this)
     val reloadingAnimationTrait = ReloadingAnimationTrait(this)
     var isFirstPersonView = true
 
@@ -29,6 +30,7 @@ class Character(myMap: MyMap) : Entity(mutableListOf(firstPersonView, thirdPerso
 //        if(showHitbox){
 //            collisionBox?.render(shaderProgram)
 //        }
+
 
         if (isFirstPersonView) {
             models[0].render(shaderProgram)

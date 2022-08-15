@@ -2,20 +2,17 @@ package cga.exercise.components.entities
 
 import cga.exercise.collision.AABB
 import cga.exercise.components.Util
+import cga.exercise.components.entities.movementcontroller.MovementController
 import cga.exercise.components.entities.traits.GravityTrait
 import cga.exercise.components.entities.traits.IGravityTrait
 import cga.exercise.components.geometry.IRenderable
 import cga.exercise.components.geometry.Renderable
 import cga.exercise.components.geometry.Transformable
-import cga.exercise.components.map.Foliage
+import cga.exercise.components.gui.WantedPoster
 import cga.exercise.components.map.Foliage.Companion.allFoliage
 import cga.exercise.components.map.MyMap
 import cga.exercise.components.shader.ShaderProgram
-import cga.framework.GameWindow
 import cga.framework.ModelLoader
-import org.joml.Vector3f
-import org.lwjgl.glfw.GLFW
-import kotlin.math.max
 
 open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPath: String? = null) : Transformable(),
     IRenderable, IGravityTrait {
@@ -24,6 +21,7 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
     )
 
     companion object {
+
         val allEntities = mutableListOf<Entity>()
     }
 
@@ -31,8 +29,10 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
     open val jumpSpeed = 8f
     open val weight = 1f
     open val height = 0f
+    var alive = true
 
-    override val gravityTrait = GravityTrait(this, myMap)
+    override val gravityTrait: GravityTrait? = GravityTrait(this, myMap)
+    open val movementController: MovementController? = MovementController(this)
     val collisionBox: AABB? = collisionBoxPath?.let { AABB(this, ModelLoader.loadModel(it)) }
 
     init {
@@ -43,16 +43,21 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
     }
 
     override fun render(shaderProgram: ShaderProgram) {
-        collisionBox?.render(shaderProgram)
+        if (alive) {
+            collisionBox?.render(shaderProgram)
 
-        for (model in models) {
-            model.render(shaderProgram)
+            for (model in models) {
+                model.render(shaderProgram)
+            }
         }
     }
 
     override fun update(dt: Float, time: Float) {
-        collisionBox?.setPosition(getPosition())
-        gravityTrait.update(dt, time)
+        if (alive) {
+            movementController?.update(dt, time)
+            collisionBox?.setPosition(getPosition())
+            gravityTrait?.update(dt, time)
+        }
     }
 
     open fun onMouseMove(xDiff: Double, yDiff: Double) {
@@ -65,91 +70,118 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
         models.forEach { it.cleanUp() }
     }
 
-    fun collision(direction: Vector3f): Boolean {
+    fun collision(): Boolean {
         if (this.collisionBox != null) {
-//            allEntities.forEach {
-//                if (it.collisionBox != null && this != it) {
-//                    val distance1 = it.collisionBox.minExtend.sub(this.collisionBox.maxExtend)
-//                    val distance2 = this.collisionBox.minExtend.sub(it.collisionBox.maxExtend)
-//                    val maxDistance = distance1.max(distance2)
-//                    val maxValue = Util.largestValueInVector(maxDistance)
-//                    if (maxValue < 0) {
-//                        println("${this.javaClass} entity collision with ${it.javaClass}")
-//                        println("distance 1 $distance1")
-//                        println("distance 2 $distance2")
-//                        println("maxdistance $maxDistance")
-//                        println("maxvalue $maxValue")
-//                        return true
-//                    }
-//                }
-//            }
-            allFoliage.forEach {
-                if (it.collisionBox != null && this != it) {
-                    val distance1 = it.collisionBox.minExtend.sub(this.collisionBox.maxExtend)
-                    val distance2 = this.collisionBox.minExtend.sub(it.collisionBox.maxExtend)
-                    val maxDistance = distance1.max(distance2)
-                    val maxValue = Util.largestValueInVector(maxDistance)
-                    if (maxValue < 0) {
-                        println("${this.javaClass} entity collision with ${it.javaClass}")
-//                        println("distance 1 $distance1")
-//                        println("distance 2 $distance2")
-//                        println("maxdistance $maxDistance")
-//                        println("maxvalue $maxValue")
-                        return true
-                    }
-                }
-            }
+
+            if (checkForBulletCollision()) return true
+
+//            if (checkForEntityCollision()) return true
+
+            //foliage koennte in chunks aufgeteilt werden, dann muesste hier viel weniger gecheckt werden
+            if (checkForFoliageCollision()) return true
         }
 
         return false
     }
 
-    private fun move(direction: Vector3f) {
-        translate(direction)
-        if (collision(direction)) {
-            translate(direction.mul(-1f))
+    fun checkForBulletCollision(): Boolean {
+        if (alive && this !is Bullet) {
+            EntityManager.bullets.forEach {
+                if (it !is Bullet) return@forEach //ignore bullet to bullet collison
+                if (it.collisionBox != null) {
+                    val distance1 = it.collisionBox.minExtend.sub(this.collisionBox!!.maxExtend)
+                    val distance2 = this.collisionBox!!.minExtend.sub(it.collisionBox.maxExtend)
+                    val maxDistance = distance1.max(distance2)
+                    val maxValue = Util.largestValueInVector(maxDistance)
+                    if (maxValue < 0) {
+                        EntityManager.bullets.remove(it)
+                        this.hitByBullet()
+                        return true
+                    }
+                }
+            }
         }
+        return false
     }
 
-    fun moveForward(dt: Float) {
-        val direction = Vector3f(0f, 0f, -movementSpeed * dt)
-        move(direction)
+    fun checkForEntityCollision(): Boolean {
+        allEntities.forEach {
+            if (it.collisionBox != null && this != it) {
+                val distance1 = it.collisionBox.minExtend.sub(this.collisionBox!!.maxExtend)
+                val distance2 = this.collisionBox!!.minExtend.sub(it.collisionBox.maxExtend)
+                val maxDistance = distance1.max(distance2)
+                val maxValue = Util.largestValueInVector(maxDistance)
+                if (maxValue < 0) {
+                    println("${this.javaClass} entity collision with ${it.javaClass}")
+                    println("distance 1 $distance1")
+                    println("distance 2 $distance2")
+                    println("maxdistance $maxDistance")
+                    println("maxvalue $maxValue")
+                    return true
+                }
+            }
+        }
+        return false
     }
 
-    fun moveLeft(dt: Float) {
-        val direction = Vector3f(-movementSpeed * dt, 0f, 0f)
-        move(direction)
+    fun checkForFoliageCollision(): Boolean {
+        allFoliage.forEach {
+            if (it.collisionBox != null && this != it) {
+                val distance1 = it.collisionBox.minExtend.sub(this.collisionBox!!.maxExtend)
+                val distance2 = this.collisionBox!!.minExtend.sub(it.collisionBox.maxExtend)
+                val maxDistance = distance1.max(distance2)
+                val maxValue = Util.largestValueInVector(maxDistance)
+                if (maxValue < 0) {
+//                        println("${this.javaClass} entity collision with ${it.javaClass}")
+//                        println("distance 1 $distance1")
+//                        println("distance 2 $distance2")
+//                        println("maxdistance $maxDistance")
+//                        println("maxvalue $maxValue")
+
+                    //TODO bullet collision mit foliage
+
+                    return true
+                }
+            }
+        }
+        return false
     }
 
-    fun moveRight(dt: Float) {
-        val direction = Vector3f(movementSpeed * dt, 0f, 0f)
-        move(direction)
-    }
+    open fun hitByBullet() {
+        alive = false
 
-    fun moveBack(dt: Float) {
-        val direction = Vector3f(0f, 0f, movementSpeed * dt)
-        move(direction)
-    }
+        val animalName = this.javaClass.simpleName
 
-    fun moveDown(dt: Float) {
-        val direction = Vector3f(0f, movementSpeed * dt, 0f)
-        move(direction)
-    }
-
-    fun moveUp(dt: Float) {
-        val direction = Vector3f(0f, -movementSpeed * dt, 0f)
-        move(direction)
+        if (WantedPoster.killList[animalName] == null) {
+            WantedPoster.killList[animalName] = 0
+        }
+        WantedPoster.killList[animalName] = (WantedPoster.killList[animalName] as Int) + 1
+        println("$animalName has been hit ${WantedPoster.killList[animalName]} times")
     }
 
 
-    open fun movementControl(dt: Float, time: Float, window: GameWindow) {
+    fun moveForward(dt: Float): Boolean {
+        return movementController?.moveForward(dt) ?: false
+    }
 
-        if (window.getKeyState(GLFW.GLFW_KEY_W)) moveForward(dt)
-        if (window.getKeyState(GLFW.GLFW_KEY_S)) moveBack(dt)
-        if (window.getKeyState(GLFW.GLFW_KEY_A)) moveLeft(dt)
-        if (window.getKeyState(GLFW.GLFW_KEY_D)) moveRight(dt)
+    fun moveLeft(dt: Float): Boolean {
+        return movementController?.moveLeft(dt) ?: false
+    }
 
-        if (window.getKeyState(GLFW.GLFW_KEY_SPACE)) jump()
+    fun moveRight(dt: Float): Boolean {
+        return movementController?.moveRight(dt) ?: false
+    }
+
+    fun moveBack(dt: Float): Boolean {
+        return movementController?.moveBack(dt) ?: false
+    }
+
+    fun moveDown(dt: Float): Boolean {
+        return movementController?.moveDown(dt) ?: false
+    }
+
+    fun moveUp(dt: Float): Boolean {
+        return movementController?.moveUp(dt) ?: false
     }
 
 

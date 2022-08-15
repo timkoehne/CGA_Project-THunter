@@ -1,6 +1,6 @@
 package cga.exercise.components.gui
 
-import cga.exercise.components.shader.ShaderProgram
+import cga.exercise.components.entities.*
 import cga.exercise.components.texture.Texture2D
 import org.joml.Vector2f
 import kotlin.random.Random
@@ -18,17 +18,27 @@ class WantedPoster : GuiElement(background, defaultPosition, defaultSize) {
         val firstNumberPosition = Vector2f(-0.25f, 0.55f)
         val numberScale = Vector2f(0.1f, 0.1f)
 
-        val possibleAnimals = mutableListOf(
-//            Texture2D.invoke("project/assets/animals/pictures/test.png", true),
-            Texture2D.invoke("project/assets/animals/pictures/bear.png", true),
-            Texture2D.invoke("project/assets/animals/pictures/deerFemale.png", true),
-            Texture2D.invoke("project/assets/animals/pictures/deerMale.png", true),
-            Texture2D.invoke("project/assets/animals/pictures/fox.png", true),
-            Texture2D.invoke("project/assets/animals/pictures/hare.png", true),
-            Texture2D.invoke("project/assets/animals/pictures/mountainLion.png", true),
-            Texture2D.invoke("project/assets/animals/pictures/opossum.png", true),
-            Texture2D.invoke("project/assets/animals/pictures/racoon.png", true),
-            Texture2D.invoke("project/assets/animals/pictures/turkey.png", true)
+
+        val possibleAnimals = mutableListOf<String>(
+            "Bear",
+            "Deer",
+            "Fox",
+            "Hare",
+            "MountainLion",
+            "Opossum",
+            "Raccoon",
+            "Turkey"
+        )
+
+        val possibleAnimalTextures = mutableListOf<Texture2D>(
+            Bear.image,
+            Deer.image,
+            Fox.image,
+            Hare.image,
+            MountainLion.image,
+            Opossum.image,
+            Raccoon.image,
+            Turkey.image
         )
 
         val possibleNumbers = mutableListOf(
@@ -43,12 +53,17 @@ class WantedPoster : GuiElement(background, defaultPosition, defaultSize) {
 
         val cross = Texture2D.invoke("project/assets/textures/cross.png", true)
 
+        val killList = HashMap<String, Int>()
+
+
     }
 
-    var killCounter: Int = 0
+    val targetAnimal = 0//Random.nextInt(possibleAnimalTextures.size)
+    val killCounter
+        get() = (killList[possibleAnimals[targetAnimal]] ?: 0)
 
     init {
-        childrenHinzufuegen(possibleAnimals[Random.nextInt(possibleAnimals.size)])
+        childrenHinzufuegen(possibleAnimalTextures[targetAnimal])
         children.forEach { it.parent = this }
         //startkoordinaten von tier[0] und zahl[0] sind jeweils direkt oben definiert
         //kreuze zum durchstreichen
@@ -69,6 +84,7 @@ class WantedPoster : GuiElement(background, defaultPosition, defaultSize) {
         children[13].translate(Vector2f(2f, 0.0f))
         children[14].translate(Vector2f(4f, 0.0f))
 
+        println("selected hunting target ${possibleAnimals[targetAnimal]}")
     }
 
     fun childrenHinzufuegen(tierTexture: Texture2D) {
@@ -109,12 +125,17 @@ class WantedPoster : GuiElement(background, defaultPosition, defaultSize) {
         )
     }
 
-    fun hit() {
-        if (killCounter in 0 until 6) {
-            children[killCounter].enable()
-            killCounter++
+    override fun update(dt: Float, time: Float) {
+        super.update(dt, time)
+
+        if (killCounter in 1..6) {
+            children[killCounter - 1].enable()
             children[12].texID = possibleNumbers[killCounter].texID
         }
+
+//        killList.forEach { (t, u) -> println("$t wurde bisher $u getoetet") }
+
+
     }
 
 

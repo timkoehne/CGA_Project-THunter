@@ -17,10 +17,16 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
 
     var player: Entity
 
+    companion object{
+        val bullets = mutableListOf<Bullet>()
+
+    }
+
+
 
     init {
         for (i in 0..50) {
-            testReh.add(Raccoon(scene.myMap))
+            testReh.add(Bear(scene.myMap))
         }
 
         testFox.rotate(0f, Math.toRadians(90.0).toFloat(), 0f)
@@ -34,19 +40,16 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
         camera.parent = character
 
         player = character
-
-
     }
+
 
     fun switchPlayer() {
         if (player == character) {
             player = drone
             character.isFirstPersonView = false
-//            camera.parent = drone
         } else {
             player = character
             character.isFirstPersonView = true
-//            camera.parent = sniper
         }
 
 
@@ -65,6 +68,7 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
         drone.render(shaderProgram)
 
         character.render(shaderProgram)
+        bullets.forEach { it.render(shaderProgram) }
 
 
     }
@@ -77,8 +81,10 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
 
 
         character.update(dt, time)
+        bullets.forEach { it.update(dt, time) }
+        //TODO despawn bullets
 
-        player.movementControl(dt, time, window)
+        player.movementController?.inputControl(dt, time, window)
 
         if (window.getKeyState(GLFW.GLFW_KEY_N)) drone.open(time)
         if (window.getKeyState(GLFW.GLFW_KEY_M)) drone.close(time)

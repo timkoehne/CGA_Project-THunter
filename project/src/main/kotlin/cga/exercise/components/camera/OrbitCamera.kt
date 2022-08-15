@@ -40,16 +40,15 @@ class OrbitCamera : TronCamera() {
         }
     }
 
-    fun updateTheta(offset: Double) {
+    override fun updateTheta(offset: Double) {
         //pitch
-
         if (theta + Math.toRadians(offset) in Math.toRadians(1f)..Math.toRadians(179f)) {
             theta += Math.toRadians(offset).toFloat()
         }
 
     }
 
-    fun updatePhi(offset: Double) {
+    override fun updatePhi(offset: Double) {
         //yaw
 
         phi -= Math.toRadians(offset).toFloat()

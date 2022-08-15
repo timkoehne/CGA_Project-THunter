@@ -16,6 +16,7 @@ open class TronCamera(
 ) : Transformable(), ICamera {
     var theta = 0f
     var phi = Math.toRadians(90f)
+    var viewDir = Vector3f()
 
     companion object {
         val default_fov = Math.toRadians(90f)
@@ -23,7 +24,8 @@ open class TronCamera(
     }
 
     override fun getCalculateViewMatrix(): Matrix4f {
-        return Matrix4f().lookAt(getWorldPosition(), getWorldPosition().sub(getWorldZAxis()), getWorldYAxis())
+        return Matrix4f().lookAt(getWorldPosition(), getWorldPosition().sub(viewDir), getWorldYAxis())
+//        return Matrix4f().lookAt(getWorldPosition(), getWorldPosition().sub(getWorldZAxis()), getWorldYAxis())
     }
 
     override fun getCalculateProjectionMatrix(): Matrix4f {
@@ -31,8 +33,28 @@ open class TronCamera(
     }
 
     override fun bind(shader: ShaderProgram) {
+
+        viewDir.x = (cos(phi) * cos(theta))
+        viewDir.y = sin(theta)
+        viewDir.z = (sin(phi) * cos(theta))
+
         shader.setUniform("view", getCalculateViewMatrix(), false)
         shader.setUniform("projection", getCalculateProjectionMatrix(), false)
     }
+
+
+    open fun updateTheta(offset: Double) {
+        //pitch
+        if (theta + Math.toRadians(offset) in Math.toRadians(-89f)..Math.toRadians(90f)) {
+            theta -= Math.toRadians(offset).toFloat()
+        }
+
+    }
+
+    open fun updatePhi(offset: Double) {
+        //yaw
+        phi -= Math.toRadians(offset).toFloat()
+    }
+
 
 }

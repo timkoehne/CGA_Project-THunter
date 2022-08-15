@@ -27,6 +27,9 @@ open class Mesh(
     private var ibo = 0
     private var indexcount = 0
 
+    private var minVertexPositions: Vector3f? = null
+    private var maxVertexPositions: Vector3f? = null
+
     init {
         vao = GL30.glGenVertexArrays()
         GL30.glBindVertexArray(vao)
@@ -89,7 +92,11 @@ open class Mesh(
     }
 
     fun minVertex(): Vector3f {
-        return Vector3f(minX(), minY(), minZ())
+
+        if(minVertexPositions == null){
+            minVertexPositions = Vector3f(minX(), minY(), minZ())
+        }
+        return minVertexPositions!!
     }
 
     private fun minX(): Float {
@@ -111,7 +118,10 @@ open class Mesh(
     }
 
     fun maxVertex(): Vector3f {
-        return Vector3f(maxX(), maxY(), maxZ())
+        if(maxVertexPositions == null){
+            maxVertexPositions = Vector3f(maxX(), maxY(),maxZ())
+        }
+        return maxVertexPositions!!
     }
 
     private fun maxX(): Float {
@@ -131,7 +141,6 @@ open class Mesh(
         vertexdata.forEachIndexed { index, value -> if (index % 8 == 2 && value > maxValue) maxValue = value }
         return maxValue
     }
-
 
 
     /**

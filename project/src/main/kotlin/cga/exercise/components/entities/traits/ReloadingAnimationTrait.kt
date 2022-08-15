@@ -14,7 +14,7 @@ class ReloadingAnimationTrait(entity: Entity) : Trait(entity) {
         Idle, MovingToReload, Filling, MovingBack
     }
 
-    val bullet = ModelLoader.loadModel("project/assets/character/bullet.obj", 0f, Math.toRadians(35.0).toFloat(), 0f)
+    val bullet = ModelLoader.loadModel("project/assets/character/bullet.obj")
     var bulletMoveStartTime = -1f
 
 
@@ -25,6 +25,7 @@ class ReloadingAnimationTrait(entity: Entity) : Trait(entity) {
 
     init {
         bullet.parent = entity
+        bullet.rotate(0f, Math.toRadians(35.0).toFloat(), 0f)
     }
 
 

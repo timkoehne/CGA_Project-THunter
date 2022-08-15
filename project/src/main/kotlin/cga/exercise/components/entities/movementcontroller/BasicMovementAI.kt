@@ -1,12 +1,9 @@
-package cga.exercise.components.entities.movementai
+package cga.exercise.components.entities.movementcontroller
 
 import cga.exercise.components.entities.Entity
-import cga.exercise.components.geometry.Transformable
-import org.joml.Matrix4f
 import org.joml.Random
-import org.joml.Vector3f
 
-open class MovementAI(val entity: Entity) {
+open class BasicMovementAI(entity: Entity): MovementController(entity) {
 
     private val random: Random = Random()
 
@@ -19,7 +16,7 @@ open class MovementAI(val entity: Entity) {
     private var sleepDuration: Float = 0f
 
 
-    open fun update(dt: Float, time: Float) {
+    override fun update(dt: Float, time: Float) {
 
         //find new goal
         if (walkingDistance in -0.1..0.1) {
@@ -44,7 +41,6 @@ open class MovementAI(val entity: Entity) {
     open fun onMove(dt: Float, time: Float) {
         entity.moveForward(dt)
         walkingDistance -= entity.movementSpeed * dt
-
     }
 
     open fun onRotate(dt: Float, time: Float) {

@@ -2,6 +2,8 @@ package cga.exercise.components.entities
 
 import DroneAnimationTrait
 import cga.exercise.components.camera.OrbitCamera
+import cga.exercise.components.entities.movementcontroller.DroneController
+import cga.exercise.components.entities.movementcontroller.MovementController
 import cga.exercise.components.entities.traits.IDroneAnimationTrait
 import cga.exercise.components.map.MyMap
 import cga.exercise.components.shader.ShaderProgram
@@ -34,6 +36,7 @@ class Drone(myMap: MyMap) : Entity(
     }
 
     override val animationTrait = DroneAnimationTrait(this)
+    override val movementController = DroneController(this)
 
 
     val body = models[0]
@@ -86,27 +89,10 @@ class Drone(myMap: MyMap) : Entity(
     override fun update(dt: Float, time: Float) {
         super.update(dt, time)
         animationTrait.update(dt, time)
-
-
     }
 
     override fun render(shaderProgram: ShaderProgram) {
         super.render(shaderProgram)
-    }
-
-    override fun movementControl(dt: Float, time: Float, window: GameWindow) {
-
-        if (animationTrait.state == DroneAnimationTrait.State.Open) {
-
-            if (window.getKeyState(GLFW.GLFW_KEY_W)) moveForward(dt)
-            if (window.getKeyState(GLFW.GLFW_KEY_S)) moveForward(dt)
-            if (window.getKeyState(GLFW.GLFW_KEY_A)) rotate(0f, 2.3f * dt, 0f)
-            if (window.getKeyState(GLFW.GLFW_KEY_D)) rotate(0f, -2.3f * dt, 0f)
-
-            if (window.getKeyState(GLFW.GLFW_KEY_SPACE)) moveUp(dt)
-            if (window.getKeyState(GLFW.GLFW_KEY_LEFT_SHIFT)) moveDown(dt)
-        }
-
     }
 
 

@@ -59,9 +59,9 @@ open class GravityTrait(entity: Entity, val myMap: MyMap) : Trait(entity) {
             State.Falling -> {
                 if (gravityEnabled) {
                     entity.preTranslate(Vector3f(0f, -(gravitySpeed * entity.weight * dt), 0f))
-                }
-                if (pos.y <= myMap.getHeight(pos.x, pos.z) + entity.height) {
-                    state = State.OnTheGround
+                    if (pos.y <= myMap.getHeight(pos.x, pos.z) + entity.height) {
+                        state = State.OnTheGround
+                    }
                 }
             }
         }

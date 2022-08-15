@@ -78,7 +78,7 @@ class Scene(val window: GameWindow) {
 
         myMap = MyMap(
             5, 1f, this, 6f, 18f,
-            2f, 2, 0.1f, 0.9f
+            2f, 2, 0.3f, 0.9f
         )
         orbitCamera.myMap = myMap
 
@@ -249,8 +249,15 @@ class Scene(val window: GameWindow) {
 
         if (entityManager.player == entityManager.character) {
             if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+
+                val bullet = Bullet(myMap)
+                EntityManager.bullets.add(bullet)
+
+                bullet.setModelMatrix(entityManager.player.getModelMatrix())
+                bullet.translate(Vector3f(0f, 1.4f, -0.5f))
+
                 guiRenderer.ammoAnzeige.shoot()
-                guiRenderer.wantedPoster.hit()
+//                guiRenderer.wantedPoster.hit()
             }
 
             if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
@@ -275,12 +282,16 @@ class Scene(val window: GameWindow) {
     }
 
     fun onMouseMove(xpos: Double, ypos: Double) {
-        if (camera is OrbitCamera) {
-            (camera as OrbitCamera).updateTheta((prevY - ypos) * 0.1f)
-            (camera as OrbitCamera).updatePhi((prevX - xpos) * 0.1f)
-        } else {
-            entityManager.player.onMouseMove(prevX - xpos, prevY - ypos)
-        }
+//        if (camera is OrbitCamera) {
+//            (camera as OrbitCamera).updateTheta((prevY - ypos) * 0.1f)
+//            (camera as OrbitCamera).updatePhi((prevX - xpos) * 0.1f)
+//        } else {
+//            entityManager.player.onMouseMove(prevX - xpos, prevY - ypos)
+//        }
+
+
+        camera.updateTheta((prevY - ypos) * 0.1f)
+        camera.updatePhi((prevX - xpos) * 0.1f)
 
 
         prevX = xpos

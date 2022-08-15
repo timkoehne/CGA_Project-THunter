@@ -18,6 +18,10 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
         return Matrix4f(modelMatrix)
     }
 
+    fun setModelMatrix(modelMatrix: Matrix4f) {
+        this.modelMatrix = modelMatrix
+    }
+
     fun lookAlong(viewDir: Vector3f) {
         modelMatrix.setLookAlong(viewDir, getWorldYAxis())
     }
