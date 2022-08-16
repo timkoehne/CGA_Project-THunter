@@ -12,7 +12,12 @@ import kotlin.math.min
 class AABB(val parent: Transformable, val boundingBox: Renderable) {
 
     companion object {
-        var showHitbox = true
+
+        fun toggleHitbox(){
+            showHitbox = !showHitbox
+        }
+
+        var showHitbox = false
     }
 
     val minExtend: Vector3f

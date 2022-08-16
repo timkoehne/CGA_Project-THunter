@@ -26,8 +26,11 @@ class MyMap(
 
     val myClock: MyClock
 
+    var ambientSound = Scene.audioMaster.createAudioSource("project/assets/sounds/ambientSound_day.ogg")
+
 
     init {
+
         groundShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/ground_frag.glsl")
         proceduralGround = ProceduralGroundInfinite(this, numChunksSquare, abstand)
 
@@ -72,6 +75,10 @@ class MyMap(
                 "project/assets/textures/skybox/night-rotating/back.png"
             ), this, true
         )
+
+        ambientSound.turnOnLooping()
+        ambientSound.play()
+
     }
 
     fun getCamera(): TronCamera{

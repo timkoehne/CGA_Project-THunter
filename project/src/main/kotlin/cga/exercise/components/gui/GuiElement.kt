@@ -73,15 +73,15 @@ open class GuiElement(
         scale(Vector3f(scale.x, scale.y, 1f))
     }
 
-    fun enable() {
+    open fun enable() {
         isShowing = true
     }
 
-    fun disable() {
+    open fun disable() {
         isShowing = false
     }
 
-    fun toggle() {
+    open fun toggle() {
         isShowing = !isShowing
     }
 

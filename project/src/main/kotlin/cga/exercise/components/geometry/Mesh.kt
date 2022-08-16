@@ -3,7 +3,7 @@ package cga.exercise.components.geometry
 import cga.exercise.components.shader.ShaderProgram
 import org.joml.Vector3f
 import org.lwjgl.opengl.*
-import org.lwjgl.opengl.GL11.GL_POLYGON_MODE
+import org.lwjgl.opengl.GL11.*
 import kotlin.math.min
 
 /**
@@ -154,13 +154,25 @@ open class Mesh(
 
     companion object {
 
-        fun renderLines() {
+        var currentlyRendering = GL11.GL_FILL
+        private fun renderLines() {
+            currentlyRendering = GL_LINE
             GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE)
         }
 
-        fun renderTriangles() {
+        private fun renderTriangles() {
+            currentlyRendering = GL_FILL
             GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL)
         }
+
+        fun toggleWireframe(){
+            if(currentlyRendering == GL_FILL){
+                renderLines()
+            }else{
+                renderTriangles()
+            }
+        }
+
 
 
         val stride: Int = 8 * 4 //sizeOf(float) = 4

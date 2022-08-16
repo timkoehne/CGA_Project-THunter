@@ -1,6 +1,8 @@
 package cga.exercise.audio
 
 import org.lwjgl.openal.AL10
+import org.lwjgl.openal.AL10.AL_FALSE
+import org.lwjgl.openal.AL10.AL_TRUE
 
 
 class AudioSource(bufferID: Int) {
@@ -10,7 +12,6 @@ class AudioSource(bufferID: Int) {
     init {
         sourceID = AL10.alGenSources()
         AL10.alSourcei(sourceID, AL10.AL_BUFFER, bufferID)
-        AL10.alSourcePlay(sourceID)
     }
 
     fun play() {
@@ -19,6 +20,13 @@ class AudioSource(bufferID: Int) {
 
     fun stop() {
         AL10.alSourceStop(sourceID)
+    }
+
+    fun turnOnLooping(){
+        AL10.alSourcei(sourceID, AL10.AL_LOOPING, AL_TRUE)
+    }
+    fun turnOffLooping(){
+        AL10.alSourcei(sourceID, AL10.AL_LOOPING, AL_FALSE)
     }
 
     fun cleanUp() {

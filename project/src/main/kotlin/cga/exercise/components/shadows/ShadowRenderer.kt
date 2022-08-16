@@ -9,8 +9,8 @@ import org.lwjgl.opengl.*
 
 class ShadowRenderer(val scene: Scene) {
     companion object {
-        const val SHADOW_WIDTH = 1024 * 4//TODO bessere loesung finden
-        const val SHADOW_HEIGHT = 1024 * 4//TODO bessere loesung finden
+        const val SHADOW_WIDTH = 1024 * 16//TODO bessere loesung finden
+        const val SHADOW_HEIGHT = 1024 * 16//TODO bessere loesung finden
     }
 
     var sun: Cube = Cube(scene.myMap)
@@ -63,10 +63,10 @@ class ShadowRenderer(val scene: Scene) {
 
         val depthProjection =
             Matrix4f().ortho(
-                -50f,
-                50f,
-                -20f,
-                20f,
+                -200f,
+                200f,
+                -200f,
+                200f,
                 near_plane,
                 far_plane
             ) //TODO bessere loesung finden. debugshader hilft vermutlich

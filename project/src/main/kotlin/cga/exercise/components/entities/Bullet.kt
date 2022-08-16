@@ -8,13 +8,13 @@ import cga.framework.ModelLoader
 class Bullet(myMap: MyMap) : Entity(ModelLoader.loadModel(filepath), myMap, hitbox) {
 
     override val gravityTrait = null
+    override val movementSpeed = 20f
 
     companion object {
         val filepath = "project/assets/character/bullet.obj"
         val hitbox = "project/assets/character/bullet hitbox.obj"
 
         val maxDistance = 50
-
     }
 
 

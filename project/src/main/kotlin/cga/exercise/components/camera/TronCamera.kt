@@ -9,10 +9,7 @@ import org.joml.Vector3f
 import kotlin.math.cos
 
 open class TronCamera(
-    var fov: Float = default_fov,
-    var aspect: Float = 16 / 9f,
-    var nPlane: Float = 0.01f,
-    var fPlane: Float = 100.0f
+    var fov: Float = default_fov, var aspect: Float = 16 / 9f, var nPlane: Float = 0.01f, var fPlane: Float = 100.0f
 ) : Transformable(), ICamera {
     var theta = 0f
     var phi = Math.toRadians(90f)
@@ -45,7 +42,7 @@ open class TronCamera(
 
     open fun updateTheta(offset: Double) {
         //pitch
-        if (theta + Math.toRadians(offset) in Math.toRadians(-89f)..Math.toRadians(90f)) {
+        if (theta + Math.toRadians(offset) in Math.toRadians(-89f)..Math.toRadians(89f)) {
             theta -= Math.toRadians(offset).toFloat()
         }
 

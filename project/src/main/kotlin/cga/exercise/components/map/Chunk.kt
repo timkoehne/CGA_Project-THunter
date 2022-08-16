@@ -34,9 +34,9 @@ class Models {
         )
 
         val stones = mutableListOf(
-            "project/assets/deko/bigStone.obj",
-            "project/assets/deko/etwasKleinererStein.obj",
-            "project/assets/deko/stock.obj"
+            "project/assets/deko/bigStone.obj"
+//            "project/assets/deko/etwasKleinererStein.obj",
+//            "project/assets/deko/stock.obj"
         )
 
         val accessories = mutableListOf(
@@ -133,7 +133,7 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
         tilesGenerieren(
             anzStones,
             Models.stones,
-            null,
+            Foliage.stoneCollsionPath,
             possibleStonePositions,
             null,
             stoneTiles,

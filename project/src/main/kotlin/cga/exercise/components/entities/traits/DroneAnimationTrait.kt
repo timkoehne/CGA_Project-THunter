@@ -1,13 +1,17 @@
 import cga.exercise.components.entities.Drone
-import cga.exercise.components.entities.traits.IDroneAnimationTrait
 import cga.exercise.components.entities.traits.Trait
-import cga.exercise.components.geometry.Transformable
-import org.joml.Vector3f
+import cga.exercise.game.Scene
 
 class DroneAnimationTrait(val drone: Drone) : Trait(drone) {
 
     var animationStartTime = 0f
     var state = State.Closed
+    var droneSound = Scene.audioMaster.createAudioSource("project/assets/sounds/drone.ogg")
+
+    init {
+        droneSound.turnOnLooping()
+    }
+
 
     companion object {
         const val rotationsSpeed = 20f
@@ -56,12 +60,14 @@ class DroneAnimationTrait(val drone: Drone) : Trait(drone) {
                 if (animationPercentage >= 1f) {
                     state = State.Open
                     drone.gravityTrait?.disable()
+                    droneSound.play()
                 }
                 rotatePropeller(rotationsSpeed * dt * animationPercentage)
             }
             State.Closing -> {
                 if (drone.frontRightArm.rotationInsgesamt.y <= Math.toRadians(30.0)) {
                     state = State.Closed
+                    droneSound.stop()
                 } else {
                     rotateArms(-dt)
                 }
@@ -128,13 +134,13 @@ class DroneAnimationTrait(val drone: Drone) : Trait(drone) {
         animationStartTime = time
     }
 
-    fun open(time: Float) {
+    fun open() {
         if (state == State.Closed) {
             state = State.Opening
         }
     }
 
-    fun close(time: Float) {
+    fun close() {
         if (state == State.Open) {
             state = State.FindingClosingPosition
         }

@@ -6,7 +6,9 @@ interface IDroneAnimationTrait: ITrait {
 
     val animationTrait: DroneAnimationTrait
 
-    fun open(time: Float)
-    fun close(time: Float)
+    fun open()
+    fun close()
+
+    fun toggle()
 
 }

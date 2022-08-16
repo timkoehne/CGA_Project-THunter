@@ -1,6 +1,7 @@
 package cga.exercise.game
 
 import cga.exercise.audio.AudioMaster
+import cga.exercise.collision.AABB
 import cga.exercise.components.camera.OrbitCamera
 import cga.exercise.components.map.TerrainGenerator
 import cga.exercise.components.camera.TronCamera
@@ -15,6 +16,7 @@ import cga.exercise.components.shadows.ShadowRenderer
 import cga.framework.GLError
 import cga.framework.GameWindow
 import org.joml.Math
+import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.*
@@ -24,6 +26,11 @@ import org.lwjgl.opengl.*
  * Created by Fabian on 16.09.2017.
  */
 class Scene(val window: GameWindow) {
+
+
+    companion object {
+        var audioMaster = AudioMaster()
+    }
 
     private var prevX: Double = window.windowWidth / 2.0
     private var prevY: Double = window.windowHeight / 2.0
@@ -39,12 +46,15 @@ class Scene(val window: GameWindow) {
     val guiRenderer: GuiRenderer
     val myMap: MyMap
     val entityManager: EntityManager
-    var audioMaster = AudioMaster()
     val shadowRenderer: ShadowRenderer
 //    val grassInstance: GrassInstance
 
+    var celShadingLevel = 0
+
     private val lights = arrayListOf<PointLight>()
     lateinit var spotlight: SpotLight
+
+    var gunShotSound = audioMaster.createAudioSource("project/assets/sounds/gun_shot.ogg")
 
 
     //scene setup
@@ -54,7 +64,7 @@ class Scene(val window: GameWindow) {
         GL11.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
         GLError.checkThrow()
 
-        val backfaceCullingEnable = false
+        val backfaceCullingEnable = true
         if (backfaceCullingEnable) {
             GL11.glEnable(GL11.GL_CULL_FACE); GLError.checkThrow()
             GL11.glFrontFace(GL11.GL_CCW); GLError.checkThrow()
@@ -96,17 +106,11 @@ class Scene(val window: GameWindow) {
 
         shadowRenderer = ShadowRenderer(this)
 
-
         initilizeLights()
-
-
-        var audioSource = audioMaster.createAudioSource("project/assets/sounds/test.ogg")
-        audioSource.play()
 
         guiRenderer = GuiRenderer(this, window)
 
         entityManager.character.reloadingAnimationTrait.ammoAnzeige = guiRenderer.ammoAnzeige
-
 
 //        grassInstance = GrassInstance(1, myMap)
 
@@ -142,7 +146,7 @@ class Scene(val window: GameWindow) {
     fun setNeededUniforms(shaderProgram: ShaderProgram) {
         shaderProgram.use()
         camera.bind(shaderProgram)
-        shaderProgram.setUniform("celShadingLevels", 0)
+        shaderProgram.setUniform("celShadingLevels", celShadingLevel)
         shaderProgram.setUniform("depthMap", 10)
         shaderProgram.setUniform("viewPos", camera.getPosition())
         shaderProgram.setUniform("sunPos", shadowRenderer.sun.getPosition())
@@ -214,9 +218,6 @@ class Scene(val window: GameWindow) {
         myMap.update(dt, time)
         entityManager.update(window, dt, time)
         guiRenderer.update(dt, time)
-
-        if (window.getKeyState(GLFW_KEY_0)) Mesh.renderTriangles()
-        if (window.getKeyState(GLFW_KEY_P)) Mesh.renderLines()
     }
 
     fun switchCamera() {
@@ -235,11 +236,38 @@ class Scene(val window: GameWindow) {
         }
 
         if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-
             if (entityManager.player == entityManager.character) {
                 (entityManager.player as Character).reload()
             }
         }
+
+        if (key == GLFW_KEY_N && action == GLFW_PRESS) {
+            entityManager.drone.toggle()
+        }
+
+        if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
+            Mesh.toggleWireframe()
+        }
+
+        if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+            AABB.toggleHitbox()
+        }
+
+        if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+            println("Celshading Level at $celShadingLevel")
+            celShadingLevel++
+        }
+
+        if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+            if(celShadingLevel > 0){
+                println("Celshading Level at $celShadingLevel")
+                celShadingLevel--
+            }else{
+                println("Celshading is off")
+            }
+        }
+
+
 
     }
 
@@ -250,14 +278,17 @@ class Scene(val window: GameWindow) {
         if (entityManager.player == entityManager.character) {
             if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 
-                val bullet = Bullet(myMap)
-                EntityManager.bullets.add(bullet)
+                if (guiRenderer.ammoAnzeige.ammoVorhanden()) {
 
-                bullet.setModelMatrix(entityManager.player.getModelMatrix())
-                bullet.translate(Vector3f(0f, 1.4f, -0.5f))
+                    gunShotSound.play()
+                    val bullet = Bullet(myMap)
+                    EntityManager.bullets.add(bullet)
 
-                guiRenderer.ammoAnzeige.shoot()
-//                guiRenderer.wantedPoster.hit()
+                    bullet.setModelMatrix(entityManager.player.getModelMatrix())
+                    bullet.translate(Vector3f(0f, 1.4f, -0.5f))
+
+                    guiRenderer.ammoAnzeige.shoot()
+                }
             }
 
             if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
@@ -282,16 +313,20 @@ class Scene(val window: GameWindow) {
     }
 
     fun onMouseMove(xpos: Double, ypos: Double) {
-//        if (camera is OrbitCamera) {
+        if (camera is OrbitCamera) {
 //            (camera as OrbitCamera).updateTheta((prevY - ypos) * 0.1f)
 //            (camera as OrbitCamera).updatePhi((prevX - xpos) * 0.1f)
-//        } else {
+        } else {
 //            entityManager.player.onMouseMove(prevX - xpos, prevY - ypos)
-//        }
+        }
 
 
         camera.updateTheta((prevY - ypos) * 0.1f)
         camera.updatePhi((prevX - xpos) * 0.1f)
+
+//        val viewMatrix = camera.getCalculateViewMatrix()
+//        val dir = Vector3f(-viewMatrix.get(2, 0), viewMatrix.get(2, 1), viewMatrix.get(2, 2))
+//        entityManager.character.setForward(dir)
 
 
         prevX = xpos

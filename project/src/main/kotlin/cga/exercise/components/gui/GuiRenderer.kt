@@ -24,6 +24,7 @@ class GuiRenderer(
     val ammoAnzeige: AmmoAnzeige
     val timer: Timer
 
+
     companion object {
         val squareVertices = floatArrayOf(
             -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
@@ -75,7 +76,7 @@ class GuiRenderer(
 
         wantedPoster = WantedPoster()
         guiElements.add(wantedPoster)
-        wantedPoster.disable()
+        wantedPoster.enable()
 
         wantedPosterButton = GuiElement(
             Texture2D.invoke("project/assets/textures/rolle.png", true),
@@ -83,6 +84,7 @@ class GuiRenderer(
             Vector2f(0.15f / scene.camera.aspect, 0.15f)
         )
         guiElements.add(wantedPosterButton)
+        wantedPosterButton.disable()
 
         timer = Timer(300f)
         guiElements.add(timer)

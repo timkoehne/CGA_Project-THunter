@@ -1,16 +1,12 @@
 package cga.exercise.components.entities
 
 import DroneAnimationTrait
-import cga.exercise.components.camera.OrbitCamera
 import cga.exercise.components.entities.movementcontroller.DroneController
-import cga.exercise.components.entities.movementcontroller.MovementController
 import cga.exercise.components.entities.traits.IDroneAnimationTrait
 import cga.exercise.components.map.MyMap
-import cga.exercise.components.shader.ShaderProgram
-import cga.framework.GameWindow
+import cga.exercise.game.Scene
 import cga.framework.ModelLoader
 import org.joml.Vector3f
-import org.lwjgl.glfw.GLFW
 
 class Drone(myMap: MyMap) : Entity(
     ModelLoader.loadModelSameTextures(
@@ -27,6 +23,8 @@ class Drone(myMap: MyMap) : Entity(
         )
     ), myMap, hitbox
 ), IDroneAnimationTrait {
+
+    var hitByBulletSound = Scene.audioMaster.createAudioSource("project/assets/sounds/drone-bullet-hit.ogg")
 
     companion object {
         val propellerTransform = Vector3f(0.135f, 0f, -0.405f)
@@ -50,7 +48,6 @@ class Drone(myMap: MyMap) : Entity(
     val backRightPropeller = models[8]
 
     init {
-
         frontRightArm.parent = body
         frontLeftArm.parent = body
         backLeftArm.parent = body
@@ -78,12 +75,20 @@ class Drone(myMap: MyMap) : Entity(
 
     }
 
-    override fun open(time: Float) {
-        animationTrait.open(time)
+    override fun toggle(){
+        if(animationTrait.state == DroneAnimationTrait.State.Closed){
+            open()
+        }else{
+            close()
+        }
     }
 
-    override fun close(time: Float) {
-        animationTrait.close(time)
+    override fun open() {
+        animationTrait.open()
+    }
+
+    override fun close() {
+        animationTrait.close()
     }
 
     override fun update(dt: Float, time: Float) {
@@ -91,8 +96,9 @@ class Drone(myMap: MyMap) : Entity(
         animationTrait.update(dt, time)
     }
 
-    override fun render(shaderProgram: ShaderProgram) {
-        super.render(shaderProgram)
+    override fun hitByBullet() {
+        hitByBulletSound.play()
+        super.hitByBullet()
     }
 
 

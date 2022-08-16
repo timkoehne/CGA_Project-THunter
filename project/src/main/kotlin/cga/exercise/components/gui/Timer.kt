@@ -1,6 +1,7 @@
 package cga.exercise.components.gui
 
 import cga.exercise.components.texture.Texture2D
+import cga.exercise.game.Scene
 import org.joml.Vector2f
 import org.joml.Vector3f
 
@@ -14,6 +15,7 @@ class Timer(var timeInSekunden: Float) : GuiElement(background, defaultPosition,
 
         val firstNumberPosition = Vector2f(-2.3f, 0f)
         val numberScale = Vector2f(0.4f, 1.5f)
+        var youLooseSound = Scene.audioMaster.createAudioSource("project/assets/sounds/you_lose.ogg")
 
         val numberTextures = mutableListOf<Texture2D>(
             Texture2D.invoke("project/assets/textures/clock/0.png", true),
@@ -77,6 +79,9 @@ class Timer(var timeInSekunden: Float) : GuiElement(background, defaultPosition,
     }
 
     fun pause(changeTo: Boolean = !pauseTimer) {
+        if (pauseTimer != changeTo) {
+            youLooseSound.play()
+        }
 //        println(pauseTimer)
         pauseTimer = changeTo
     }

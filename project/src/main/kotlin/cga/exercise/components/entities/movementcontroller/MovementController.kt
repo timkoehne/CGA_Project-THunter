@@ -14,7 +14,7 @@ open class MovementController(val entity: Entity) {
 
         entity.translate(direction)
 
-        val collisionDetected = entity.collision()
+        val collisionDetected = entity.movementCollision()
         if (collisionDetected) {
             entity.translate(direction.mul(-1f))
         }
@@ -27,6 +27,7 @@ open class MovementController(val entity: Entity) {
 
     fun moveForward(dt: Float): Boolean {
         val direction = Vector3f(0f, 0f, -entity.movementSpeed * dt)
+
         return move(direction)
     }
 

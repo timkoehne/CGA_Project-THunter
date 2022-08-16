@@ -37,7 +37,6 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
 
     init {
         models.forEach { it.parent = this }
-
         allEntities.add(this)
 
     }
@@ -57,6 +56,9 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
             movementController?.update(dt, time)
             collisionBox?.setPosition(getPosition())
             gravityTrait?.update(dt, time)
+
+            checkForBulletCollision()
+
         }
     }
 
@@ -70,13 +72,9 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
         models.forEach { it.cleanUp() }
     }
 
-    fun collision(): Boolean {
+    fun movementCollision(): Boolean {
         if (this.collisionBox != null) {
-
-            if (checkForBulletCollision()) return true
-
 //            if (checkForEntityCollision()) return true
-
             //foliage koennte in chunks aufgeteilt werden, dann muesste hier viel weniger gecheckt werden
             if (checkForFoliageCollision()) return true
         }
@@ -85,16 +83,16 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
     }
 
     fun checkForBulletCollision(): Boolean {
-        if (alive && this !is Bullet) {
+        if (this.collisionBox != null && this.alive) {
             EntityManager.bullets.forEach {
-                if (it !is Bullet) return@forEach //ignore bullet to bullet collison
-                if (it.collisionBox != null) {
+                if (it.collisionBox != null && this != it && it.alive) {
                     val distance1 = it.collisionBox.minExtend.sub(this.collisionBox!!.maxExtend)
                     val distance2 = this.collisionBox!!.minExtend.sub(it.collisionBox.maxExtend)
                     val maxDistance = distance1.max(distance2)
                     val maxValue = Util.largestValueInVector(maxDistance)
                     if (maxValue < 0) {
-                        EntityManager.bullets.remove(it)
+                        it.alive = false
+
                         this.hitByBullet()
                         return true
                     }
@@ -125,22 +123,23 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
     }
 
     fun checkForFoliageCollision(): Boolean {
-        allFoliage.forEach {
-            if (it.collisionBox != null && this != it) {
-                val distance1 = it.collisionBox.minExtend.sub(this.collisionBox!!.maxExtend)
-                val distance2 = this.collisionBox!!.minExtend.sub(it.collisionBox.maxExtend)
-                val maxDistance = distance1.max(distance2)
-                val maxValue = Util.largestValueInVector(maxDistance)
-                if (maxValue < 0) {
+        if (alive) {
+            //TODO check only foliage in same chunk
+            //TODO seperate foliage so that this wont loop over every grass element
+            allFoliage.forEach {
+                if (it.collisionBox != null && this != it) {
+                    val distance1 = it.collisionBox.minExtend.sub(this.collisionBox!!.maxExtend)
+                    val distance2 = this.collisionBox!!.minExtend.sub(it.collisionBox.maxExtend)
+                    val maxDistance = distance1.max(distance2)
+                    val maxValue = Util.largestValueInVector(maxDistance)
+                    if (maxValue < 0) {
 //                        println("${this.javaClass} entity collision with ${it.javaClass}")
 //                        println("distance 1 $distance1")
 //                        println("distance 2 $distance2")
 //                        println("maxdistance $maxDistance")
 //                        println("maxvalue $maxValue")
-
-                    //TODO bullet collision mit foliage
-
-                    return true
+                        return true
+                    }
                 }
             }
         }
@@ -151,6 +150,7 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
         alive = false
 
         val animalName = this.javaClass.simpleName
+        println(animalName)
 
         if (WantedPoster.killList[animalName] == null) {
             WantedPoster.killList[animalName] = 0

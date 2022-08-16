@@ -26,6 +26,12 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
         modelMatrix.setLookAlong(viewDir, getWorldYAxis())
     }
 
+    fun setForward(viewDir: Vector3f) {
+        modelMatrix.set(2, 0, viewDir.x)
+        modelMatrix.set(2, 1, viewDir.y)
+        modelMatrix.set(2, 2, viewDir.z)
+    }
+
     fun setPosition(pos: Vector3f) {
         modelMatrix.set(3, 0, pos.x)
         modelMatrix.set(3, 1, pos.y)

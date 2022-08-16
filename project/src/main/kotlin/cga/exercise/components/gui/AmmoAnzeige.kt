@@ -28,6 +28,10 @@ class AmmoAnzeige : GuiElement(null, Vector2f(1f - 0.05f, -1f), Vector2f(0.2f, 0
         }
     }
 
+    fun ammoVorhanden(): Boolean{
+        return currentAmmoIndex >= 0
+    }
+
     fun shoot() {
         if (currentAmmoIndex >= 0) {
             children[currentAmmoIndex].texID = bulletEmpty.texID

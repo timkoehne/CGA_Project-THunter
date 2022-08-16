@@ -2,6 +2,7 @@ package cga.exercise.components.gui
 
 import cga.exercise.components.entities.*
 import cga.exercise.components.texture.Texture2D
+import cga.exercise.game.Scene
 import org.joml.Vector2f
 import kotlin.random.Random
 
@@ -18,6 +19,9 @@ class WantedPoster : GuiElement(background, defaultPosition, defaultSize) {
         val firstNumberPosition = Vector2f(-0.25f, 0.55f)
         val numberScale = Vector2f(0.1f, 0.1f)
 
+        var youWinSound = Scene.audioMaster.createAudioSource("project/assets/sounds/you_win.ogg")
+        var correctKillSound = Scene.audioMaster.createAudioSource("project/assets/sounds/correct_kill.ogg")
+        var paperscrollSound = Scene.audioMaster.createAudioSource("project/assets/sounds/paperscroll.ogg")
 
         val possibleAnimals = mutableListOf<String>(
             "Bear",
@@ -58,9 +62,13 @@ class WantedPoster : GuiElement(background, defaultPosition, defaultSize) {
 
     }
 
-    val targetAnimal = 0//Random.nextInt(possibleAnimalTextures.size)
-    val killCounter
-        get() = (killList[possibleAnimals[targetAnimal]] ?: 0)
+    val targetAnimal = Random.nextInt(possibleAnimalTextures.size)
+    val killCounter: Int
+        get() {
+//            println(killList[possibleAnimals[targetAnimal]] ?: 0)
+            return killList[possibleAnimals[targetAnimal]] ?: 0
+        }
+    var lastKillCounter = 0
 
     init {
         childrenHinzufuegen(possibleAnimalTextures[targetAnimal])
@@ -85,6 +93,11 @@ class WantedPoster : GuiElement(background, defaultPosition, defaultSize) {
         children[14].translate(Vector2f(4f, 0.0f))
 
         println("selected hunting target ${possibleAnimals[targetAnimal]}")
+    }
+
+    override fun toggle() {
+        paperscrollSound.play()
+        super.toggle()
     }
 
     fun childrenHinzufuegen(tierTexture: Texture2D) {
@@ -128,11 +141,23 @@ class WantedPoster : GuiElement(background, defaultPosition, defaultSize) {
     override fun update(dt: Float, time: Float) {
         super.update(dt, time)
 
-        if (killCounter in 1..6) {
-            children[killCounter - 1].enable()
-            children[12].texID = possibleNumbers[killCounter].texID
-        }
+        if (killCounter != lastKillCounter) {
+            if (killCounter in 0 .. 6) {
 
+                correctKillSound.play()
+
+                children[killCounter - 1].enable()
+                children[12].texID = possibleNumbers[killCounter].texID
+                lastKillCounter = killCounter
+
+                if(killCounter == 6){
+                    youWinSound.play()
+                }
+
+
+
+            }
+        }
 //        killList.forEach { (t, u) -> println("$t wurde bisher $u getoetet") }
 
 

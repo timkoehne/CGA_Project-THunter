@@ -19,7 +19,7 @@ open class Foliage(var models: List<Renderable>, collisionBoxPath: String? = nul
 
         val allFoliage = mutableListOf<Foliage>()
         val treeCollsionPath = "project/assets/trees/tree hitbox.obj"
-        val stoneCollsionPath = "project/assets/deko/stonecube.obj"
+        val stoneCollsionPath = "project/assets/deko/bigstonecube.obj"
     }
 
 
