@@ -6,11 +6,12 @@ import cga.exercise.components.entities.traits.ReloadingAnimationTrait
 import cga.exercise.components.map.MyMap
 import cga.exercise.components.shader.ShaderProgram
 import cga.framework.ModelLoader
+import org.joml.Vector3f
 
 class Character(myMap: MyMap) : Entity(mutableListOf(firstPersonView, thirdPersonView), myMap, hitbox),
     IReloadAnimationTrait {
-
     companion object {
+
         val firstPersonView =
             ModelLoader.loadModel("project/assets/character/sniper.obj")
         val thirdPersonView =
@@ -21,16 +22,14 @@ class Character(myMap: MyMap) : Entity(mutableListOf(firstPersonView, thirdPerso
 
     }
 
+    init {
+    }
+
     override val movementController = MovementController(this)
     val reloadingAnimationTrait = ReloadingAnimationTrait(this)
     var isFirstPersonView = true
 
     override fun render(shaderProgram: ShaderProgram) {
-
-//        if(showHitbox){
-//            collisionBox?.render(shaderProgram)
-//        }
-
 
         if (isFirstPersonView) {
             models[0].render(shaderProgram)
@@ -41,6 +40,10 @@ class Character(myMap: MyMap) : Entity(mutableListOf(firstPersonView, thirdPerso
     }
 
     override fun update(dt: Float, time: Float) {
+        if (!alive) {
+            println("player died. is this intended??")
+            alive = true
+        }
         super.update(dt, time)
         reloadingAnimationTrait.update(dt, time)
     }

@@ -6,6 +6,7 @@ import cga.exercise.components.camera.OrbitCamera
 import cga.exercise.components.map.TerrainGenerator
 import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.entities.*
+import cga.exercise.components.entities.traits.ReloadingAnimationTrait
 import cga.exercise.components.geometry.*
 import cga.exercise.components.gui.GuiRenderer
 import cga.exercise.components.light.PointLight
@@ -15,6 +16,7 @@ import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.components.shadows.ShadowRenderer
 import cga.framework.GLError
 import cga.framework.GameWindow
+import org.joml.AxisAngle4f
 import org.joml.Math
 import org.joml.Matrix4f
 import org.joml.Vector3f
@@ -30,20 +32,28 @@ class Scene(val window: GameWindow) {
 
     companion object {
         var audioMaster = AudioMaster()
+        var gunShotSound = audioMaster.createAudioSource("project/assets/sounds/gun_shot.ogg")
+
+        init {
+            gunShotSound.setVolume(0.1f)
+        }
+
     }
 
     private var prevX: Double = window.windowWidth / 2.0
     private var prevY: Double = window.windowHeight / 2.0
     private var scrollValue: Double = 0.0
 
-    private val staticShader: ShaderProgram
+
+    private val staticShader: ShaderProgram =
+        ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
 
     var camera: TronCamera
 
-    val flyThroughCamera: TronCamera
-    val orbitCamera: OrbitCamera
+    private val flyThroughCamera: TronCamera
+    private val orbitCamera: OrbitCamera
 
-    val guiRenderer: GuiRenderer
+    private val guiRenderer: GuiRenderer
     val myMap: MyMap
     val entityManager: EntityManager
     val shadowRenderer: ShadowRenderer
@@ -54,12 +64,8 @@ class Scene(val window: GameWindow) {
     private val lights = arrayListOf<PointLight>()
     lateinit var spotlight: SpotLight
 
-    var gunShotSound = audioMaster.createAudioSource("project/assets/sounds/gun_shot.ogg")
-
-
     //scene setup
     init {
-        staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
 
         GL11.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
         GLError.checkThrow()
@@ -82,15 +88,12 @@ class Scene(val window: GameWindow) {
         orbitCamera = OrbitCamera()
         camera = flyThroughCamera
 
-//        flyThroughCamera.translate(Vector3f(-1.0f, 1.3f, 1.9f))
         flyThroughCamera.translate(Vector3f(0f, 1.6f, 0f))
 
 
         myMap = MyMap(
-            5, 1f, this, 6f, 18f,
-            2f, 2, 0.3f, 0.9f
+            5, 1f, this, 6f, 18f, 2f, 2, 0.3f, 0.9f
         )
-        orbitCamera.myMap = myMap
 
 
         entityManager = EntityManager(camera, this)
@@ -117,7 +120,7 @@ class Scene(val window: GameWindow) {
 
     }
 
-    fun initilizeLights() {
+    private fun initilizeLights() {
         lights.add(PointLight(Vector3f(0f, -0.75f, 0f), Vector3f(0.3f)))
         lights[0].parent = entityManager.player
 //        lights.add(PointLight(Vector3f(-5f, 2f, -5f), Vector3f(1f, 1f, 1f)))
@@ -164,7 +167,7 @@ class Scene(val window: GameWindow) {
 
         shaderProgram.setUniform("sandUpperBound", 0.10f * TerrainGenerator.terrainMaxHeight)
         shaderProgram.setUniform("dirtUpperBound", 0.30f * TerrainGenerator.terrainMaxHeight)
-        shaderProgram.setUniform("grassUpperBound", 1.0f * TerrainGenerator.terrainMaxHeight)
+        shaderProgram.setUniform("grassUpperBound", 1.5f * TerrainGenerator.terrainMaxHeight)
     }
 
     fun render(dt: Float, time: Float) {
@@ -177,7 +180,7 @@ class Scene(val window: GameWindow) {
 
 //        grassInstance.render(camera)
 
-        shadowRenderer.sun.render(staticShader)
+//        shadowRenderer.sun.render(staticShader)
         entityManager.render(dt, time, staticShader)
         renderLights(dt, time, staticShader)
 
@@ -218,13 +221,20 @@ class Scene(val window: GameWindow) {
         myMap.update(dt, time)
         entityManager.update(window, dt, time)
         guiRenderer.update(dt, time)
+
+
     }
 
-    fun switchCamera() {
+    private fun switchCamera() {
         camera = if (camera == flyThroughCamera) orbitCamera else flyThroughCamera
     }
 
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {
+
+        if (key == GLFW_KEY_X && action == GLFW_PRESS) {
+            guiRenderer.controlDisplay.toggle()
+        }
+
         if (key == GLFW_KEY_C && action == GLFW_PRESS) {
             entityManager.switchPlayer()
             switchCamera()
@@ -259,14 +269,13 @@ class Scene(val window: GameWindow) {
         }
 
         if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
-            if(celShadingLevel > 0){
+            if (celShadingLevel > 0) {
                 println("Celshading Level at $celShadingLevel")
                 celShadingLevel--
-            }else{
+            } else {
                 println("Celshading is off")
             }
         }
-
 
 
     }
@@ -278,14 +287,16 @@ class Scene(val window: GameWindow) {
         if (entityManager.player == entityManager.character) {
             if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 
-                if (guiRenderer.ammoAnzeige.ammoVorhanden()) {
+                if (guiRenderer.ammoAnzeige.ammoVorhanden() &&
+                    entityManager.character.reloadingAnimationTrait.state == ReloadingAnimationTrait.State.Idle
+                ) {
 
                     gunShotSound.play()
                     val bullet = Bullet(myMap)
                     EntityManager.bullets.add(bullet)
 
-                    bullet.setModelMatrix(entityManager.player.getModelMatrix())
-                    bullet.translate(Vector3f(0f, 1.4f, -0.5f))
+                    bullet.setModelMatrix(camera.getWorldModelMatrix())
+                    bullet.translate(Vector3f(0f, 0f, -1f))
 
                     guiRenderer.ammoAnzeige.shoot()
                 }
@@ -314,29 +325,21 @@ class Scene(val window: GameWindow) {
 
     fun onMouseMove(xpos: Double, ypos: Double) {
         if (camera is OrbitCamera) {
-//            (camera as OrbitCamera).updateTheta((prevY - ypos) * 0.1f)
-//            (camera as OrbitCamera).updatePhi((prevX - xpos) * 0.1f)
+            (camera as OrbitCamera).updateTheta((prevY - ypos) * 0.1f)
+            (camera as OrbitCamera).updatePhi((prevX - xpos) * 0.1f)
         } else {
-//            entityManager.player.onMouseMove(prevX - xpos, prevY - ypos)
+            entityManager.character.onMouseMove(prevX - xpos, prevY - ypos)
         }
 
-
-        camera.updateTheta((prevY - ypos) * 0.1f)
         camera.updatePhi((prevX - xpos) * 0.1f)
-
-//        val viewMatrix = camera.getCalculateViewMatrix()
-//        val dir = Vector3f(-viewMatrix.get(2, 0), viewMatrix.get(2, 1), viewMatrix.get(2, 2))
-//        entityManager.character.setForward(dir)
-
+        camera.updateTheta((prevY - ypos) * 0.1f)
 
         prevX = xpos
         prevY = ypos
     }
 
     fun cleanup() {
-
         staticShader.cleanUp()
-
         myMap.cleanUp()
         entityManager.cleanUp()
         guiRenderer.cleanUp()

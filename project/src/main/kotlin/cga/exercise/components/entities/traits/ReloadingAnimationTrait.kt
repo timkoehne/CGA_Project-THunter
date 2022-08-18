@@ -24,7 +24,6 @@ class ReloadingAnimationTrait(entity: Entity) : Trait(entity) {
     var bulletMoveDuration = 0.5f
     val bulletMoveSpeed = 3.5f
 
-    var reloadSound = Scene.audioMaster.createAudioSource("project/assets/sounds/reload.ogg")
 
     init {
         bullet.parent = entity
@@ -96,7 +95,6 @@ class ReloadingAnimationTrait(entity: Entity) : Trait(entity) {
     fun reload() {
         if (state == State.Idle) {
             if (ammoAnzeige!!.reloadAllowed()) {
-                reloadSound.play()
                 reloadStartTime = -1f
                 state = State.MovingToReload
             }

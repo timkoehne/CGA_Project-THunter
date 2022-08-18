@@ -17,6 +17,10 @@ class Timer(var timeInSekunden: Float) : GuiElement(background, defaultPosition,
         val numberScale = Vector2f(0.4f, 1.5f)
         var youLooseSound = Scene.audioMaster.createAudioSource("project/assets/sounds/you_lose.ogg")
 
+        init {
+            youLooseSound.setVolume(0.1f)
+        }
+
         val numberTextures = mutableListOf<Texture2D>(
             Texture2D.invoke("project/assets/textures/clock/0.png", true),
             Texture2D.invoke("project/assets/textures/clock/1.png", true),
@@ -58,6 +62,8 @@ class Timer(var timeInSekunden: Float) : GuiElement(background, defaultPosition,
             timeInSekunden -= dt
         }
         displayTime()
+
+
     }
 
     fun displayTime() {
@@ -79,7 +85,8 @@ class Timer(var timeInSekunden: Float) : GuiElement(background, defaultPosition,
     }
 
     fun pause(changeTo: Boolean = !pauseTimer) {
-        if (pauseTimer != changeTo) {
+
+        if (pauseTimer != changeTo && timeInSekunden <= 0f) {
             youLooseSound.play()
         }
 //        println(pauseTimer)

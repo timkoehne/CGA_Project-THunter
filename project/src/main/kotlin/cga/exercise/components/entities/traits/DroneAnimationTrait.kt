@@ -9,6 +9,7 @@ class DroneAnimationTrait(val drone: Drone) : Trait(drone) {
     var droneSound = Scene.audioMaster.createAudioSource("project/assets/sounds/drone.ogg")
 
     init {
+        droneSound.setVolume(0.05f)
         droneSound.turnOnLooping()
     }
 

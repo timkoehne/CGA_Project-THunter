@@ -8,6 +8,7 @@ import cga.exercise.game.Scene
 import cga.framework.GameWindow
 import org.joml.Vector2f
 import org.lwjgl.opengl.*
+import javax.naming.ldap.Control
 
 class GuiRenderer(
     scene: Scene,
@@ -15,6 +16,7 @@ class GuiRenderer(
     private val guiElements: MutableList<GuiElement> = mutableListOf()
 ) {
 
+    val controlDisplay: GuiElement
     val sniperScope: GuiElement
     val crosshair: GuiElement
     val youWin: GuiElement
@@ -56,7 +58,11 @@ class GuiRenderer(
             Vector2f(-1 + (0.2f / 1.77f), 0.9f),
             Vector2f(0.2f / scene.camera.aspect, 0.2f)
         )
-        guiElements.add(sunView)
+//        guiElements.add(sunView)
+
+        controlDisplay = ControlDisplay()
+        guiElements.add(controlDisplay)
+        controlDisplay.disable()
 
         crosshair = GuiElement(
             Texture2D.invoke("project/assets/textures/crosshair2.png", true),

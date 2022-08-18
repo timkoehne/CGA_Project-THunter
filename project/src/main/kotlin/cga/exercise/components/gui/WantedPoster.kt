@@ -1,6 +1,6 @@
 package cga.exercise.components.gui
 
-import cga.exercise.components.entities.*
+import cga.exercise.components.entities.animals.*
 import cga.exercise.components.texture.Texture2D
 import cga.exercise.game.Scene
 import org.joml.Vector2f
@@ -58,6 +58,12 @@ class WantedPoster : GuiElement(background, defaultPosition, defaultSize) {
         val cross = Texture2D.invoke("project/assets/textures/cross.png", true)
 
         val killList = HashMap<String, Int>()
+
+        init {
+            youWinSound.setVolume(0.2f)
+            correctKillSound.setVolume(0.5f)
+            paperscrollSound.setVolume(0.1f)
+        }
 
 
     }

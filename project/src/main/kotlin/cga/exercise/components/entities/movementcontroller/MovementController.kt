@@ -16,6 +16,7 @@ open class MovementController(val entity: Entity) {
 
         val collisionDetected = entity.movementCollision()
         if (collisionDetected) {
+
             entity.translate(direction.mul(-1f))
         }
         return collisionDetected

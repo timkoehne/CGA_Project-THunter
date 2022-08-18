@@ -11,7 +11,6 @@ import kotlin.math.cos
 class OrbitCamera : TronCamera() {
 
     var radius = 5f
-    var myMap: MyMap? = null
 
     init {
         theta = Math.toRadians(45f)
@@ -45,12 +44,10 @@ class OrbitCamera : TronCamera() {
         if (theta + Math.toRadians(offset) in Math.toRadians(1f)..Math.toRadians(179f)) {
             theta += Math.toRadians(offset).toFloat()
         }
-
     }
 
     override fun updatePhi(offset: Double) {
         //yaw
-
         phi -= Math.toRadians(offset).toFloat()
     }
 }

@@ -1,5 +1,6 @@
 package cga.exercise.components.camera
 
+import cga.exercise.components.entities.movementcontroller.MovementController
 import cga.exercise.components.geometry.Transformable
 import cga.exercise.components.shader.ShaderProgram
 import org.joml.Math
@@ -18,6 +19,7 @@ open class TronCamera(
     companion object {
         val default_fov = Math.toRadians(90f)
         val zoom_fov = Math.toRadians(25f)
+        val cameraOffset = Vector3f(0f, 1.6f, 0f)
     }
 
     override fun getCalculateViewMatrix(): Matrix4f {
@@ -30,10 +32,11 @@ open class TronCamera(
     }
 
     override fun bind(shader: ShaderProgram) {
-
-        viewDir.x = (cos(phi) * cos(theta))
+        viewDir.x = cos(theta) * cos(phi)
         viewDir.y = sin(theta)
-        viewDir.z = (sin(phi) * cos(theta))
+        viewDir.z = cos(theta) * sin(phi)
+
+        setForward(viewDir)
 
         shader.setUniform("view", getCalculateViewMatrix(), false)
         shader.setUniform("projection", getCalculateProjectionMatrix(), false)
@@ -42,10 +45,9 @@ open class TronCamera(
 
     open fun updateTheta(offset: Double) {
         //pitch
-        if (theta + Math.toRadians(offset) in Math.toRadians(-89f)..Math.toRadians(89f)) {
+        if (theta - Math.toRadians(offset) in Math.toRadians(-89f)..Math.toRadians(89f)) {
             theta -= Math.toRadians(offset).toFloat()
         }
-
     }
 
     open fun updatePhi(offset: Double) {

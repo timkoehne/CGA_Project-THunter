@@ -22,14 +22,19 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
         this.modelMatrix = modelMatrix
     }
 
-    fun lookAlong(viewDir: Vector3f) {
-        modelMatrix.setLookAlong(viewDir, getWorldYAxis())
-    }
-
     fun setForward(viewDir: Vector3f) {
         modelMatrix.set(2, 0, viewDir.x)
         modelMatrix.set(2, 1, viewDir.y)
         modelMatrix.set(2, 2, viewDir.z)
+
+        modelMatrix.set(1, 0, 0f)
+        modelMatrix.set(1, 1, 1f)
+        modelMatrix.set(1, 2, 0f)
+
+        modelMatrix.set(0, 0, -1f)
+        modelMatrix.set(0, 1, 0f)
+        modelMatrix.set(0, 2, 0f)
+
     }
 
     fun setPosition(pos: Vector3f) {
@@ -62,7 +67,6 @@ open class Transformable(private var modelMatrix: Matrix4f = Matrix4f(), var par
 //                    "${Math.toDegrees(rotationInsgesamt.y.toDouble())}, " +
 //                    "${Math.toDegrees(rotationInsgesamt.z.toDouble())}"
 //        )
-
         modelMatrix.rotateX(pitch)
         modelMatrix.rotateY(yaw)
         modelMatrix.rotateZ(roll)

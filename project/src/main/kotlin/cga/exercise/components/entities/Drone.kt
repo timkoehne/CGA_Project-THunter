@@ -72,7 +72,6 @@ class Drone(myMap: MyMap) : Entity(
         frontLeftPropeller.translate(propellerTransform)
         backLeftPropeller.translate(propellerTransform)
         backRightPropeller.translate(propellerTransform)
-
     }
 
     override fun toggle(){

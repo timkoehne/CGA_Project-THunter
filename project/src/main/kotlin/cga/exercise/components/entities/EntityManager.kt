@@ -1,13 +1,12 @@
 package cga.exercise.components.entities
 
 import cga.exercise.components.camera.TronCamera
+import cga.exercise.components.entities.animals.*
 import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.game.Scene
 import cga.framework.GameWindow
 import org.joml.Random
 import org.joml.Vector3f
-import org.lwjgl.glfw.GLFW
-import kotlin.math.roundToInt
 
 class EntityManager(val camera: TronCamera, val scene: Scene) {
 
@@ -21,8 +20,8 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
 
     companion object {
 
-        val minDistanceFromPlayer = 8
-        val maxDistanceFromPlayer = 25
+        val animalMinSpawnDistance = 8
+        val animalMaxSpawnDistance = 25
 
         val bullets = mutableListOf<Bullet>()
 
@@ -33,10 +32,10 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
         drone.translate(Vector3f(5f, scene.myMap.getHeight(5f, 5f) + 1f, 5f))
 
         character = Character(scene.myMap)
-        character.translate(Vector3f(5f, scene.myMap.getHeight(5f, 5f) + 2, 5f))
-        camera.parent = character
-        player = character
+        findSpawnpoint(character)
 
+//        camera.parent = character
+        player = character
 
         for (i in 0..3) {
             val animal = Bear(scene.myMap)
@@ -51,7 +50,7 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
         for (i in 0..5) {
             val animal = Fox(scene.myMap)
             animals.add(animal)
-            findSpawnpoint(animal)
+            findSpawnpoint(character)
         }
         for (i in 0..10) {
             val animal = Gecko(scene.myMap)
@@ -108,24 +107,23 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
 
         animals.forEach { it.render(shaderProgram) }
 
-
         drone.render(shaderProgram)
 
         character.render(shaderProgram)
         bullets.forEach { it.render(shaderProgram) }
-
-
     }
 
     fun update(window: GameWindow, dt: Float, time: Float) {
         drone.update(dt, time)
+        camera.setPosition(character.getPosition().add(TronCamera.cameraOffset))
 
-        animals.forEach { it.update(dt, time)
-            if(!it.alive){
+        animals.forEach {
+            it.update(dt, time)
+
+            if (!it.alive || it.getPosition().sub(player.getPosition()).length() > 2 * animalMaxSpawnDistance) {
                 it.alive = true
-                println(it.getPosition())
                 findSpawnpoint(it)
-                println("moved to ${it.getPosition()}")
+                println("moved ${it.javaClass.simpleName} to ${it.getPosition()}")
             }
 
 
@@ -139,8 +137,6 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
             }
         }
         bullets.removeIf { t -> !t.alive }
-
-
 
 
         player.movementController?.inputControl(dt, time, window)
@@ -158,10 +154,9 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
             rand1 = (random.nextFloat() - 0.5f) * 2f
             rand2 = (random.nextFloat() - 0.5f) * 2f
             pos.x =
-                rand1 * (maxDistanceFromPlayer - minDistanceFromPlayer) +
-                        if (rand1 < 0) -minDistanceFromPlayer else +minDistanceFromPlayer
-            pos.z = rand2 * (maxDistanceFromPlayer - minDistanceFromPlayer) +
-                    if (rand2 < 0) -minDistanceFromPlayer else +minDistanceFromPlayer
+                rand1 * (animalMaxSpawnDistance - animalMinSpawnDistance) + if (rand1 < 0) -animalMinSpawnDistance else +animalMinSpawnDistance
+            pos.z =
+                rand2 * (animalMaxSpawnDistance - animalMinSpawnDistance) + if (rand2 < 0) -animalMinSpawnDistance else +animalMinSpawnDistance
             pos.y = entity.myMap.getHeight(pos.x, pos.z)
 
             entity.setPosition(character.getPosition().add(pos))

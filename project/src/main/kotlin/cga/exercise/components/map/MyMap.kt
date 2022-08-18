@@ -76,6 +76,7 @@ class MyMap(
             ), this, true
         )
 
+        ambientSound.setVolume(0.1f)
         ambientSound.turnOnLooping()
         ambientSound.play()
 

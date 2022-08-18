@@ -1,6 +1,7 @@
 package cga.exercise.components.gui
 
 import cga.exercise.components.texture.Texture2D
+import cga.exercise.game.Scene
 import org.joml.Vector2f
 
 class AmmoAnzeige : GuiElement(null, Vector2f(1f - 0.05f, -1f), Vector2f(0.2f, 0.2f)) {
@@ -10,6 +11,8 @@ class AmmoAnzeige : GuiElement(null, Vector2f(1f - 0.05f, -1f), Vector2f(0.2f, 0
     var nachladeZeit: Float = 1f
 
     var reloadingStartTime: Float = -1f
+
+    var reloadSound = Scene.audioMaster.createAudioSource("project/assets/sounds/reload.ogg")
 
     companion object {
 
@@ -26,6 +29,8 @@ class AmmoAnzeige : GuiElement(null, Vector2f(1f - 0.05f, -1f), Vector2f(0.2f, 0
             children[x].parent = this
             children[x].translate(Vector2f(x * 3f, 0f))
         }
+
+        reloadSound.setVolume(0.2f)
     }
 
     fun ammoVorhanden(): Boolean{
@@ -42,6 +47,7 @@ class AmmoAnzeige : GuiElement(null, Vector2f(1f - 0.05f, -1f), Vector2f(0.2f, 0
     fun reloadOneBullet() {
         if(reloadAllowed()){
             currentAmmoIndex++
+            reloadSound.play()
             children[currentAmmoIndex].texID = bullet.texID
         }
     }

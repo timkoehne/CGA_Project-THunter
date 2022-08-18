@@ -12,7 +12,9 @@ import cga.exercise.components.gui.WantedPoster
 import cga.exercise.components.map.Foliage.Companion.allFoliage
 import cga.exercise.components.map.MyMap
 import cga.exercise.components.shader.ShaderProgram
+import cga.exercise.game.Scene
 import cga.framework.ModelLoader
+import org.joml.Math
 
 open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPath: String? = null) : Transformable(),
     IRenderable, IGravityTrait {
@@ -21,6 +23,12 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
     )
 
     companion object {
+        var animalDyingSound = Scene.audioMaster.createAudioSource("project/assets/sounds/animal_dying.ogg")
+
+        init {
+            animalDyingSound.setVolume(0.05f)
+        }
+
 
         val allEntities = mutableListOf<Entity>()
     }
@@ -63,9 +71,7 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
     }
 
     open fun onMouseMove(xDiff: Double, yDiff: Double) {
-//        println(Math.toDegrees(rotationInsgesamt.x.toDouble()))
-        rotate((yDiff * 0.002f).toFloat(), 0f, 0f)
-        rotate(0f, (xDiff * 0.002f).toFloat(), 0f)
+        rotate(0f, Math.toRadians((xDiff * 0.1f).toFloat()), 0f)
     }
 
     fun cleanUp() {
@@ -148,6 +154,7 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
 
     open fun hitByBullet() {
         alive = false
+        animalDyingSound.play()
 
         val animalName = this.javaClass.simpleName
         println(animalName)
