@@ -61,7 +61,6 @@ class DroneAnimationTrait(val drone: Drone) : Trait(drone) {
                 if (animationPercentage >= 1f) {
                     state = State.Open
                     drone.gravityTrait?.disable()
-                    droneSound.play()
                 }
                 rotatePropeller(rotationsSpeed * dt * animationPercentage)
             }
@@ -137,6 +136,7 @@ class DroneAnimationTrait(val drone: Drone) : Trait(drone) {
 
     fun open() {
         if (state == State.Closed) {
+            droneSound.play()
             state = State.Opening
         }
     }

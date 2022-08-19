@@ -92,7 +92,8 @@ class Scene(val window: GameWindow) {
 
 
         myMap = MyMap(
-            5, 1f, this, 6f, 18f, 2f, 2, 0.3f, 0.9f
+            5, 1f, this, 6f, 18f, 2f,
+            2, 0.3f, 0.9f
         )
 
 
@@ -236,8 +237,10 @@ class Scene(val window: GameWindow) {
         }
 
         if (key == GLFW_KEY_C && action == GLFW_PRESS) {
-            entityManager.switchPlayer()
-            switchCamera()
+            if (entityManager.drone.alive) {
+                entityManager.switchPlayer()
+                switchCamera()
+            }
         }
 
         if (key == GLFW_KEY_E && action == GLFW_PRESS) {
@@ -324,15 +327,15 @@ class Scene(val window: GameWindow) {
     }
 
     fun onMouseMove(xpos: Double, ypos: Double) {
-        if (camera is OrbitCamera) {
-            (camera as OrbitCamera).updateTheta((prevY - ypos) * 0.1f)
-            (camera as OrbitCamera).updatePhi((prevX - xpos) * 0.1f)
-        } else {
-            entityManager.character.onMouseMove(prevX - xpos, prevY - ypos)
+
+        var multiplier = 1f
+        if (guiRenderer.sniperScope.isShowing) {
+            multiplier = 0.5f
         }
 
-        camera.updatePhi((prevX - xpos) * 0.1f)
-        camera.updateTheta((prevY - ypos) * 0.1f)
+        entityManager.character.onMouseMove((prevX - xpos) * multiplier, (prevY - ypos) * multiplier)
+        camera.updatePhi((prevX - xpos) * 0.1f * multiplier)
+        camera.updateTheta((prevY - ypos) * 0.1f * multiplier)
 
         prevX = xpos
         prevY = ypos

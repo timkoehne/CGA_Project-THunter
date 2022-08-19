@@ -82,12 +82,16 @@ class MyMap(
 
     }
 
-    fun getCamera(): TronCamera{
+    fun getCamera(): TronCamera {
         return scene.camera
     }
 
     fun getHeight(x: Float, z: Float): Float {
-        return proceduralGround.getHeight(x, z) //TOD
+        return proceduralGround.getHeight(x, z)
+    }
+
+    fun getChunk(pos: Vector3f): Chunk? {
+        return proceduralGround.getChunk(pos)
     }
 
     fun update(dt: Float, time: Float) {
@@ -117,13 +121,10 @@ class MyMap(
         proceduralGround.renderEntites(shaderProgram)
     }
 
-    fun renderEntities(shaderProgram: ShaderProgram){
+    fun renderEntities(shaderProgram: ShaderProgram) {
         shaderProgram.use()
         proceduralGround.renderEntites(shaderProgram)
     }
-
-
-
 
 
     fun renderSkybox() {

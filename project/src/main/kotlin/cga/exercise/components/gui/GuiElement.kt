@@ -35,7 +35,7 @@ open class GuiElement(
 
     var vao = 0
     var vbo = 0
-    private var isShowing: Boolean = true
+    var isShowing: Boolean = true
     var children = mutableListOf<GuiElement>()
 
 

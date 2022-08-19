@@ -145,6 +145,13 @@ class Chunk(val abstand: Float, var positionXZ: Vector3f) {
 
     }
 
+    fun getCollidables(): List<Foliage> {
+        val list = mutableListOf<Foliage>()
+        list.addAll(treeTiles)
+        list.addAll(stoneTiles)
+        return list
+    }
+
 
     fun groundMeshGenerieren(): Renderable {
 

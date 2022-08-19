@@ -16,8 +16,6 @@ open class Foliage(var models: List<Renderable>, collisionBoxPath: String? = nul
     val collisionBox: AABB? = collisionBoxPath?.let { AABB(this, ModelLoader.loadModel(it)) }
 
     companion object {
-
-        val allFoliage = mutableListOf<Foliage>()
         val treeCollsionPath = "project/assets/trees/tree hitbox.obj"
         val stoneCollsionPath = "project/assets/deko/bigstonecube.obj"
     }
@@ -25,7 +23,6 @@ open class Foliage(var models: List<Renderable>, collisionBoxPath: String? = nul
 
     init {
         models.forEach { it.parent = this }
-        allFoliage.add(this)
     }
 
     override fun render(shaderProgram: ShaderProgram) {

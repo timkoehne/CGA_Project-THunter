@@ -1,6 +1,6 @@
 # THunter
 
-THunder ist ein First-Person Hunting Game, indem der Spieler einen Jäger spielt der in einem Wald spawnt und bestimmte
+THunter ist ein First-Person Hunting Game, indem der Spieler einen Jäger spielt der in einem Wald spawnt und bestimmte
 Tiere abschießen muss, um die Population im Einklang zu halten.
 
 # Teammitglieder

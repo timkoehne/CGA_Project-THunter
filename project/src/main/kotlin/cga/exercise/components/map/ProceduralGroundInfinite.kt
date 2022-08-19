@@ -15,7 +15,7 @@ class ProceduralGroundInfinite(
     val abstand: Float
 ) {
 
-    var chunks: HashMap<Vector3i, Chunk> = HashMap<Vector3i, Chunk>()
+    var chunks: HashMap<Vector3i, Chunk> = HashMap()
     //TODO aktuell werden chunks geladen bis das programm beendet wird und nie entladen
 
 
@@ -51,6 +51,12 @@ class ProceduralGroundInfinite(
         )
     }
 
+    fun getChunk(pos: Vector3f): Chunk? {
+//        println("$pos ist an hat chunk index ${chunkPosToIndex(getChunkPos(pos, 0, 0))}")
+        return chunks[chunkPosToIndex(getChunkPos(pos, 0, 0))]
+
+    }
+
     fun render(shaderProgram: ShaderProgram) {
         shaderProgram.use()
         val playerposXZ = Vector3f(myMap.getCamera().getWorldPosition().x, 0f, myMap.getCamera().getWorldPosition().z)
@@ -83,7 +89,6 @@ class ProceduralGroundInfinite(
 
 
     fun update(dt: Float, time: Float) {
-
     }
 
     fun getHeight(x: Float, z: Float): Float {

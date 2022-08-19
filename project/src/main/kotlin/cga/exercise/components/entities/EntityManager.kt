@@ -28,11 +28,14 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
     }
 
     init {
-        drone = Drone(scene.myMap)
-        drone.translate(Vector3f(5f, scene.myMap.getHeight(5f, 5f) + 1f, 5f))
 
         character = Character(scene.myMap)
-        findSpawnpoint(character)
+        findSpawnpoint(character, 0, 5)
+
+
+        drone = Drone(scene.myMap)
+        findSpawnpoint(drone, 0,5)
+
 
 //        camera.parent = character
         player = character
@@ -40,47 +43,47 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
         for (i in 0..3) {
             val animal = Bear(scene.myMap)
             animals.add(animal)
-            findSpawnpoint(animal)
+            findSpawnpoint(animal, animalMinSpawnDistance, animalMaxSpawnDistance)
         }
         for (i in 0..10) {
             val animal = Deer(scene.myMap)
             animals.add(animal)
-            findSpawnpoint(animal)
+            findSpawnpoint(animal, animalMinSpawnDistance, animalMaxSpawnDistance)
         }
         for (i in 0..5) {
             val animal = Fox(scene.myMap)
             animals.add(animal)
-            findSpawnpoint(character)
+            findSpawnpoint(animal, animalMinSpawnDistance, animalMaxSpawnDistance)
         }
         for (i in 0..10) {
             val animal = Gecko(scene.myMap)
             animals.add(animal)
-            findSpawnpoint(animal)
+            findSpawnpoint(animal, animalMinSpawnDistance, animalMaxSpawnDistance)
         }
         for (i in 0..10) {
             val animal = Hare(scene.myMap)
             animals.add(animal)
-            findSpawnpoint(animal)
+            findSpawnpoint(animal, animalMinSpawnDistance, animalMaxSpawnDistance)
         }
         for (i in 0..4) {
             val animal = MountainLion(scene.myMap)
             animals.add(animal)
-            findSpawnpoint(animal)
+            findSpawnpoint(animal, animalMinSpawnDistance, animalMaxSpawnDistance)
         }
         for (i in 0..4) {
             val animal = Opossum(scene.myMap)
             animals.add(animal)
-            findSpawnpoint(animal)
+            findSpawnpoint(animal, animalMinSpawnDistance, animalMaxSpawnDistance)
         }
         for (i in 0..4) {
             val animal = Raccoon(scene.myMap)
             animals.add(animal)
-            findSpawnpoint(animal)
+            findSpawnpoint(animal, animalMinSpawnDistance, animalMaxSpawnDistance)
         }
         for (i in 0..5) {
             val animal = Turkey(scene.myMap)
             animals.add(animal)
-            findSpawnpoint(animal)
+            findSpawnpoint(animal, animalMinSpawnDistance, animalMaxSpawnDistance)
         }
 
 
@@ -122,8 +125,8 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
 
             if (!it.alive || it.getPosition().sub(player.getPosition()).length() > 2 * animalMaxSpawnDistance) {
                 it.alive = true
-                findSpawnpoint(it)
-                println("moved ${it.javaClass.simpleName} to ${it.getPosition()}")
+                findSpawnpoint(it, animalMinSpawnDistance, animalMaxSpawnDistance)
+//                println("moved ${it.javaClass.simpleName} to ${it.getPosition()}")
             }
 
 
@@ -144,7 +147,7 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
 //        if (window.getKeyState(GLFW.GLFW_KEY_LEFT_SHIFT)) sniper.translate(Vector3f(0f, -5 * dt, 0f))
     }
 
-    fun findSpawnpoint(entity: Entity) {
+    fun findSpawnpoint(entity: Entity, minDistance: Int, maxDistance: Int) {
 
         var pos = Vector3f()
         var rand1: Float
@@ -154,12 +157,12 @@ class EntityManager(val camera: TronCamera, val scene: Scene) {
             rand1 = (random.nextFloat() - 0.5f) * 2f
             rand2 = (random.nextFloat() - 0.5f) * 2f
             pos.x =
-                rand1 * (animalMaxSpawnDistance - animalMinSpawnDistance) + if (rand1 < 0) -animalMinSpawnDistance else +animalMinSpawnDistance
+                rand1 * (maxDistance - minDistance) + if (rand1 < 0) -minDistance else +minDistance
             pos.z =
-                rand2 * (animalMaxSpawnDistance - animalMinSpawnDistance) + if (rand2 < 0) -animalMinSpawnDistance else +animalMinSpawnDistance
+                rand2 * (maxDistance - minDistance) + if (rand2 < 0) -minDistance else +minDistance
             pos.y = entity.myMap.getHeight(pos.x, pos.z)
 
-            entity.setPosition(character.getPosition().add(pos))
+            entity.setPosition(entity.getPosition().add(pos))
         } while (entity.movementCollision())
     }
 

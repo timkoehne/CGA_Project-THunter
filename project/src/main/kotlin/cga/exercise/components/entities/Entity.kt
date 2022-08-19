@@ -9,7 +9,6 @@ import cga.exercise.components.geometry.IRenderable
 import cga.exercise.components.geometry.Renderable
 import cga.exercise.components.geometry.Transformable
 import cga.exercise.components.gui.WantedPoster
-import cga.exercise.components.map.Foliage.Companion.allFoliage
 import cga.exercise.components.map.MyMap
 import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.game.Scene
@@ -132,19 +131,22 @@ open class Entity(var models: List<Renderable>, val myMap: MyMap, collisionBoxPa
         if (alive) {
             //TODO check only foliage in same chunk
             //TODO seperate foliage so that this wont loop over every grass element
-            allFoliage.forEach {
-                if (it.collisionBox != null && this != it) {
-                    val distance1 = it.collisionBox.minExtend.sub(this.collisionBox!!.maxExtend)
-                    val distance2 = this.collisionBox!!.minExtend.sub(it.collisionBox.maxExtend)
-                    val maxDistance = distance1.max(distance2)
-                    val maxValue = Util.largestValueInVector(maxDistance)
-                    if (maxValue < 0) {
-//                        println("${this.javaClass} entity collision with ${it.javaClass}")
+
+            if (this is cga.exercise.components.entities.Character) {
+                myMap.getChunk(this.getWorldPosition())?.getCollidables()?.forEach {
+                    if (it.collisionBox != null && this != it) {
+                        val distance1 = it.collisionBox.minExtend.sub(this.collisionBox!!.maxExtend)
+                        val distance2 = this.collisionBox!!.minExtend.sub(it.collisionBox.maxExtend)
+                        val maxDistance = distance1.max(distance2)
+                        val maxValue = Util.largestValueInVector(maxDistance)
+                        if (maxValue < 0) {
+                            println("${this.javaClass} entity collision with ${it.javaClass}")
 //                        println("distance 1 $distance1")
 //                        println("distance 2 $distance2")
 //                        println("maxdistance $maxDistance")
 //                        println("maxvalue $maxValue")
-                        return true
+                            return true
+                        }
                     }
                 }
             }
