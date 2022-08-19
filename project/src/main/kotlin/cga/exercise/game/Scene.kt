@@ -92,7 +92,7 @@ class Scene(val window: GameWindow) {
 
 
         myMap = MyMap(
-            5, 1f, this, 6f, 18f, 2f,
+            8, 1f, this, 6f, 18f, 2f,
             2, 0.3f, 0.9f
         )
 
