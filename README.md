@@ -57,6 +57,7 @@ Third Person View von der Drone
 - Tiermodelle - https://davidoreilly.itch.io/everything-library-animals
 - Bäume - https://unity-of-fantom.itch.io/low-poly-trees-pack
 - Player - https://adamzhajdu.itch.io/free-low-poly-character
+- Skybox - https://steamcommunity.com/sharedfiles/filedetails/?id=2092939146
 - Drone - https://sketchfab.com/3d-models/drone-dccc3772dffe4daba458cf5ad75f6752
 - Dronen Sound - https://freesoundstock.com/products/flying-drone-sound-effect
 - Soundeffekte - https://mixkit.co/free-sound-effects/
